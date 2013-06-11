@@ -8,21 +8,26 @@
 #ifndef CONNECTEDCOMPONENTS_HPP_
 #define CONNECTEDCOMPONENTS_HPP_
 
+#include <queue>
+#include <vector>
+
+#include "c_wrapper.h"
+#include "glm/glm.hpp"
+
 class ConnectedComponents
 {
 	public:
 		ConnectedComponents();
 		virtual ~ConnectedComponents();
 
-		const static short CONNECTIVITY_2D_4 = 0;
-		const static short CONNECTIVITY_2D_8 = 1;
-		static short connectivity_2d = CONNECTIVITY_2D_4;
+		const static short SMALL_CONNECTIVITY = 0;
+		const static short LARGE_CONNECTIVITY = 1;
 
-		const static short CONNECTIVITY_3D_6 = 0;
-		const static short CONNECTIVITY_3D_14 = 1;
-		static short connectivity_3d = CONNECTIVITY_3D_6;
+		static short connectivity;
 
 		static cimage* getComponents(cimage *image);
+	private:
+		inline void addNeigbours(std::queue<glm::vec2<int> > indices, std::vector<glm::vec2<int> > neighbours, glm::vec2<int> index, int width, int height);
 };
 
 #endif /* CONNECTEDCOMPONENTS_HPP_ */

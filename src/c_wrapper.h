@@ -35,8 +35,9 @@ typedef struct {
 /* Write C function declarations here */
 	void labeling_c(cimage *new_label_image, cimage* label_image, cimage* input_image, parameters *input_params);
 
+	cimage* cloneImage(cimage *image);
 	cimage* createImage(cimage *image);
-//	cimage* createImage(mint width, mint height, mint bit_depth, mint channels);
+	cimage* createImage2(mint width, mint height, mint bit_depth, mint channels);
 	parameters* createParameters(mint int_params_size, mint double_params_size);
 	void freeImage(cimage *image);
 	void freeParameters(parameters *param);

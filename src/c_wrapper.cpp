@@ -17,6 +17,24 @@ void labeling_c(cimage *new_label_image, cimage* label_image, cimage* input_imag
 	labeling(new_label_image, label_image, input_image, input_params);
 }
 
+cimage* cloneImage(cimage* image)
+{
+	cimage *new_image;
+
+	new_image = (cimage*)malloc(sizeof(cimage));
+	new_image->bit_depth = image->bit_depth;
+	new_image->channels = image->channels;
+	new_image->rank = image->rank;
+	new_image->dimensions = (mint*)malloc(sizeof(mint)*image->rank);
+	memcpy(new_image->dimensions, image->dimensions, sizeof(mint)*image->rank);
+	new_image->flattened_length = image->flattened_length;
+	new_image->data = (mint*)malloc(sizeof(mint)*new_image->flattened_length);
+	memcpy(new_image->data, image->data, sizeof(mint)*new_image->flattened_length);
+	new_image->shared = 0;
+
+	return new_image;
+}
+
 cimage* createImage(cimage* image)
 {
 	cimage *new_image;
@@ -34,27 +52,26 @@ cimage* createImage(cimage* image)
 	return new_image;
 }
 
-//cimage* createImage(mint rank, mint *dimensions, mint bit_depth, mint channels)
-//{
-//	mint i;
-//	cimage *new_image;
-//
-//	new_image = (cimage*)malloc(sizeof(cimage));
-//	new_image->bit_depth = bit_depth;
-//	new_image->channels = channels;
-//	new_image->rank = rank;
-//	new_image->dimensions = (mint*)malloc(sizeof(mint)*rank);
-//	memcpy(new_image->dimensions, dimensions, sizeof(mint)*rank);
-//	new_image->flattened_length = channels;
-//	for(i=0; i<image->rank; ++i)
-//	{
-//		new_image->dimensions[i] = image->dimensions[i];
-//		new_image->flattened_length*=image->dimensions[i];
-//	}
-//	new_image->data = (mint*)malloc(size(mint)*new_image->flattened_length);
-//
-//	return new_image;
-//}
+cimage* createImage2(mint rank, mint *dimensions, mint bit_depth, mint channels)
+{
+	mint i;
+	cimage *new_image;
+
+	new_image = (cimage*)malloc(sizeof(cimage));
+	new_image->bit_depth = bit_depth;
+	new_image->channels = channels;
+	new_image->rank = rank;
+	new_image->dimensions = (mint*)malloc(sizeof(mint)*rank);
+	memcpy(new_image->dimensions, dimensions, sizeof(mint)*rank);
+	new_image->flattened_length = channels;
+	for(i=0; i<new_image->rank; ++i)
+	{
+		new_image->flattened_length*=dimensions[i];
+	}
+	new_image->data = (mint*)malloc(sizeof(mint)*new_image->flattened_length);
+
+	return new_image;
+}
 
 parameters* createParameters(mint int_params_size, mint double_params_size)
 {
