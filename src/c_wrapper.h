@@ -37,7 +37,7 @@ typedef struct {
 
 	cimage* cloneImage(cimage *image);
 	cimage* createImage(cimage *image);
-	cimage* createImage2(mint width, mint height, mint bit_depth, mint channels);
+	cimage* createImage2(mint rank, mint *dimensions, mint bit_depth, mint channels);
 	parameters* createParameters(mint int_params_size, mint double_params_size);
 	void freeImage(cimage *image);
 	void freeParameters(parameters *param);

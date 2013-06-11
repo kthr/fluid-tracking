@@ -1,14 +1,6 @@
 cmake_minimum_required(VERSION 2.8.4)
 project(Labeling)
 
-include_directories(
-    src
-    src/gco
-    lib
-    lib/glm
-    lib/eigen
-)
-
 set(SOURCES 
     src/libraryLink.c
     src/c_wrapper.cpp
@@ -46,12 +38,20 @@ add_library(Labeling SHARED
     src/gco/LinkedBlockList.cpp
 )
 
+set(CMAKE_INCLUDE_PATH
+    src/gco
+    lib
+    lib/glm
+    lib/eigen
+    
+)
+
 if(APPLE)
     message("\nEntering configuration for APPLE computers:\n")
     set_target_properties(Labeling label
         PROPERTIES
-        COMPILE_FLAGS "-g -pipe -Wall"
-        LINK_FLAGS "-v -lstdc++"
+        COMPILE_FLAGS "-g -pipe -Wall -I/opt/local/include"
+        LINK_FLAGS "-v -lstdc++ -lpthread  -L/opt/X11/lib -lX11"
      )
 endif()
 

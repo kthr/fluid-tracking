@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "c_wrapper.h"
-#include "glm/glm.hpp"
+#include "../lib/glm/glm.hpp"
 
 class ConnectedComponents
 {
@@ -22,12 +22,12 @@ class ConnectedComponents
 
 		const static short SMALL_CONNECTIVITY = 0;
 		const static short LARGE_CONNECTIVITY = 1;
-
 		static short connectivity;
 
 		static cimage* getComponents(cimage *image);
+		inline static void addNeigbours(std::queue<glm::vec2> *indices, std::vector<glm::vec2> neighbours, glm::vec2 index, int width, int height);
 	private:
-		inline void addNeigbours(std::queue<glm::vec2<int> > indices, std::vector<glm::vec2<int> > neighbours, glm::vec2<int> index, int width, int height);
+
 };
 
 #endif /* CONNECTEDCOMPONENTS_HPP_ */

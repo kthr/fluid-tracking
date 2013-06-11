@@ -10,8 +10,11 @@
 
 #include <stdint.h>
 #include <set>
+#include <vector>
+#include <tr1/unordered_map>
 
-#include "lib/eigen/SparseCore"
+#include "c_wrapper.h"
+#include "../lib/eigen/SparseCore"
 
 class ComponentsMeasurements
 {
@@ -19,15 +22,19 @@ class ComponentsMeasurements
 		ComponentsMeasurements(cimage *label_image);
 		virtual ~ComponentsMeasurements();
 
+		const static short SMALL_CONNECTIVITY = 0;
+		const static short LARGE_CONNECTIVITY = 1;
+		static short connectivity;
+
 	private:
 		void init();
 
 		cimage * label_image;
-		bool binary = false;
-		int32_t num_labels = 0;
+		bool binary;
+		int32_t num_labels;
 		std::set<int32_t> labels;
 		std::tr1::unordered_map<int32_t,int32_t> labels2masks_map;
-		std::vector<Eigen::SparseVector<int32_t> > masks;
+		std::vector<Eigen::SparseMatrix<int32_t> > masks;
 };
 
 #endif /* COMPONENTSMEASUREMENTS_HPP_ */

@@ -7,10 +7,11 @@
 
 #include "connectedComponents.hpp"
 
+short ConnectedComponents::connectivity;
+
 ConnectedComponents::ConnectedComponents()
 {
-	// TODO Auto-generated constructor stub
-	static short connectivity = SMALL_CONNECTIVITY;
+	 connectivity = SMALL_CONNECTIVITY;
 }
 
 ConnectedComponents::~ConnectedComponents()
@@ -24,18 +25,19 @@ cimage* ConnectedComponents::getComponents(cimage *image)
 	int label, *data, *label_data;
 	int width, height, depth;
 
-	tmp_image = cloneImage(image);
 	label = 1;
+	tmp_image = cloneImage(image);
 	data = tmp_image->data;
-	label_data = label_image->data;
 	label_image = createImage(image);
+	label_data = label_image->data;
+
 	if(image->rank == 2) //2d-image
 	{
 		width = image->dimensions[0];
 		height = image->dimensions[1];
-		std::queue<glm::vec2<int> > indices;
-		std::vector<glm::vec2<int> > neighbours;
-		glm::vec2<int> index, neighbour;
+		std::queue<glm::vec2 > indices;
+		std::vector<glm::vec2 > neighbours;
+		glm::vec2 index, neighbour;
 		int pixel;
 
 		neighbours.push_back(glm::vec2(-1,0));
@@ -55,25 +57,27 @@ cimage* ConnectedComponents::getComponents(cimage *image)
 			for(int i=0; i<width; ++i)
 			{
 				pixel = j*width+i;
-				if(data[pixel] == 1)
+				if(data[pixel] > 0)
 				{
+					data[pixel] = 0;
 					label_data[pixel] = label;
 					index = glm::vec2(i,j);
-					addNeigbours(indices, neighbours, index, width, height);
+					addNeigbours(&indices, neighbours, index, width, height);
 					while(!indices.empty())
 					{
 						index = indices.front();
 						indices.pop();
-						pixel = index.y*width * index.x;
-						if(data[pixel] == 1)
+						pixel = index.y*width + index.x;
+						if(data[pixel] > 0)
 						{
 							data[pixel] = 0;
 							label_data[pixel] = label;
-							addNeigbours(indices, neighbours, index, width, height);
+							addNeigbours(&indices, neighbours, index, width, height);
 						}
 					}
 					label++;
 				}
+
 			}
 		}
 	}
@@ -86,17 +90,17 @@ cimage* ConnectedComponents::getComponents(cimage *image)
 	return label_image;
 }
 
-inline void ConnectedComponents::addNeigbours(std::queue<glm::vec2<int> > indices, std::vector<glm::vec2<int> > neighbours, glm::vec2<int> index, int width, int height)
+inline void ConnectedComponents::addNeigbours(std::queue<glm::vec2> *indices, std::vector<glm::vec2> neighbours, glm::vec2 index, int width, int height)
 {
-	std::vector<glm::vec2<int> >::iterator it;
-	glm::vec2<int> neighbour;
+	std::vector<glm::vec2>::iterator it;
+	glm::vec2 neighbour;
 
 	for(it = neighbours.begin(); it!=neighbours.end(); ++it)
 	{
 		neighbour = index+*it;
-		if(!(neighbour.x < 0 || neighbour.x > width || neighbour.y < 0 || neighbour.y > height))
+		if(!(neighbour.x < 0 || neighbour.x >= width || neighbour.y < 0 || neighbour.y >= height))
 		{
-			indices.push(neighbour);
+			indices->push(neighbour);
 		}
 	}
 }

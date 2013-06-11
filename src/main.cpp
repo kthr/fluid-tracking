@@ -5,20 +5,21 @@
  *      Author: kthierbach
  */
 
-#include "lib/CImg.h"
+#include <algorithm>
+#include "../lib/CImg.h"
 #include "c_wrapper.h"
+#include "ConnectedComponents.hpp"
 
 int main(int argc, char *argv[])
 {
-	cimg::imagemagick_path("/opt/local/bin/convert");
-
-	cimg_library::CImg<int> image("/Users/kthierbach/Documents/current/emb/refdataB/bin/bin275.png");
-	mint dimensions[2] = {image.width(), image.height()};
-	cimage *bimage = createImage2(2, dimensions, 8, 1);
-	memcpy(bimage->data, image.data(), sizeof(mint)*bimage->flattened_length);
+	cimg_library::CImg<int> image("/Users/kthierbach/Documents/current/emb/refdataA/bin/bin026.png");
+	image = image.get_channel(0);
+	int dimensions[2] = {image.width(), image.height()};
+	cimage *bimage = createImage2(2, dimensions, 16, 1);
+	std::copy(image.data(), image.data()+image.size(), bimage->data);
 
 	cimage *label_image = ConnectedComponents::getComponents(bimage);
-	memcpy(image.data(), label_image->data, sizeof(mint)*label_image->flattened_length);
-	image.save("~/Users/kthierbach/label.png");
+	std::copy(label_image->data, label_image->data+label_image->flattened_length, image.data());
+	image.save("/Users/kthierbach/label.png");
 
 }

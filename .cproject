@@ -35,8 +35,13 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.exe.debug.438723949" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.macosx.exe.debug">
 								<option id="gnu.cpp.compilermacosx.exe.debug.option.optimization.level.268411241" name="Optimization Level" superClass="gnu.cpp.compilermacosx.exe.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.macosx.exe.debug.option.debugging.level.64825927" name="Debug Level" superClass="gnu.cpp.compiler.macosx.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.include.paths.472231900" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+								<option id="gnu.cpp.compiler.option.include.paths.472231900" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Labeling/lib}&quot;"/>
+									<listOptionValue builtIn="false" value="/usr/include"/>
+									<listOptionValue builtIn="false" value="/usr/lib/clang/4.1/include"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.2.1"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.2.1/tr1"/>
+									<listOptionValue builtIn="false" value="/usr/include/c++/4.2.1/backward"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.2046680496" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -45,6 +50,7 @@
 								<option id="gnu.c.compiler.macosx.exe.debug.option.debugging.level.1865042826" name="Debug Level" superClass="gnu.c.compiler.macosx.exe.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.838654937" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/Applications/Mathematica.app/SystemFiles/IncludeFiles/C/"/>
+									<listOptionValue builtIn="false" value="/Applications/Mathematica.app/SystemFiles/Links/MathLink/DeveloperKit/CompilerAdditions/"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.374397708" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
