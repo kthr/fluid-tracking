@@ -59,7 +59,7 @@ namespace glm
 	// Float definition
 
 #if(defined(GLM_PRECISION_HIGHP_FLOAT))
-	typedef highp_vec2          ivec2;
+	typedef highp_vec2          vec2;
 	typedef highp_vec3          vec3;
 	typedef highp_vec4          vec4;
 	typedef highp_mat2x2		mat2x2;
@@ -72,7 +72,7 @@ namespace glm
 	typedef highp_mat4x3		mat4x3;
 	typedef highp_mat4x4		mat4x4;
 #elif(defined(GLM_PRECISION_MEDIUMP_FLOAT))
-	typedef mediump_vec2		ivec2;
+	typedef mediump_vec2		vec2;
 	typedef mediump_vec3		vec3;
 	typedef mediump_vec4		vec4;
 	typedef mediump_mat2x2      mat2x2;
@@ -85,7 +85,7 @@ namespace glm
 	typedef mediump_mat4x3      mat4x3;
 	typedef mediump_mat4x4      mat4x4;
 #elif(defined(GLM_PRECISION_LOWP_FLOAT))
-	typedef lowp_vec2			ivec2;
+	typedef lowp_vec2			vec2;
 	typedef lowp_vec3			vec3;
 	typedef lowp_vec4			vec4;
 	typedef lowp_mat2x2			mat2x2;
@@ -101,7 +101,7 @@ namespace glm
 	/// 2 components vector of floating-point numbers. 
 	/// 
 	/// @see <a href="http://www.opengl.org/registry/doc/GLSLangSpec.4.20.8.pdf">GLSL 4.20.8 specification, section 4.1.5 Vectors</a>
-	typedef mediump_vec2		ivec2;
+	typedef mediump_vec2		vec2;
 
 	//! 3 components vector of floating-point numbers. 
 	/// 
@@ -179,22 +179,22 @@ namespace glm
 	// Signed integer definition
 
 #if(defined(GLM_PRECISION_HIGHP_INT))
-	typedef highp_ivec2			ivec2;
+	typedef highp_ivec2			vec2;
 	typedef highp_ivec3			ivec3;
 	typedef highp_ivec4			ivec4;
 #elif(defined(GLM_PRECISION_MEDIUMP_INT))
-	typedef mediump_ivec2		ivec2;
+	typedef mediump_ivec2		vec2;
 	typedef mediump_ivec3		ivec3;
 	typedef mediump_ivec4		ivec4;
 #elif(defined(GLM_PRECISION_LOWP_INT))
-	typedef lowp_ivec2			ivec2;
+	typedef lowp_ivec2			vec2;
 	typedef lowp_ivec3			ivec3;
 	typedef lowp_ivec4			ivec4;
 #else
 	//! 2 components vector of signed integer numbers. 
 	/// 
 	/// @see <a href="http://www.opengl.org/registry/doc/GLSLangSpec.4.20.8.pdf">GLSL 4.20.8 specification, section 4.1.5 Vectors</a>
-	typedef mediump_ivec2		ivec2;
+	typedef mediump_ivec2		vec2;
 
 	//! 3 components vector of signed integer numbers. 
 	/// 

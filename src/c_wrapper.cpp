@@ -14,7 +14,8 @@
 
 void labeling_c(cimage *new_label_image, cimage* label_image, cimage* input_image, parameters *input_params)
 {
-	labeling(new_label_image, label_image, input_image, input_params);
+	elib::Labeling lc;
+	lc.labeling(new_label_image, label_image, input_image, input_params);
 }
 
 cimage* cloneImage(cimage* image)

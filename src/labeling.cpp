@@ -11,6 +11,8 @@
 
 #define GC_INFINITY 300000
 
+using elib::Labeling;
+
 void labeling(cimage *new_label_image, cimage* label_image, cimage* input_image, parameters *input_params)
 {
 	int width, height, bit_depth, num_labels;

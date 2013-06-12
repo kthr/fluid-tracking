@@ -11,6 +11,8 @@
 #include <set>
 #include "../lib/glm/glm.hpp"
 
+namespace elib{
+
 template <typename Point>
 class Mask
 {
@@ -61,5 +63,8 @@ class Mask
 		std::set<Point> points;
 		std::set<Point> outline = NULL;
 };
+
+} /* namespace elib */
+
 #endif /* MASK_HPP_ */
 

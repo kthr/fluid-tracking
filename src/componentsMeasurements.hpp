@@ -16,6 +16,8 @@
 #include "c_wrapper.h"
 #include "mask.hpp"
 
+namespace elib {
+
 class ComponentsMeasurements
 {
 	public:
@@ -33,7 +35,9 @@ class ComponentsMeasurements
 		int32_t num_labels;
 		std::set<int32_t> labels;
 		std::tr1::unordered_map<int32_t,int32_t> labels2masks_map;
-		std::vector<Mask<glm::ivec3> > masks;
+		std::vector<Mask<glm::vec3> > masks;
 };
+
+} /* namespace elib */
 
 #endif /* COMPONENTSMEASUREMENTS_HPP_ */

@@ -41,6 +41,7 @@ typedef struct {
 	parameters* createParameters(mint int_params_size, mint double_params_size);
 	void freeImage(cimage *image);
 	void freeParameters(parameters *param);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

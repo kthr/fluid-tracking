@@ -7,6 +7,8 @@
 
 #include "parameters.hpp"
 
+using elib::Parameters;
+
 Parameters::Parameters(uint32_t int_params_size, int32_t *int_params, uint32_t double_params_size, double double_params)
 {
 	this->int_params_size = int_params_size;

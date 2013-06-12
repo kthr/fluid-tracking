@@ -7,6 +7,8 @@
 
 #include "connectedComponents.hpp"
 
+using elib::ConnectedComponents;
+
 short ConnectedComponents::connectivity;
 
 ConnectedComponents::ConnectedComponents()
@@ -35,9 +37,9 @@ cimage* ConnectedComponents::getComponents(cimage *image)
 	{
 		width = image->dimensions[0];
 		height = image->dimensions[1];
-		std::queue<glm::ivec2 > indices;
-		std::vector<glm::ivec2 > *neighbours;
-		glm::ivec2 index, neighbour;
+		std::queue<glm::vec2 > indices;
+		std::vector<glm::vec2 > *neighbours;
+		glm::vec2 index, neighbour;
 		int pixel;
 
 		if(connectivity == SMALL_CONNECTIVITY)
@@ -58,7 +60,7 @@ cimage* ConnectedComponents::getComponents(cimage *image)
 				{
 					data[pixel] = 0;
 					label_data[pixel] = label;
-					index = glm::ivec2(i,j);
+					index = glm::vec2(i,j);
 					addNeigbours(&indices, neighbours, index, width, height);
 					while(!indices.empty())
 					{
@@ -87,10 +89,10 @@ cimage* ConnectedComponents::getComponents(cimage *image)
 	return label_image;
 }
 
-inline void ConnectedComponents::addNeigbours(std::queue<glm::ivec2> *indices, std::vector<glm::ivec2> *neighbours, glm::ivec2 index, int width, int height)
+inline void ConnectedComponents::addNeigbours(std::queue<glm::vec2> *indices, std::vector<glm::vec2> *neighbours, glm::vec2 index, int width, int height)
 {
-	std::vector<glm::ivec2>::iterator it;
-	glm::ivec2 neighbour;
+	std::vector<glm::vec2>::iterator it;
+	glm::vec2 neighbour;
 
 	for(it = neighbours->begin(); it!=neighbours->end(); ++it)
 	{

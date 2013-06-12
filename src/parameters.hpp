@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+namespace elib{
+
 class Parameters
 {
 	public:
@@ -24,5 +26,7 @@ class Parameters
 		double *double_params;
 		int32_t *int_params;
 };
+
+} /* namespace elib */
 
 #endif /* PARAMETERS_HPP_ */

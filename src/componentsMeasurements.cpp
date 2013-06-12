@@ -6,8 +6,9 @@
  */
 
 #include "componentsMeasurements.hpp"
-
 #include "connectedComponents.hpp"
+
+using elib::ComponentsMeasurements;
 
 short ComponentsMeasurements::connectivity;
 
@@ -34,63 +35,62 @@ void ComponentsMeasurements::init()
 	tmp_image = cloneImage(label_image);
 	tmp_data = tmp_image->data;
 
-	if(label_image->rank == 2) //2d-image
+	if (label_image->rank == 2) //2d-image
+	{
+		width = label_image->dimensions[0];
+		height = label_image->dimensions[1];
+		std::queue<glm::vec2> indices;
+		std::vector<glm::vec2> *neighbours;
+		glm::vec2 index, neighbour;
+		int32_t pixel;
+
+		if (connectivity == SMALL_CONNECTIVITY)
 		{
-			width = label_image->dimensions[0];
-			height = label_image->dimensions[1];
-			std::queue<glm::ivec2 > indices;
-			std::vector<glm::ivec2 > *neighbours;
-			glm::ivec2 index, neighbour;
-			int32_t pixel;
+			neighbours = &(ConnectedComponents::small_2d);
+		}
+		else
+		{
+			neighbours = &(ConnectedComponents::large_2d);
+		}
 
-			if(connectivity == SMALL_CONNECTIVITY)
+		for (int32_t j = 0; j < height; ++j)
+		{
+			for (int32_t i = 0; i < width; ++i)
 			{
-				neighbours = &(ConnectedComponents::small_2d);
-			}
-			else
-			{
-				neighbours = &(ConnectedComponents::large_2d);
-			}
-
-			for(int32_t j=0; j<height; ++j)
-			{
-				for(int32_t i=0; i<width; ++i)
+				pixel = j * width + i;
+				if (label_data[pixel] > 0)
 				{
-					pixel = j*width+i;
-					if(label_data[pixel] > 0)
+					tmp_data[pixel] = 0;
+					label = label_data[pixel];
+					if (labels.insert(label).second == true)
 					{
-						tmp_data[pixel] = 0;
-						label = label_data[pixel];
-						if(labels.insert(label).second == true)
-						{
-							Mask<glm::ivec2> mask;
-							std::pair<int32_t,int32_t> map(label, masks.size()-1);
-							masks.push_back(mask);
-							labels2masks_map.insert(map);
-						}
-						masks[labels2masks_map.find(label)->second].push_back(glm::ivec3(i,j,1));
+						Mask<glm::vec3> mask;
+						std::pair<int32_t, int32_t> map(label, masks.size() - 1);
+						labels2masks_map.insert(map);
+					}
+					masks[labels2masks_map.find(label)->second].addPoint(glm::vec3(i, j, 1));
 
-						index = glm::ivec2(i,j);
-						ConnectedComponents::addNeigbours(&indices, neighbours, index, width, height);
-						while(!indices.empty())
+					index = glm::vec2(i, j);
+					ConnectedComponents::addNeigbours(&indices, neighbours, index, width, height);
+					while (!indices.empty())
+					{
+						index = indices.front();
+						indices.pop();
+						pixel = index.y * width + index.x;
+						if (label_data[pixel] == label)
 						{
-							index = indices.front();
-							indices.pop();
-							pixel = index.y*width + index.x;
-							if(label_data[pixel] == label)
-							{
-								tmp_data[pixel] = 0;
-								masks[labels2masks_map.find(label)->second].push_back(glm::ivec3(index.x,index.y,1));
-								ConnectedComponents::addNeigbours(&indices, neighbours, index, width, height);
-							}
+							tmp_data[pixel] = 0;
+							masks[labels2masks_map.find(label)->second].addPoint(glm::vec3(index.x, index.y, 1));
+							ConnectedComponents::addNeigbours(&indices, neighbours, index, width, height);
 						}
 					}
-
 				}
+
 			}
 		}
-		else //3d-image
-		{
+	}
+	else //3d-image
+	{
 
-		}
+	}
 }

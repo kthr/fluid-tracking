@@ -8,8 +8,10 @@
 #ifndef IMAGE_HPP_
 #define IMAGE_HPP_
 
+#include <algorithm>
 #include <stdint.h>
-#include <stdlib.h>
+
+namespace elib{
 
 template <typename type>
 class Image
@@ -52,5 +54,7 @@ class Image
 					rank;
 		type 		*data;
 };
+
+} /* namespace elib */
 
 #endif /* IMAGE_HPP_ */
