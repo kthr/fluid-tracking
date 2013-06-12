@@ -14,7 +14,7 @@
 #include <tr1/unordered_map>
 
 #include "c_wrapper.h"
-#include "../lib/eigen/SparseCore"
+#include "mask.hpp"
 
 class ComponentsMeasurements
 {
@@ -30,11 +30,10 @@ class ComponentsMeasurements
 		void init();
 
 		cimage * label_image;
-		bool binary;
 		int32_t num_labels;
 		std::set<int32_t> labels;
 		std::tr1::unordered_map<int32_t,int32_t> labels2masks_map;
-		std::vector<Eigen::SparseMatrix<int32_t> > masks;
+		std::vector<Mask<glm::ivec3> > masks;
 };
 
 #endif /* COMPONENTSMEASUREMENTS_HPP_ */

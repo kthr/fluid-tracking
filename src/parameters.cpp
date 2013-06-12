@@ -13,8 +13,17 @@ Parameters::Parameters(uint32_t int_params_size, int32_t *int_params, uint32_t d
 	this->int_params = new int32_t[int_params_size];
 	this->double_params_size = double_params_size;
 	this->double_params = new double[double_params_size];
-	memcpy(this->int_params, int_params, sizeof(int32_t)*int_params_size);
-	memcpy(this->double_params, double_params, sizeof(int32_t)*double_params_size);
+	std::copy(int_params, int_params+int_params_size, this->int_params);
+	std::copy(double_params, double_params+double_params_size, this->double_params);
+}
+Parameters::Parameters(parameters *params)
+{
+	this->int_params_size = (uint32_t)params->int_params_size;
+	this->int_params = new int32_t[int_params_size];
+	this->double_params_size = (uint32_t)params->double_params_size;
+	this->double_params = new double[double_params_size];
+	std::copy(params->int_params, params->int_params+int_params_size, this->int_params);
+	std::copy(params->double_params, params->double_params+double_params_size, this->double_params);
 }
 
 Parameters::~Parameters()

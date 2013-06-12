@@ -8,7 +8,8 @@
 #include <algorithm>
 #include "../lib/CImg.h"
 #include "c_wrapper.h"
-#include "ConnectedComponents.hpp"
+#include "connectedComponents.hpp"
+#include "componentsMeasurements.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -20,6 +21,7 @@ int main(int argc, char *argv[])
 
 	cimage *label_image = ConnectedComponents::getComponents(bimage);
 	std::copy(label_image->data, label_image->data+label_image->flattened_length, image.data());
+	//ComponentsMeasurements cm(label_image);
 	image.save("/Users/kthierbach/label.png");
 
 }

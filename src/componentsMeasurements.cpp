@@ -28,7 +28,6 @@ void ComponentsMeasurements::init()
 	int *label_data, *tmp_data;
 	int32_t width, height, depth;
 	int32_t label;
-	std::vector<std::vector<Eigen::Triplet<int32_t> > > triplets;
 
 	labels.insert(label_image->data, label_image->data + label_image->flattened_length);
 	label_data = label_image->data;
@@ -39,42 +38,39 @@ void ComponentsMeasurements::init()
 		{
 			width = label_image->dimensions[0];
 			height = label_image->dimensions[1];
-			std::queue<glm::vec2 > indices;
-			std::vector<glm::vec2 > neighbours;
-			glm::vec2 index, neighbour;
-			int pixel;
+			std::queue<glm::ivec2 > indices;
+			std::vector<glm::ivec2 > *neighbours;
+			glm::ivec2 index, neighbour;
+			int32_t pixel;
 
-			neighbours.push_back(glm::vec2(-1,0));
-			neighbours.push_back(glm::vec2(0,-1));
-			neighbours.push_back(glm::vec2(1,0));
-			neighbours.push_back(glm::vec2(0,1));
-			if(connectivity == LARGE_CONNECTIVITY)
+			if(connectivity == SMALL_CONNECTIVITY)
 			{
-				neighbours.push_back(glm::vec2(-1,-1));
-				neighbours.push_back(glm::vec2(1,-1));
-				neighbours.push_back(glm::vec2(1,1));
-				neighbours.push_back(glm::vec2(-1,1));
+				neighbours = &(ConnectedComponents::small_2d);
+			}
+			else
+			{
+				neighbours = &(ConnectedComponents::large_2d);
 			}
 
-			for(int j=0; j<height; ++j)
+			for(int32_t j=0; j<height; ++j)
 			{
-				for(int i=0; i<width; ++i)
+				for(int32_t i=0; i<width; ++i)
 				{
 					pixel = j*width+i;
 					if(label_data[pixel] > 0)
 					{
+						tmp_data[pixel] = 0;
 						label = label_data[pixel];
 						if(labels.insert(label).second == true)
 						{
-							std::vector<Eigen::Triplet<int32_t> > tmp;
-							Eigen::SparseMatrix<int32_t> matrix(width,height);
-							std::pair<int32_t,int32_t>
-							masks.push_back(matrix);
-							triplets.push_back(tmp);
-							labels2masks_map.insert();
+							Mask<glm::ivec2> mask;
+							std::pair<int32_t,int32_t> map(label, masks.size()-1);
+							masks.push_back(mask);
+							labels2masks_map.insert(map);
 						}
+						masks[labels2masks_map.find(label)->second].push_back(glm::ivec3(i,j,1));
 
-						index = glm::vec2(i,j);
+						index = glm::ivec2(i,j);
 						ConnectedComponents::addNeigbours(&indices, neighbours, index, width, height);
 						while(!indices.empty())
 						{
@@ -83,7 +79,8 @@ void ComponentsMeasurements::init()
 							pixel = index.y*width + index.x;
 							if(label_data[pixel] == label)
 							{
-								tmp_data[pixel] = -1;
+								tmp_data[pixel] = 0;
+								masks[labels2masks_map.find(label)->second].push_back(glm::ivec3(index.x,index.y,1));
 								ConnectedComponents::addNeigbours(&indices, neighbours, index, width, height);
 							}
 						}

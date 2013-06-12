@@ -35,21 +35,18 @@ cimage* ConnectedComponents::getComponents(cimage *image)
 	{
 		width = image->dimensions[0];
 		height = image->dimensions[1];
-		std::queue<glm::vec2 > indices;
-		std::vector<glm::vec2 > neighbours;
-		glm::vec2 index, neighbour;
+		std::queue<glm::ivec2 > indices;
+		std::vector<glm::ivec2 > *neighbours;
+		glm::ivec2 index, neighbour;
 		int pixel;
 
-		neighbours.push_back(glm::vec2(-1,0));
-		neighbours.push_back(glm::vec2(0,-1));
-		neighbours.push_back(glm::vec2(1,0));
-		neighbours.push_back(glm::vec2(0,1));
-		if(connectivity == LARGE_CONNECTIVITY)
+		if(connectivity == SMALL_CONNECTIVITY)
 		{
-			neighbours.push_back(glm::vec2(-1,-1));
-			neighbours.push_back(glm::vec2(1,-1));
-			neighbours.push_back(glm::vec2(1,1));
-			neighbours.push_back(glm::vec2(-1,1));
+			neighbours = &(ConnectedComponents::small_2d);
+		}
+		else
+		{
+			neighbours = &(ConnectedComponents::large_2d);
 		}
 
 		for(int j=0; j<height; ++j)
@@ -61,7 +58,7 @@ cimage* ConnectedComponents::getComponents(cimage *image)
 				{
 					data[pixel] = 0;
 					label_data[pixel] = label;
-					index = glm::vec2(i,j);
+					index = glm::ivec2(i,j);
 					addNeigbours(&indices, neighbours, index, width, height);
 					while(!indices.empty())
 					{
@@ -90,12 +87,12 @@ cimage* ConnectedComponents::getComponents(cimage *image)
 	return label_image;
 }
 
-inline void ConnectedComponents::addNeigbours(std::queue<glm::vec2> *indices, std::vector<glm::vec2> neighbours, glm::vec2 index, int width, int height)
+inline void ConnectedComponents::addNeigbours(std::queue<glm::ivec2> *indices, std::vector<glm::ivec2> *neighbours, glm::ivec2 index, int width, int height)
 {
-	std::vector<glm::vec2>::iterator it;
-	glm::vec2 neighbour;
+	std::vector<glm::ivec2>::iterator it;
+	glm::ivec2 neighbour;
 
-	for(it = neighbours.begin(); it!=neighbours.end(); ++it)
+	for(it = neighbours->begin(); it!=neighbours->end(); ++it)
 	{
 		neighbour = index+*it;
 		if(!(neighbour.x < 0 || neighbour.x >= width || neighbour.y < 0 || neighbour.y >= height))

@@ -15,6 +15,7 @@ class Parameters
 {
 	public:
 		Parameters(uint32_t int_params_size, int32_t *int_params, uint32_t double_params_size, double double_params);
+		Parameters(parameters *param);
 		virtual ~Parameters();
 		int32_t getIntegerParam(uint32_t index);
 		double getDoubleParam(uint32_t index);
