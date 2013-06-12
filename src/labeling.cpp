@@ -13,7 +13,7 @@
 
 using elib::Labeling;
 
-void labeling(cimage *new_label_image, cimage* label_image, cimage* input_image, parameters *input_params)
+void Labeling::labeling(cimage *new_label_image, cimage* label_image, cimage* input_image, parameters *input_params)
 {
 	int width, height, bit_depth, num_labels;
 	double c0, c1, lambda, mu;
@@ -93,7 +93,7 @@ void labeling(cimage *new_label_image, cimage* label_image, cimage* input_image,
 
 }
 
-int smoothFn(int p1, int p2, int l1, int l2, void *data)
+int elib::smoothFn(int p1, int p2, int l1, int l2, void *data)
 {
 	ForSmoothFn fsf = *((ForSmoothFn*) data);
 	if(l1==l2)
@@ -102,10 +102,10 @@ int smoothFn(int p1, int p2, int l1, int l2, void *data)
 		if((l1==1 && l2!=0) || (l1!=0 && l2==1))
 			return GC_INFINITY;
 		else
-			return int(fsf.lambda*(label_dist(l1-l2)) + exp(-pow(fsf.image[p1]-fsf.image[p2],2)));
+			return int(fsf.lambda*(Labeling::label_dist(l1-l2)) + exp(-pow(fsf.image[p1]-fsf.image[p2],2)));
 }
 
-int label_dist(int value)
+int Labeling::label_dist(int value)
 {
 	if(value==0)
 		return 0;

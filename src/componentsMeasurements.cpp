@@ -46,11 +46,11 @@ void ComponentsMeasurements::init()
 
 		if (connectivity == SMALL_CONNECTIVITY)
 		{
-			neighbours = &(ConnectedComponents::small_2d);
+//			neighbours = &(ConnectedComponents::small_2d);
 		}
 		else
 		{
-			neighbours = &(ConnectedComponents::large_2d);
+//			neighbours = &(ConnectedComponents::large_2d);
 		}
 
 		for (int32_t j = 0; j < height; ++j)

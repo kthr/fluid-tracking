@@ -9,7 +9,6 @@
 #define MASK_HPP_
 
 #include <set>
-#include "../lib/glm/glm.hpp"
 
 namespace elib{
 
@@ -48,7 +47,8 @@ class Mask
 				size *= dimensions[i];
 			}
 			image = (int32_t*)malloc(sizeof(int32_t)*size);
-			for(std::set<Point>::iterator it=points.begin(); it!=points.end(); ++it)
+			typename std::set<Point>::iterator it;
+			for(it=points.begin(); it!=points.end(); ++it)
 			{
 				for(int32_t i=0; i<rank; ++i)
 				{

@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 	cimage *bimage = createImage2(2, dimensions, 16, 1);
 	std::copy(image.data(), image.data()+image.size(), bimage->data);
 
-	cimage *label_image = ConnectedComponents::getComponents(bimage);
+	cimage *label_image = elib::ConnectedComponents::getComponents(bimage);
 	std::copy(label_image->data, label_image->data+label_image->flattened_length, image.data());
 	//ComponentsMeasurements cm(label_image);
 	image.save("/Users/kthierbach/label.png");

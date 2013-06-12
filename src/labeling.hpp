@@ -22,7 +22,10 @@ class Labeling
 		void labeling(cimage *new_label_image, cimage* label_image, cimage* input_image, parameters *input_params);
 
 	private:
-		struct ForSmoothFn
+		int label_dist(int value);
+};
+
+struct ForSmoothFn
 		{
 			int *image;
 			double lambda;
@@ -30,9 +33,7 @@ class Labeling
 		};
 
 
-		int smoothFn(int p1, int p2, int l1, int l2, void *data);
-		int label_dist(int value);
-};
+int smoothFn(int p1, int p2, int l1, int l2, void *data);
 
 } /* namespace elib */
 

@@ -24,8 +24,6 @@ class ConnectedComponents
 
 		const static short SMALL_CONNECTIVITY = 0;
 		const static short LARGE_CONNECTIVITY = 1;
-		const static std::vector<glm::vec2> small_2d; //= {glm::vec2(-1,0) ,glm::vec2(0,-1), glm::vec2(1,0), glm::vec2(0,1)};
-		const static std::vector<glm::vec2> large_2d; //= {glm::vec2(-1,0) ,glm::vec2(0,-1), glm::vec2(1,0), glm::vec2(0,1), glm::vec2(-1,-1), glm::vec2(1,-1), glm::vec2(1,1), glm::vec2(-1,1)};
 
 		static short connectivity;
 
