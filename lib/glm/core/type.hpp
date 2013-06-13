@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////////
 /// OpenGL Mathematics (glm.g-truc.net)
 ///
-/// Copyright (c) 2005 - 2012 G-Truc Creation (www.g-truc.net)
+/// Copyright (c) 2005 - 2013 G-Truc Creation (www.g-truc.net)
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
 /// in the Software without restriction, including without limitation the rights
@@ -179,22 +179,22 @@ namespace glm
 	// Signed integer definition
 
 #if(defined(GLM_PRECISION_HIGHP_INT))
-	typedef highp_ivec2			vec2;
+	typedef highp_ivec2			ivec2;
 	typedef highp_ivec3			ivec3;
 	typedef highp_ivec4			ivec4;
 #elif(defined(GLM_PRECISION_MEDIUMP_INT))
-	typedef mediump_ivec2		vec2;
+	typedef mediump_ivec2		ivec2;
 	typedef mediump_ivec3		ivec3;
 	typedef mediump_ivec4		ivec4;
 #elif(defined(GLM_PRECISION_LOWP_INT))
-	typedef lowp_ivec2			vec2;
+	typedef lowp_ivec2			ivec2;
 	typedef lowp_ivec3			ivec3;
 	typedef lowp_ivec4			ivec4;
 #else
 	//! 2 components vector of signed integer numbers. 
 	/// 
 	/// @see <a href="http://www.opengl.org/registry/doc/GLSLangSpec.4.20.8.pdf">GLSL 4.20.8 specification, section 4.1.5 Vectors</a>
-	typedef mediump_ivec2		vec2;
+	typedef mediump_ivec2		ivec2;
 
 	//! 3 components vector of signed integer numbers. 
 	/// 

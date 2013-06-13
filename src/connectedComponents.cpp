@@ -6,10 +6,11 @@
  */
 
 #include "connectedComponents.hpp"
-#include "../lib/glm/core/type.hpp"
+#include "../lib/glm/glm.hpp"
 
 using elib::ConnectedComponents;
 using elib::Image;
+
 
 short ConnectedComponents::connectivity;
 
