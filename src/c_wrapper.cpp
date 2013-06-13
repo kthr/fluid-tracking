@@ -9,7 +9,7 @@
 
 #include "c_wrapper.h"
 #include "labeling.hpp"
-#include "image.hpp"
+#include "templates/image.hpp"
 #include "parameters.hpp"
 
 void labeling_c(cimage *new_label_image, cimage* label_image, cimage* input_image, parameters *input_params)

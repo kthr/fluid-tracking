@@ -16,7 +16,7 @@
 #include "../lib/glm/glm.hpp"
 #include "c_wrapper.h"
 #include "connectedComponents.hpp"
-#include "mask.hpp"
+#include "templates/mask.hpp"
 
 namespace elib {
 

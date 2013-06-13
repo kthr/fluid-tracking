@@ -11,8 +11,7 @@
 #include <queue>
 #include <vector>
 
-#include "../lib/glm/glm.hpp"
-#include "image.h"
+#include "templates/image.hpp"
 
 namespace elib{
 
@@ -28,7 +27,21 @@ class ConnectedComponents
 		static short connectivity;
 
 		static Image<int32_t>* getComponents(Image<int32_t> *image);
-		inline static void addNeigbours(std::queue<glm::vec2> *indices, std::vector<glm::vec2> *neighbours, glm::vec2 index, int width, int height);
+		template <typename Point>
+		inline static void addNeigbours(std::queue<Point> *indices, std::vector<Point> *neighbours, Point index, int width, int height)
+		{
+			typename std::vector<Point>::iterator it;
+			Point neighbour;
+
+			for(it = neighbours->begin(); it!=neighbours->end(); ++it)
+			{
+				neighbour = index+*it;
+				if(!(neighbour.x < 0 || neighbour.x >= width || neighbour.y < 0 || neighbour.y >= height))
+				{
+					indices->push(neighbour);
+				}
+			}
+		}
 	private:
 
 };

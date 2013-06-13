@@ -6,8 +6,10 @@
  */
 
 #include "connectedComponents.hpp"
+#include "../lib/glm/core/type.hpp"
 
 using elib::ConnectedComponents;
+using elib::Image;
 
 short ConnectedComponents::connectivity;
 
@@ -25,18 +27,19 @@ Image<int32_t>* ConnectedComponents::getComponents(Image<int32_t> *image)
 {
 	Image<int32_t> *label_image, *tmp_image;
 	int32_t label, *data, *label_data;
-	uint32_t width, height, depth;
+	uint32_t width, height, depth, *dimensions;
 
 	label = 1;
 	tmp_image = new Image<int32_t>(image);
 	data = tmp_image->getData();
-	label_image = new Image(image->getRank(), image->getDimensions(), 16, 1);
+	label_image = new Image<int32_t>(image->getRank(), image->getDimensions(), 16, 1);
 	label_data = label_image->getData();;
 
 	if(image->getRank() == 2) //2d-image
 	{
-		width = image->dimensions[0];
-		height = image->dimensions[1];
+		dimensions=image->getDimensions();
+		width = dimensions[0];
+		height = dimensions[1];
 		std::queue<glm::vec2 > indices;
 		std::vector<glm::vec2 > *neighbours;
 		glm::vec2 index, neighbour;
@@ -87,19 +90,4 @@ Image<int32_t>* ConnectedComponents::getComponents(Image<int32_t> *image)
 
 	delete tmp_image;
 	return label_image;
-}
-
-inline void ConnectedComponents::addNeigbours(std::queue<glm::vec2> *indices, std::vector<glm::vec2> *neighbours, glm::vec2 index, int width, int height)
-{
-	std::vector<glm::vec2>::iterator it;
-	glm::vec2 neighbour;
-
-	for(it = neighbours->begin(); it!=neighbours->end(); ++it)
-	{
-		neighbour = index+*it;
-		if(!(neighbour.x < 0 || neighbour.x >= width || neighbour.y < 0 || neighbour.y >= height))
-		{
-			indices->push(neighbour);
-		}
-	}
 }

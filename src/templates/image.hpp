@@ -11,6 +11,8 @@
 #include <algorithm>
 #include <stdint.h>
 
+#include "../c_wrapper.h"
+
 namespace elib{
 
 template <typename type>

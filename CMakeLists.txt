@@ -45,9 +45,13 @@ include_directories(
     lib/eigen   
 )
 
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
 find_package(Mathematica)
 if(${Mathematica_WolframLibrary_FOUND})
     include_directories(${Mathematica_WolframLibrary_INCLUDE_DIR})
+else(
+	message(ERROR "Mathematica not found")
+)
 endif()
 
 if(APPLE)
@@ -59,4 +63,4 @@ if(APPLE)
      )
 endif()
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
+
