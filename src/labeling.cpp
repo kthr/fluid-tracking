@@ -6,8 +6,14 @@
  */
 
 #include "labeling.hpp"
+
+#include <math.h>
 #include <tr1/unordered_map>
 #include <set>
+
+#include "gco/GCoptimization.h"
+#include "../lib/glm/glm.hpp"
+
 
 #define GC_INFINITY 300000
 
@@ -102,10 +108,10 @@ int elib::smoothFn(int p1, int p2, int l1, int l2, void *data)
 		if((l1==1 && l2!=0) || (l1!=0 && l2==1))
 			return GC_INFINITY;
 		else
-			return int(fsf.lambda*(Labeling::label_dist(l1-l2)) + exp(-pow(fsf.image[p1]-fsf.image[p2],2)));
+			return int(fsf.lambda*(label_dist(l1-l2)) + exp(-pow(fsf.image[p1]-fsf.image[p2],2)));
 }
 
-int Labeling::label_dist(int value)
+int label_dist(int value)
 {
 	if(value==0)
 		return 0;

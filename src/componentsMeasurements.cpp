@@ -6,11 +6,11 @@
  */
 
 #include "componentsMeasurements.hpp"
-#include "connectedComponents.hpp"
 
 using elib::ComponentsMeasurements;
 
 short ComponentsMeasurements::connectivity;
+
 
 ComponentsMeasurements::ComponentsMeasurements(cimage *label_image)
 {
@@ -21,6 +21,31 @@ ComponentsMeasurements::ComponentsMeasurements(cimage *label_image)
 ComponentsMeasurements::~ComponentsMeasurements()
 {
 	// TODO Auto-generated destructor stub
+}
+
+bool ComponentsMeasurements::deleteMask(int32_t label)
+{
+	if(labels2masks_map.erase(label))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+elib::Mask<glm::vec3>* ComponentsMeasurements::getMask(int32_t label)
+{
+	return labels2masks_map.find(label);
+}
+
+cimage* ComponentsMeasurements::masksToImage(uint32_t rank, uint32_t *dimensions)
+{
+	cimage* image;
+
+	image = createImage2(rank, dimensions, 16, 1);
+	return image;
 }
 
 void ComponentsMeasurements::init()
@@ -60,15 +85,19 @@ void ComponentsMeasurements::init()
 				pixel = j * width + i;
 				if (label_data[pixel] > 0)
 				{
+					Mask<glm::vec3> mask;
 					tmp_data[pixel] = 0;
 					label = label_data[pixel];
 					if (labels.insert(label).second == true)
 					{
-						Mask<glm::vec3> mask;
-						std::pair<int32_t, int32_t> map(label, masks.size() - 1);
+						std::pair<int32_t, Mask<glm::vec3> > map(label, mask);
 						labels2masks_map.insert(map);
 					}
-					masks[labels2masks_map.find(label)->second].addPoint(glm::vec3(i, j, 1));
+					else
+					{
+						mask = labels2masks_map.find(label)->second;
+					}
+					mask.addPoint(glm::vec3(i, j, 1));
 
 					index = glm::vec2(i, j);
 					ConnectedComponents::addNeigbours(&indices, neighbours, index, width, height);
@@ -80,7 +109,7 @@ void ComponentsMeasurements::init()
 						if (label_data[pixel] == label)
 						{
 							tmp_data[pixel] = 0;
-							masks[labels2masks_map.find(label)->second].addPoint(glm::vec3(index.x, index.y, 1));
+							mask.addPoint(glm::vec3(index.x, index.y, 1));
 							ConnectedComponents::addNeigbours(&indices, neighbours, index, width, height);
 						}
 					}

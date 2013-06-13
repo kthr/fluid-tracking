@@ -21,19 +21,19 @@ ConnectedComponents::~ConnectedComponents()
 	// TODO Auto-generated destructor stub
 }
 
-cimage* ConnectedComponents::getComponents(cimage *image)
+Image<int32_t>* ConnectedComponents::getComponents(Image<int32_t> *image)
 {
-	cimage *label_image, *tmp_image;
-	int label, *data, *label_data;
-	int width, height, depth;
+	Image<int32_t> *label_image, *tmp_image;
+	int32_t label, *data, *label_data;
+	uint32_t width, height, depth;
 
 	label = 1;
-	tmp_image = cloneImage(image);
-	data = tmp_image->data;
-	label_image = createImage(image);
-	label_data = label_image->data;
+	tmp_image = new Image<int32_t>(image);
+	data = tmp_image->getData();
+	label_image = new Image(image->getRank(), image->getDimensions(), 16, 1);
+	label_data = label_image->getData();;
 
-	if(image->rank == 2) //2d-image
+	if(image->getRank() == 2) //2d-image
 	{
 		width = image->dimensions[0];
 		height = image->dimensions[1];
@@ -85,7 +85,7 @@ cimage* ConnectedComponents::getComponents(cimage *image)
 
 	}
 
-	freeImage(tmp_image);
+	delete tmp_image;
 	return label_image;
 }
 

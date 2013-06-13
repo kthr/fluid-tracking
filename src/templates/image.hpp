@@ -41,11 +41,46 @@ class Image
 			this->data = new type[this->flattened_length];
 			std::copy(image->data, image->data+this->flattened_length, this->data);
 		}
+		Image(Image *image)
+		{
+
+		}
 		virtual ~Image()
 		{
 			delete dimensions;
 			delete data;
 		}
+
+		uint32_t getBitDepth() const
+		{
+			return bit_depth;
+		}
+
+		uint32_t getChannels() const
+		{
+			return channels;
+		}
+
+		type* getData() const
+		{
+			return data;
+		}
+
+		uint32_t* getDimensions() const
+		{
+			return dimensions;
+		}
+
+		uint32_t getFlattenedLength() const
+		{
+			return flattened_length;
+		}
+
+		uint32_t getRank() const
+		{
+			return rank;
+		}
+
 	private:
 		uint32_t 	*dimensions,
 					bit_depth,

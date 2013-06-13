@@ -38,13 +38,17 @@ add_library(Labeling SHARED
     src/gco/LinkedBlockList.cpp
 )
 
-set(CMAKE_INCLUDE_PATH
+include_directories(
     src/gco
     lib
     lib/glm
-    lib/eigen
-    
+    lib/eigen   
 )
+
+find_package(Mathematica)
+if(${Mathematica_WolframLibrary_FOUND})
+    include_directories(${Mathematica_WolframLibrary_INCLUDE_DIR})
+endif()
 
 if(APPLE)
     message("\nEntering configuration for APPLE computers:\n")
@@ -56,7 +60,3 @@ if(APPLE)
 endif()
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
-find_package(Mathematica)
-if(${Mathematica_FOUND})
-    include_directories("/Applications/Mathematica.app/SystemFiles/IncludeFiles/C" "/Applications/Mathematica.app/SystemFiles/Links/MathLink/DeveloperKit/CompilerAdditions/")
-endif()

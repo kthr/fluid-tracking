@@ -9,6 +9,8 @@
 #define MASK_HPP_
 
 #include <set>
+#include <stdint.h>
+#include <stdlib.h>
 
 namespace elib{
 
@@ -35,13 +37,13 @@ class Mask
 		{
 			return (int32_t)points.size();
 		}
-		int32_t* toImage(int32_t rank, int32_t *dimensions, int32_t channels)
+		int32_t* toImage(int32_t rank, int32_t *dimensions)
 		{
 			int32_t *image,
 					pixel,
 					size;
 
-			size = channels;
+			size = 1;
 			for(int32_t i=0; i<rank; ++i)
 			{
 				size *= dimensions[i];
@@ -61,7 +63,7 @@ class Mask
 		}
 	private:
 		std::set<Point> points;
-		std::set<Point> outline = NULL;
+		std::set<Point> outline;
 };
 
 } /* namespace elib */

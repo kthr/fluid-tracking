@@ -11,8 +11,8 @@
 #include <queue>
 #include <vector>
 
-#include "c_wrapper.h"
 #include "../lib/glm/glm.hpp"
+#include "image.h"
 
 namespace elib{
 
@@ -27,7 +27,7 @@ class ConnectedComponents
 
 		static short connectivity;
 
-		static cimage* getComponents(cimage *image);
+		static Image<int32_t>* getComponents(Image<int32_t> *image);
 		inline static void addNeigbours(std::queue<glm::vec2> *indices, std::vector<glm::vec2> *neighbours, glm::vec2 index, int width, int height);
 	private:
 
