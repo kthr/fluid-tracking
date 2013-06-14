@@ -19,40 +19,55 @@ template <typename type>
 class Image
 {
 	public:
-		Image(uint32_t rank, uint32_t *dimensions, uint32_t channels, uint32_t bit_depth)
+		Image(uint32_t rank, uint32_t *dimensions, uint32_t bit_depth, uint32_t channels)
+		: bit_depth(bit_depth), channels(channels), rank(rank)
 		{
-			this->rank = rank;
 			this->dimensions  = new uint32_t[rank];
 			std::copy(dimensions, dimensions+rank, this->dimensions);
-			this->channels = channels;
-			this->bit_depth = bit_depth;
 			this->flattened_length = channels;
 			for(uint32_t i=0; i<rank; ++i)
 			{
-				this->flattened_length*dimensions[i];
+				this->flattened_length*=dimensions[i];
 			}
 			this->data = new type[flattened_length];
 		}
 		Image(cimage *image)
+		: bit_depth(image->bit_depth), channels(image->channels), flattened_length(image->flattened_length), rank(image->rank)
 		{
-			this->rank = (uint32_t)image->rank;
-			std::copy(image->dimensions, image->dimensions+this->rank, this->dimensions);
-			this->channels = (uint32_t)image->channels;
-			this->bit_depth = (uint32_t)image->bit_depth;
-			this->flattened_length = (uint32_t)image->flattened_length;
-			this->data = new type[this->flattened_length];
-			std::copy(image->data, image->data+this->flattened_length, this->data);
+			std::copy(image->dimensions, image->dimensions+rank, dimensions);
+			data = new type[flattened_length];
+			std::copy(image->data, image->data+flattened_length, data);
 		}
-		Image(Image *image)
+		Image(const Image &image)
+		: bit_depth(image.getBitDepth()), channels(image.getChannels()), flattened_length(image.getFlattenedLength()), rank(image.getRank())
 		{
-
+			dimensions = new uint32_t[rank];
+			std::copy(image.getDimensions(), image.getDimensions()+rank, dimensions);
+			data = new type[flattened_length];
+			std::copy(image.getData(), image.getData()+flattened_length, data);
 		}
 		virtual ~Image()
 		{
 			delete dimensions;
 			delete data;
 		}
+		cimage* to_cimage()
+		{
+			cimage *new_image;
 
+			new_image = (cimage*)malloc(sizeof(cimage));
+			new_image->bit_depth = this->getBitDepth();
+			new_image->channels = this->getChannels();
+			new_image->rank = this->getRank();
+			new_image->dimensions = (mint*)malloc(sizeof(mint)*this->getRank());
+			std::copy(this->getDimensions(), this->getDimensions()+this->getRank(), new_image->dimensions);
+			new_image->flattened_length = this->getFlattenedLength();
+			new_image->data = (mint*)malloc(sizeof(mint)*new_image->flattened_length);
+			std::copy(this->getData(), this->getData()+new_image->flattened_length, new_image->data);
+			new_image->shared = 0;
+
+			return new_image;
+		}
 		uint32_t getBitDepth() const
 		{
 			return bit_depth;
@@ -81,6 +96,11 @@ class Image
 		uint32_t getRank() const
 		{
 			return rank;
+		}
+
+		void setData(type* data)
+		{
+			std::copy(data, data+flattened_length, this->data);
 		}
 
 	private:

@@ -15,7 +15,7 @@ cimage* getImage(WolframLibraryData libData, MTensor* tensor, mint bit_depth, mi
 
 DLLEXPORT int llLabeling(WolframLibraryData libData, mint nargs, MArgument* input, MArgument output)
 {
-	cimage *label_image, *input_image, *new_label_image;
+	cimage *label_image, *input_image, *new_label_image = NULL;
 	parameters *params;
 	MTensor new_label_tensor;
 
@@ -33,7 +33,6 @@ DLLEXPORT int llLabeling(WolframLibraryData libData, mint nargs, MArgument* inpu
 	params->double_params[3] = MArgument_getReal(input[7]);// mu
 
 	//compute cut
-	new_label_image = createImage(label_image);
 	labeling_c(new_label_image, label_image, input_image, params);
 
 	//transform and write data to output

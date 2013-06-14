@@ -14,28 +14,36 @@
 
 namespace elib{
 
-template <typename Point>
+template <typename Point, typename Comparator>
 class Mask
 {
 	public:
-		Mask();
-		virtual ~Mask();
+		Mask()
+		{
+			points = new std::set<Point,Comparator>();
+			outline = new std::set<Point,Comparator>();
+		}
+		virtual ~Mask()
+		{
+			delete points;
+			delete outline;
+		}
 		bool addPoint(Point p)
 		{
-			return points.insert(p).second;
+			return points->insert(p).second;
 
 		}
-		std::set<Point> getMask()
+		std::set<Point,Comparator>* getMask()
 		{
 			return points;
 		}
-		std::set<Point> getOutline()
+		std::set<Point,Comparator>* getOutline()
 		{
 			return NULL;
 		}
 		int32_t getSize()
 		{
-			return (int32_t)points.size();
+			return (int32_t)points->size();
 		}
 		int32_t* toImage(int32_t rank, int32_t *dimensions)
 		{
@@ -50,7 +58,7 @@ class Mask
 			}
 			image = (int32_t*)malloc(sizeof(int32_t)*size);
 			typename std::set<Point>::iterator it;
-			for(it=points.begin(); it!=points.end(); ++it)
+			for(it=points->begin(); it!=points->end(); ++it)
 			{
 				for(int32_t i=0; i<rank; ++i)
 				{
@@ -62,8 +70,8 @@ class Mask
 			return image;
 		}
 	private:
-		std::set<Point> points;
-		std::set<Point> outline;
+		std::set<Point, Comparator> *points;
+		std::set<Point, Comparator> *outline;
 };
 
 } /* namespace elib */

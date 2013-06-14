@@ -20,6 +20,7 @@ add_executable(label
     src/labeling.cpp
     src/connectedComponents.cpp
     src/componentsMeasurements.cpp
+    src/parameters.cpp
     src/gco/graph.cpp
     src/gco/maxflow.cpp
     src/gco/GCoptimization.cpp
@@ -32,6 +33,7 @@ add_library(Labeling SHARED
     src/labeling.cpp
     src/connectedComponents.cpp
     src/componentsMeasurements.cpp
+    src/parameters.cpp
     src/gco/graph.cpp
     src/gco/maxflow.cpp
     src/gco/GCoptimization.cpp

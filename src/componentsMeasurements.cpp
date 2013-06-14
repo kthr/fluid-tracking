@@ -8,11 +8,12 @@
 #include "componentsMeasurements.hpp"
 
 using elib::ComponentsMeasurements;
+using elib::Image;
 
 short ComponentsMeasurements::connectivity;
 
 
-ComponentsMeasurements::ComponentsMeasurements(cimage *label_image)
+ComponentsMeasurements::ComponentsMeasurements(Image<int32_t> *label_image)
 {
 	this->label_image = label_image;
 	init();
@@ -35,38 +36,38 @@ bool ComponentsMeasurements::deleteMask(int32_t label)
 	}
 }
 
-elib::Mask<glm::vec3>* ComponentsMeasurements::getMask(int32_t label)
+elib::Mask<glm::ivec3, elib::VectorComparators>* ComponentsMeasurements::getMask(int32_t label)
 {
-	return labels2masks_map.find(label);
+	return &(labels2masks_map.find(label)->second);
 }
 
-cimage* ComponentsMeasurements::masksToImage(uint32_t rank, uint32_t *dimensions)
+Image<int32_t>* ComponentsMeasurements::masksToImage(uint32_t rank, uint32_t *dimensions)
 {
-	cimage* image;
+	Image<int32_t>* image;
 
-	image = createImage2(rank, dimensions, 16, 1);
+	image = new Image<int32_t>(rank, dimensions, 16, 1);
 	return image;
 }
 
 void ComponentsMeasurements::init()
 {
-	cimage* tmp_image;
-	int *label_data, *tmp_data;
-	int32_t width, height, depth;
-	int32_t label;
+	Image<int32_t>* tmp_image;
+	int32_t *label_data, *tmp_data;
+	uint32_t *dimensions, width, height, depth, label;
 
-	labels.insert(label_image->data, label_image->data + label_image->flattened_length);
-	label_data = label_image->data;
-	tmp_image = cloneImage(label_image);
-	tmp_data = tmp_image->data;
+	labels.insert(label_image->getData(), label_image->getData() + label_image->getFlattenedLength());
+	label_data = label_image->getData();
+	tmp_image = new Image<int32_t>(*label_image);
+	tmp_data = tmp_image->getData();
 
-	if (label_image->rank == 2) //2d-image
+	if (label_image->getRank() == 2) //2d-image
 	{
-		width = label_image->dimensions[0];
-		height = label_image->dimensions[1];
-		std::queue<glm::vec2> indices;
-		std::vector<glm::vec2> *neighbours;
-		glm::vec2 index, neighbour;
+		dimensions = label_image->getDimensions();
+		width = dimensions[0];
+		height = dimensions[1];
+		std::queue<glm::ivec2> indices;
+		std::vector<glm::ivec2> *neighbours;
+		glm::ivec2 index, neighbour;
 		int32_t pixel;
 
 		if (connectivity == SMALL_CONNECTIVITY)
@@ -85,21 +86,21 @@ void ComponentsMeasurements::init()
 				pixel = j * width + i;
 				if (label_data[pixel] > 0)
 				{
-					Mask<glm::vec3> mask;
+					Mask<glm::ivec3, elib::VectorComparators> mask;
 					tmp_data[pixel] = 0;
 					label = label_data[pixel];
 					if (labels.insert(label).second == true)
 					{
-						std::pair<int32_t, Mask<glm::vec3> > map(label, mask);
+						std::pair<int32_t, Mask<glm::ivec3, elib::VectorComparators> > map(label, mask);
 						labels2masks_map.insert(map);
 					}
 					else
 					{
 						mask = labels2masks_map.find(label)->second;
 					}
-					mask.addPoint(glm::vec3(i, j, 1));
+					mask.addPoint(glm::ivec3(i, j, 1));
 
-					index = glm::vec2(i, j);
+					index = glm::ivec2(i, j);
 					ConnectedComponents::addNeigbours(&indices, neighbours, index, width, height);
 					while (!indices.empty())
 					{
@@ -109,7 +110,7 @@ void ComponentsMeasurements::init()
 						if (label_data[pixel] == label)
 						{
 							tmp_data[pixel] = 0;
-							mask.addPoint(glm::vec3(index.x, index.y, 1));
+							mask.addPoint(glm::ivec3(index.x, index.y, 1));
 							ConnectedComponents::addNeigbours(&indices, neighbours, index, width, height);
 						}
 					}
@@ -122,4 +123,5 @@ void ComponentsMeasurements::init()
 	{
 
 	}
+	delete tmp_image;
 }

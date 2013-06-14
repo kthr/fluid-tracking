@@ -31,7 +31,7 @@ Image<int32_t>* ConnectedComponents::getComponents(Image<int32_t> *image)
 	uint32_t width, height, depth, *dimensions;
 
 	label = 1;
-	tmp_image = new Image<int32_t>(image);
+	tmp_image = new Image<int32_t>(*image);
 	data = tmp_image->getData();
 	label_image = new Image<int32_t>(image->getRank(), image->getDimensions(), 16, 1);
 	label_data = label_image->getData();;
@@ -41,9 +41,9 @@ Image<int32_t>* ConnectedComponents::getComponents(Image<int32_t> *image)
 		dimensions=image->getDimensions();
 		width = dimensions[0];
 		height = dimensions[1];
-		std::queue<glm::vec2 > indices;
-		std::vector<glm::vec2 > *neighbours;
-		glm::vec2 index, neighbour;
+		std::queue<glm::ivec2 > indices;
+		std::vector<glm::ivec2 > *neighbours;
+		glm::ivec2 index, neighbour;
 		int pixel;
 
 		if(connectivity == SMALL_CONNECTIVITY)
@@ -64,7 +64,7 @@ Image<int32_t>* ConnectedComponents::getComponents(Image<int32_t> *image)
 				{
 					data[pixel] = 0;
 					label_data[pixel] = label;
-					index = glm::vec2(i,j);
+					index = glm::ivec2(i,j);
 					addNeigbours(&indices, neighbours, index, width, height);
 					while(!indices.empty())
 					{

@@ -5,6 +5,7 @@
  *      Author: kthierbach
  */
 
+#include <algorithm>
 #include <stdlib.h>
 
 #include "c_wrapper.h"
@@ -12,10 +13,20 @@
 #include "templates/image.hpp"
 #include "parameters.hpp"
 
+using elib::Image;
+using elib::Parameters;
+using elib::Labeling;
+
 void labeling_c(cimage *new_label_image, cimage* label_image, cimage* input_image, parameters *input_params)
 {
-	elib::Labeling lc;
-	lc.labeling(new_label_image, label_image, input_image, input_params);
+	Labeling lc;
+	Image<int32_t> 	new_label(label_image),
+					label(label_image),
+					image(input_image);
+	Parameters params(input_params);
+
+	lc.labeling(&new_label, &label, &image, &params);
+	new_label_image = new_label.to_cimage();
 }
 
 cimage* cloneImage(cimage* image)
@@ -27,10 +38,10 @@ cimage* cloneImage(cimage* image)
 	new_image->channels = image->channels;
 	new_image->rank = image->rank;
 	new_image->dimensions = (mint*)malloc(sizeof(mint)*image->rank);
-	memcpy(new_image->dimensions, image->dimensions, sizeof(mint)*image->rank);
+	std::copy(image->dimensions, image->dimensions+image->rank, new_image->dimensions);
 	new_image->flattened_length = image->flattened_length;
 	new_image->data = (mint*)malloc(sizeof(mint)*new_image->flattened_length);
-	memcpy(new_image->data, image->data, sizeof(mint)*new_image->flattened_length);
+	std::copy(image->data, image->data+image->flattened_length, new_image->data);
 	new_image->shared = 0;
 
 	return new_image;
@@ -45,7 +56,7 @@ cimage* createImage(cimage* image)
 	new_image->channels = image->channels;
 	new_image->rank = image->rank;
 	new_image->dimensions = (mint*)malloc(sizeof(mint)*image->rank);
-	memcpy(new_image->dimensions, image->dimensions, sizeof(mint)*image->rank);
+	std::copy(image->dimensions, image->dimensions+image->rank, new_image->dimensions);
 	new_image->flattened_length = image->flattened_length;
 	new_image->data = (mint*)malloc(sizeof(mint)*new_image->flattened_length);
 	new_image->shared = 0;
@@ -63,7 +74,7 @@ cimage* createImage2(mint rank, mint *dimensions, mint bit_depth, mint channels)
 	new_image->channels = channels;
 	new_image->rank = rank;
 	new_image->dimensions = (mint*)malloc(sizeof(mint)*rank);
-	memcpy(new_image->dimensions, dimensions, sizeof(mint)*rank);
+	std::copy(dimensions, dimensions+rank, new_image->dimensions);
 	new_image->flattened_length = channels;
 	for(i=0; i<new_image->rank; ++i)
 	{

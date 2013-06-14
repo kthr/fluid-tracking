@@ -14,9 +14,10 @@
 #include <vector>
 
 #include "../lib/glm/glm.hpp"
-#include "c_wrapper.h"
 #include "connectedComponents.hpp"
 #include "templates/mask.hpp"
+#include "templates/image.hpp"
+#include "utils/vectorComparators.hpp"
 
 namespace elib {
 
@@ -27,19 +28,19 @@ class ComponentsMeasurements
 		const static short LARGE_CONNECTIVITY = 1;
 		static short connectivity;
 
-		ComponentsMeasurements(cimage *label_image);
+		ComponentsMeasurements(Image<int32_t> *label_image);
 		virtual ~ComponentsMeasurements();
 		bool deleteMask(int32_t label);
-		Mask<glm::vec3>* getMask(int32_t label);
-		cimage* masksToImage(uint32_t rank, uint32_t *dimensions);
+		Mask<glm::ivec3, elib::VectorComparators>* getMask(int32_t label);
+		Image<int32_t>* masksToImage(uint32_t rank, uint32_t *dimensions);
 
 	private:
 		void init();
 
-		cimage * label_image;
+		Image<int32_t> * label_image;
 		int32_t num_labels;
 		std::set<int32_t> labels;
-		std::tr1::unordered_map<int32_t,Mask<glm::vec3> > labels2masks_map;
+		std::tr1::unordered_map<int32_t,Mask<glm::ivec3,elib::VectorComparators> > labels2masks_map;
 };
 
 } /* namespace elib */
