@@ -9,7 +9,7 @@
 #define LABELING_HPP_
 
 #include "templates/image.hpp"
-#include "parameters.hpp"
+#include "utils/parameters.hpp"
 
 namespace elib{
 
@@ -18,7 +18,7 @@ class Labeling
 	public:
 		Labeling(){}
 		~Labeling(){}
-		void labeling(Image<int32_t> *new_label_image, Image<int32_t>* label_image, Image<int32_t>* input_image, Parameters *input_params);
+		Image<int32_t>* labeling(Image<int32_t>* label_image, Image<int32_t>* input_image, Parameters *input_params);
 };
 
 struct ForSmoothFn

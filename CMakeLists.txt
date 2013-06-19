@@ -5,8 +5,10 @@ set(SOURCES
     src/libraryLink.c
     src/c_wrapper.cpp
     src/labeling.cpp
-    src/connectedComponents.cpp
-    src/componentMeasurements.cpp
+    src/alg/connectedComponents.cpp
+    src/alg/componentsMeasurements.cpp
+    src/alg/fluidTracks.cpp
+    src/utils/parameters.cpp
     src/gco/graph.cpp
     src/gco/maxflow.cpp
     src/gco/GCoptimization.cpp
@@ -15,29 +17,11 @@ set(SOURCES
 
 add_executable(label
     src/main.cpp
-    src/libraryLink.c
-    src/c_wrapper.cpp
-    src/labeling.cpp
-    src/connectedComponents.cpp
-    src/componentsMeasurements.cpp
-    src/parameters.cpp
-    src/gco/graph.cpp
-    src/gco/maxflow.cpp
-    src/gco/GCoptimization.cpp
-    src/gco/LinkedBlockList.cpp
+    ${SOURCES}
 )
 
 add_library(Labeling SHARED
-    src/libraryLink.c
-    src/c_wrapper.cpp
-    src/labeling.cpp
-    src/connectedComponents.cpp
-    src/componentsMeasurements.cpp
-    src/parameters.cpp
-    src/gco/graph.cpp
-    src/gco/maxflow.cpp
-    src/gco/GCoptimization.cpp
-    src/gco/LinkedBlockList.cpp
+    ${SOURCES}
 )
 
 include_directories(
@@ -56,11 +40,18 @@ else(
 )
 endif()
 
+set(CMAKE_CXX_FLAGS
+    "-g -pipe -Wall -I/opt/local/include -std=c++11 -stdlib=libc++"
+)
+set(CMAKE_C_FLAGS
+    "-g -pipe -Wall -I/opt/local/include"
+)
+
 if(APPLE)
     message("\nEntering configuration for APPLE computers:\n")
     set_target_properties(Labeling label
         PROPERTIES
-        COMPILE_FLAGS "-g -pipe -Wall -I/opt/local/include"
+        #COMPILE_FLAGS "-g -pipe -Wall -I/opt/local/include"
         LINK_FLAGS "-v -lstdc++ -lpthread  -L/opt/X11/lib -lX11"
      )
 endif()

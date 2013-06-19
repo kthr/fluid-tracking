@@ -11,22 +11,22 @@
 #include "c_wrapper.h"
 #include "labeling.hpp"
 #include "templates/image.hpp"
-#include "parameters.hpp"
+#include "utils/parameters.hpp"
 
 using elib::Image;
 using elib::Parameters;
 using elib::Labeling;
 
-void labeling_c(cimage *new_label_image, cimage* label_image, cimage* input_image, parameters *input_params)
+cimage* labeling_c(cimage* label_image, cimage* input_image, parameters *input_params)
 {
 	Labeling lc;
-	Image<int32_t> 	new_label(label_image),
+	Image<int32_t> 	*new_label,
 					label(label_image),
 					image(input_image);
 	Parameters params(input_params);
 
-	lc.labeling(&new_label, &label, &image, &params);
-	new_label_image = new_label.to_cimage();
+	new_label = lc.labeling(&label, &image, &params);
+	return new_label->to_cimage();
 }
 
 cimage* cloneImage(cimage* image)

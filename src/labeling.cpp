@@ -8,7 +8,7 @@
 #include "labeling.hpp"
 
 #include <math.h>
-#include <tr1/unordered_map>
+#include <unordered_map>
 #include <set>
 
 #include "gco/GCoptimization.h"
@@ -18,15 +18,18 @@
 #define GC_INFINITY 300000
 
 using elib::Labeling;
+using elib::Image;
 
-void Labeling::labeling(Image<int32_t> *new_label_image, Image<int32_t>* label_image, Image<int32_t>* input_image, Parameters *input_params)
+Image<int32_t>* Labeling::labeling(Image<int32_t>* label_image, Image<int32_t>* input_image, Parameters *input_params)
 {
 	uint32_t *dimensions, width, height, bit_depth, num_labels;
 	double c0, c1, lambda, mu, c;
 	std::set<int32_t> labels;
 	std::set<int32_t>::iterator it;
-	std::tr1::unordered_map<int,int> label_map;
+	std::unordered_map<int,int> label_map;
 	int32_t *label_array, label, num_pixels, *label_data, *image_data;
+	Image<int32_t> *new_label_image = new Image<int32_t>(*label_image);
+
 
 	dimensions = label_image->getDimensions();
 	width = dimensions[0];
@@ -98,7 +101,7 @@ void Labeling::labeling(Image<int32_t> *new_label_image, Image<int32_t>* label_i
 	catch (GCException &e){
 		e.Report();
 	}
-
+	return new_label_image;
 }
 
 int elib::smoothFn(int p1, int p2, int l1, int l2, void *data)

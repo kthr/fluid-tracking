@@ -5,26 +5,33 @@
  *      Author: kthierbach
  */
 
-#include <algorithm>
-#include "../lib/CImg.h"
-#include "c_wrapper.h"
-#include "connectedComponents.hpp"
-#include "componentsMeasurements.hpp"
-#include "templates/image.hpp"
+#include <string>
+#include <vector>
 
-using elib::Image;
+#include "alg/connectedComponents.hpp"
+#include "alg/fluidTracks.hpp"
+#include "templates/image.hpp"
+#include "utils/parameters.hpp"
 
 int main(int argc, char *argv[])
 {
-	cimg_library::CImg<int32_t> image("/Users/kthierbach/Documents/current/emb/refdataB/bin/bin045.png");
-	image = image.get_channel(0);
-	uint32_t dimensions[2] = {image.width(), image.height()};
-	elib::Image<int32_t> *bimage = new elib::Image<int32_t>(2, dimensions, 16, 1);
-	bimage->setData(image.data());
+	using elib::ConnectedComponents;
+	using elib::FluidTracks;
+	using elib::Image;
+	using elib::Parameters;
 
-	Image<int32_t> *label_image = elib::ConnectedComponents::getComponents(bimage);
-	std::copy(label_image->getData(), label_image->getData()+label_image->getFlattenedLength(), image.data());
-//	ComponentsMeasurements cm(label_image);
-	image.save("/Users/kthierbach/label.png");
-	delete bimage;
+	std::string folder = "/Users/kthierbach/Documents/projects/eclipse/Labeling/tests/";
+	int32_t int_params[1] = {0};
+	double double_params[4] = {.2, .8, 10., 2.};
+	std::string bla[5] = {folder+"initial.png", folder+"smaller002.png", folder+"smaller003.png", folder+"smaller004.png", folder+"smaller005.png"};
+	std::vector<std::string> images(bla, bla+3);
+
+//	ConnectedComponents cc;
+//	Image<int32_t> *test = Image<int32_t>::openImage(bla[0]);
+//	test = cc.getComponents(test);
+//	Image<int32_t>::saveImage("/Users/kthierbach/test.jpg",test);
+
+	Parameters params = Parameters(1, int_params, 4, double_params);
+	FluidTracks ft = FluidTracks(&images, &params);
+	ft.track();
 }
