@@ -27,7 +27,7 @@ Image<int32_t>* ConnectedComponents::getComponents(Image<int32_t> *image)
 {
 	Image<int32_t> *label_image, *tmp_image;
 	int32_t *tmp_data, *label_data;
-	uint32_t width, height, depth, *dimensions;
+	uint32_t width, height, *dimensions;
 
 	tmp_image = new Image<int32_t>(*image);
 	tmp_data = tmp_image->getData();

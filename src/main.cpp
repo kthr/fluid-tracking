@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 
 	std::string folder = "/Users/kthierbach/Documents/projects/eclipse/Labeling/tests/";
 	int32_t int_params[1] = {0};
-	double double_params[4] = {.2, .8, 10., 2.};
+	double double_params[4] = {.6, .8, 1., 1.}; //c0, c1, lambda, mu
 	std::string bla[5] = {folder+"initial.png", folder+"smaller002.png", folder+"smaller003.png", folder+"smaller004.png", folder+"smaller005.png"};
 	std::vector<std::string> images(bla, bla+3);
 

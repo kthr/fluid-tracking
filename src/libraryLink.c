@@ -19,8 +19,8 @@ DLLEXPORT int llLabeling(WolframLibraryData libData, mint nargs, MArgument* inpu
 	parameters *params;
 	MTensor new_label_tensor;
 
-	int debug=1;
-	while(debug);
+//	int debug=1;
+//	while(debug);
 
 	//get input
 	label_image = getImage(libData, &MArgument_getMTensor(input[0]), 16, 1);

@@ -14,6 +14,7 @@
 
 #include "../c_wrapper.h"
 #include "../lib/CImg.h"
+#include "../exceptions/IOException.hpp"
 
 namespace elib{
 
@@ -37,6 +38,7 @@ class Image
 				this->flattened_length*=dimensions[i];
 			}
 			this->data = new type[flattened_length];
+			std::fill_n(this->data, flattened_length, 0);
 		}
 		Image(cimage *image)
 		: bit_depth(image->bit_depth), channels(image->channels), flattened_length(image->flattened_length), rank(image->rank)
@@ -141,7 +143,8 @@ class Image
 			}
 			catch(CImgIOException &e)
 			{
-				//throw IOException;
+				std::string message = std::string("Failed to open image at: ") + file_name;
+				throw IOException(message);
 				return NULL;
 			}
 		}
@@ -162,12 +165,12 @@ class Image
 				}
 				else
 				{
-
 				}
 			}
 			catch(CImgIOException &e)
 			{
-				//throw IOException;
+				std::string message = std::string("Failed to save image at: ") + file_name;
+				throw IOException(message);
 			}
 		}
 		uint32_t getBitDepth() const

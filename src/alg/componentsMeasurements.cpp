@@ -14,68 +14,40 @@ using elib::VectorComparators;
 
 ComponentsMeasurements::ComponentsMeasurements()
 {
+	labels = new std::set<int32_t>();
+	masks = new MaskList<int32_t, mask2D>();
+}
+ComponentsMeasurements::ComponentsMeasurements(const ComponentsMeasurements& other)
+{
+	operator=(other);
+}
+elib::ComponentsMeasurements::ComponentsMeasurements(ComponentsMeasurements&& other)
+: ComponentsMeasurements::ComponentsMeasurements()
+{
+	swap(*this,other);
 }
 ComponentsMeasurements::ComponentsMeasurements(Image<int32_t> *label_image)
 {
 	this->label_image = label_image;
 	labels = new std::set<int32_t>();
-	masks = new unordered_map<int32_t, mask2D* >();
+	masks = new MaskList<int32_t, mask2D>();
 	init();
 }
 ComponentsMeasurements::~ComponentsMeasurements()
 {
-	unordered_map<int32_t, mask2D* >::iterator it;
-	for(it=masks->begin(); it!=masks->end(); ++it)
-	{
-		delete it->second;
-	}
 	delete labels;
 	delete masks;
 }
-
-bool ComponentsMeasurements::deleteMask(int32_t label)
+elib::MaskList<int32_t, elib::mask2D> ComponentsMeasurements::getMasks()
 {
-	if(masks->erase(label))
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-elib::mask2D* ComponentsMeasurements::getMask(int32_t label)
-{
-	unordered_map<int32_t, mask2D* >::iterator it;
-	it = masks->find(label);
-	if(it != masks->end())
-		return it->second;
-	else
-		return nullptr;
-}
-Image<int32_t>* ComponentsMeasurements::masksToImage(uint32_t rank, uint32_t *dimensions)
-{
-	Image<int32_t>* image;
-
-	image = new Image<int32_t>(rank, dimensions, 16, 1);
-	return image;
-}
-unordered_map<int32_t, elib::mask2D > ComponentsMeasurements::getMasks()
-{
-	unordered_map<int32_t, mask2D> copy;
-	unordered_map<int32_t, mask2D* >::iterator it;
-	for(it=masks->begin(); it!=masks->end(); ++it)
-	{
-		copy.insert(std::pair<int32_t, mask2D>(it->first, *(it->second)));
-	}
-	return copy;
+	return *masks;
 }
 
 void ComponentsMeasurements::init()
 {
 	Image<int32_t>* tmp_image;
 	int32_t *tmp_data;
-	uint32_t *dimensions, width, height, depth, label;
+	uint32_t *dimensions, width, height, label;
 
 	tmp_image = new Image<int32_t>(*label_image);
 	tmp_data = tmp_image->getData();
@@ -109,17 +81,7 @@ void ComponentsMeasurements::init()
 					mask2D* mask_ptr;
 					label = tmp_data[pixel];
 					tmp_data[pixel] = 0;
-					if (labels->insert(label).second == true)
-					{
-						mask_ptr = new Mask<glm::ivec3, elib::VectorComparators>();
-						std::pair<int32_t, mask2D* > map(label, mask_ptr);
-						masks->insert(map);
-						num_labels++;
-					}
-					else
-					{
-						mask_ptr = masks->find(label)->second;
-					}
+					mask_ptr = masks.addMask(label);
 					mask_ptr->addPoint(glm::ivec3(i, j, 1));
 
 					index = glm::ivec2(i, j);

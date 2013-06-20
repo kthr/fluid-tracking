@@ -9,17 +9,28 @@
 #define IOEXCEPTION_CPP_
 
 #include <exception>
+#include <string>
 
 namespace elib{
 
 class IOException : virtual public std::exception {
 
 	public:
+		IOException(const char* message)
+		: message(std::string(message))
+		{
+		}
+		IOException(std::string message)
+		: message(message)
+		{
+		}
 		virtual const char* what() const throw() override
 		{
-			return "IO error, image could not be loaded!";
+			return message.c_str();
 		}
-} IOException;
+	private:
+		std::string message;
+};
 
 }
 

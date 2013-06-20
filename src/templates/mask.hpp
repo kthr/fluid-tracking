@@ -14,33 +14,32 @@
 
 namespace elib{
 
-template <typename Point, typename Comparator>
+template <typename Point>
 class Mask
 {
 	public:
 		Mask()
 		{
-			points = new std::set<Point,Comparator>();
-			outline = new std::set<Point,Comparator>();
+			points = new std::vector<Point>();
+			outline = new std::vector<Point>();
 		}
 		virtual ~Mask()
 		{
 			delete points;
 			delete outline;
 		}
-		bool addPoint(Point p)
+		void addPoint(Point p)
 		{
-			return points->insert(p).second;
-
+			points->push_back(p);
 		}
-		std::set<Point,Comparator>* getMask()
-				{
+		std::vector<Point>* getMask()
+		{
 			return points;
-				}
-		std::set<Point,Comparator>* getOutline()
-				{
+		}
+		std::vector<Point>* getOutline()
+		{
 			return NULL;
-				}
+		}
 		int32_t getSize()
 		{
 			return (int32_t)points->size();
@@ -50,7 +49,7 @@ class Mask
 			Image<int32_t> *image;
 			int32_t *image_data;
 			int32_t pixel;
-			typename std::set<Point>::iterator it;
+			typename std::vector<Point>::iterator it;
 
 			image = new Image<int32_t>(rank, dimensions, bit_depth, 1);
 			image_data = image->getData();
@@ -76,19 +75,20 @@ class Mask
 			}
 			return image;
 		}
-		static Image<int32_t>* masksToImage(uint32_t rank, uint32_t *dimensions, std::unordered_map<int32_t, Mask<Point, Comparator> > *masks)
+		static Image<int32_t>* masksToImage(uint32_t rank, uint32_t *dimensions, std::unordered_map<int32_t, Mask<Point>* > *masks)
 		{
 			Image<int32_t> *image;
 			int32_t *image_data, label, pixel;
-			typename std::unordered_map<int32_t, Mask<Point, Comparator> >::iterator it;
-			typename std::set<Point>::iterator pt_it;
+			typename std::unordered_map<int32_t, Mask<Point>* >::iterator it;
+			typename std::vector<Point> *points;
+			typename std::vector<Point>::iterator pt_it;
 
 			image = new Image<int32_t>(rank, dimensions, bit_depth, 1);
 			image_data = image->getData();
 			for(it = masks->begin(); it!=masks->end(); ++it)
 			{
 				label = it->first;
-				typename std::set<Point, Comparator> const *points = it->second.getPoints();
+				points = it->second->getPoints();
 				for(pt_it=points->begin(); pt_it!=points->end(); ++pt_it)
 				{
 					for(int32_t i=0; i<rank; ++i)
@@ -112,22 +112,16 @@ class Mask
 			}
 			return image;
 		}
-		const std::set<Point, Comparator>* getPoints()
+		std::vector<Point>* getPoints()
 		{
 			return points;
 		}
-		Mask<Point,Comparator>& operator=(Mask<Point,Comparator> other)
-		{
-		    swap(*this, other);
-
-		    return *this;
-		}
 	private:
-		std::set<Point, Comparator> *points;
-		std::set<Point, Comparator> *outline;
+		std::vector<Point> *points;
+		std::vector<Point> *outline;
 		const static int32_t bit_depth = 16;
 
-		friend void swap(Mask<Point,Comparator>& first, Mask<Point,Comparator>& second) // nothrow
+		friend void swap(Mask<Point>& first, Mask<Point>& second) // nothrow
 		{
 			// enable ADL (not necessary in our case, but good practice)
 			using std::swap;

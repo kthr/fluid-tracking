@@ -68,7 +68,7 @@ class ConnectedComponents
 		}
 	private:
 		int32_t label = 1;
-		short connectivity = SMALL_CONNECTIVITY;
+		short connectivity = LARGE_CONNECTIVITY;
 };
 
 } /* namespace elib */

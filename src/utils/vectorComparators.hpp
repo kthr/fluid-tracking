@@ -14,13 +14,9 @@ namespace elib{
 class VectorComparators
 {
 	public:
-		bool operator()(glm::ivec2 v1, glm::ivec2 v2)
-		{
-			return (v1.x <= v2.x && v1.y <= v2.y);
-		}
 		bool operator()(glm::ivec3 v1, glm::ivec3 v2)
 		{
-			return (v1.x <= v2.x && v1.y <= v2.y && v1.z < v2.z);
+			return (v1.x <= v2.x && v1.y < v2.y);
 		}
 };
 }

@@ -13,7 +13,7 @@
 
 namespace elib{
 
-	typedef elib::Mask<glm::ivec3, elib::VectorComparators> mask2D;
+	typedef elib::Mask<glm::ivec3> mask2D;
 
 }
 

@@ -16,6 +16,7 @@
 #include "../lib/glm/glm.hpp"
 #include "../templates/image.hpp"
 #include "../templates/mask.hpp"
+#include "../templates/maskList.hpp"
 #include "../types.hpp"
 #include "../utils/vectorComparators.hpp"
 #include "connectedComponents.hpp"
@@ -33,32 +34,23 @@ class ComponentsMeasurements
 		const static short LARGE_CONNECTIVITY = 1;
 
 		ComponentsMeasurements();
+		ComponentsMeasurements(const ComponentsMeasurements& other);
+		ComponentsMeasurements(ComponentsMeasurements&& other);
 		ComponentsMeasurements(Image<int32_t> *label_image);
 		virtual ~ComponentsMeasurements();
-		bool deleteMask(int32_t label);
-		elib::mask2D* getMask(int32_t label);
-		unordered_map<int32_t, mask2D > getMasks();
-		Image<int32_t>* masksToImage(uint32_t rank, uint32_t *dimensions);
-		const std::set<int32_t>& getLabels() const
+		elib::MaskList<int32_t, elib::mask2D> getMasks();
+		ComponentsMeasurements& operator=(ComponentsMeasurements other)
 		{
-			return *labels;
+			swap(*this, other);
+			return *this;
 		}
-		int32_t getNumLabels() const
-		{
-			return num_labels;
-		}
-//		ComponentsMeasurements& operator=(ComponentsMeasurements other)
-//		{
-//			swap(*this, other);
-//			return *this;
-//		}
 	private:
 
 		Image<int32_t> *label_image = nullptr;
 		int32_t num_labels = 0;
-		short connectivity = SMALL_CONNECTIVITY;
+		short connectivity = LARGE_CONNECTIVITY;
 		std::set<int32_t> *labels;
-		unordered_map<int32_t, mask2D* > *masks;
+		MaskList<int32_t, mask2D> *masks;
 
 		void init();
 		friend void swap(ComponentsMeasurements& first, ComponentsMeasurements& second)
