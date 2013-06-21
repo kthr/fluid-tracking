@@ -23,20 +23,20 @@ ConnectedComponents::~ConnectedComponents()
 	// TODO Auto-generated destructor stub
 }
 
-Image<int32_t>* ConnectedComponents::getComponents(Image<int32_t> *image)
+Image<int32_t> ConnectedComponents::getComponents(Image<int32_t> image)
 {
-	Image<int32_t> *label_image, *tmp_image;
+	Image<int32_t> label_image, tmp_image;
 	int32_t *tmp_data, *label_data;
 	uint32_t width, height, *dimensions;
 
-	tmp_image = new Image<int32_t>(*image);
-	tmp_data = tmp_image->getData();
-	label_image = new Image<int32_t>(image->getRank(), image->getDimensions(), 16, 1);
-	label_data = label_image->getData();
+	tmp_image = Image<int32_t>(image);
+	tmp_data = tmp_image.getData();
+	label_image = Image<int32_t>(image.getRank(), image.getDimensions(), 16, 1);
+	label_data = label_image.getData();
 
-	if(image->getRank() == 2) //2d-image
+	if(image.getRank() == 2) //2d-image
 	{
-		dimensions=image->getDimensions();
+		dimensions=image.getDimensions();
 		width = dimensions[0];
 		height = dimensions[1];
 		std::queue<glm::ivec2 > indices;
@@ -63,7 +63,7 @@ Image<int32_t>* ConnectedComponents::getComponents(Image<int32_t> *image)
 					tmp_data[pixel] = 0;
 					label_data[pixel] = label;
 					index = glm::ivec2(i,j);
-					addNeigbours(&indices, neighbours, index, image->getRank(), image->getDimensions());
+					addNeigbours(&indices, neighbours, index, image.getRank(), image.getDimensions());
 					while(!indices.empty())
 					{
 						index = indices.front();
@@ -73,7 +73,7 @@ Image<int32_t>* ConnectedComponents::getComponents(Image<int32_t> *image)
 						{
 							tmp_data[pixel] = 0;
 							label_data[pixel] = label;
-							addNeigbours(&indices, neighbours, index,  image->getRank(), image->getDimensions());
+							addNeigbours(&indices, neighbours, index,  image.getRank(), image.getDimensions());
 						}
 					}
 					label++;
@@ -86,7 +86,6 @@ Image<int32_t>* ConnectedComponents::getComponents(Image<int32_t> *image)
 	{
 
 	}
-
-	delete tmp_image;
 	return label_image;
+
 }

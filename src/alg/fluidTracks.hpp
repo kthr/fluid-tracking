@@ -66,12 +66,12 @@ class FluidTracks
 		{
 			initial_mask_image = initialMaskImage;
 		}
-		Image<int32_t>*& getInitial();
+		Image<int32_t>* getInitial();
 		vector<MaskList<int32_t, glm::ivec3> >*& getFrames();
 
 	private:
 		bool include_appearing = true;
-		Image<int32_t> *initial;
+		Image<int32_t> initial;
 		vector<glm::ivec2> *divisions;
 		Parameters *params;
 		string initial_mask_image = "";

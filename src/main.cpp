@@ -36,7 +36,8 @@ int main(int argc, char *argv[])
 	for(int i = 0; i<frames->size(); ++i)
 	{
 		name << "/Users/kthierbach/" << i << ".png";
-		Image<int32_t>::saveImage(name.str(), (*frames)[i].masksToImage(ft.getInitial()->getRank(), ft.getInitial()->getDimensions()));
+		Image<int32_t> image =(*frames)[i].masksToImage(ft.getInitial()->getRank(), ft.getInitial()->getDimensions());
+		Image<int32_t>::saveImage(name.str(), &image);
 		name.str("");
 	}
 }

@@ -26,7 +26,7 @@ class ConnectedComponents
 		const static short LARGE_CONNECTIVITY = 1;
 		static std::vector<glm::ivec2> SMALL_2D, LARGE_2D;
 
-		Image<int32_t>* getComponents(Image<int32_t> *image);
+		Image<int32_t> getComponents(Image<int32_t> image);
 		short getConnectivity() const
 		{
 			return connectivity;
@@ -57,7 +57,7 @@ class ConnectedComponents
 				push = true;
 				for(uint32_t i=0; i<rank; ++i)
 				{
-					if(neighbour[i] < 0 || neighbour[i] > dimensions[i])
+					if(neighbour[i] < 0 || neighbour[i] >= dimensions[i])
 						push = false;
 				}
 				if(push)

@@ -53,7 +53,13 @@ class MaskList
 		}
 		virtual ~MaskList()
 		{
-
+			typename std::unordered_map<Label, Mask<Point>*>::iterator it;
+			for(it=masks->begin(); it!=masks->end(); ++it)
+			{
+				delete it->second;
+			}
+			delete labels;
+			delete masks;
 		}
 
 		elib::Mask<Point>* addMask(Label id)
@@ -146,7 +152,7 @@ class MaskList
 		{
 			return masks->end();
 		}
-		Image<int32_t>* masksToImage(uint32_t rank, uint32_t *dimensions)
+		Image<int32_t> masksToImage(uint32_t rank, uint32_t *dimensions)
 		{
 			return Mask<Point>::masksToImage(rank, dimensions, masks);
 		}

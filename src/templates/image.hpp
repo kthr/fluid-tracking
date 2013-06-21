@@ -26,7 +26,25 @@ template <typename type>
 class Image
 {
 	public:
-		Image();
+		Image()
+		{
+			dimensions = NULL;
+			data = NULL;
+		}
+		Image(const Image &other)
+		: bit_depth(other.bit_depth), channels(other.channels), flattened_length(other.flattened_length), rank(other.rank)
+		{
+			dimensions = new uint32_t[rank];
+			data = new type[flattened_length];
+
+			std::copy(other.dimensions, other.dimensions+rank, dimensions);
+			std::copy(other.data, other.data+flattened_length, data);
+		}
+		Image(const Image &&other)
+		: Image()
+		{
+			this->operator=(other);
+		}
 		Image(uint32_t rank, uint32_t *dimensions, uint32_t bit_depth, uint32_t channels)
 		: bit_depth(bit_depth), channels(channels), rank(rank)
 		{
@@ -86,18 +104,15 @@ class Image
 			else//8bit
 				bit_depth = 8;
 		}
-		Image(const Image &image)
-		: bit_depth(image.getBitDepth()), channels(image.getChannels()), flattened_length(image.getFlattenedLength()), rank(image.getRank())
-		{
-			dimensions = new uint32_t[rank];
-			std::copy(image.getDimensions(), image.getDimensions()+rank, dimensions);
-			data = new type[flattened_length];
-			std::copy(image.getData(), image.getData()+flattened_length, data);
-		}
 		virtual ~Image()
 		{
-			delete dimensions;
-			delete data;
+			delete[] dimensions;
+			delete[] data;
+		}
+		Image& operator=(Image other)
+		{
+			swap(*this,other);
+			return *this;
 		}
 		type min()
 		{
@@ -134,18 +149,18 @@ class Image
 
 			return new_image;
 		}
-		static Image<type>* openImage(string file_name)
+		static Image<type> openImage(string file_name)
 		{
 			try
 			{
 				CImg<type> img(file_name.c_str());
-				return new Image<type>(&img);
+				return Image<type>(&img);
 			}
 			catch(CImgIOException &e)
 			{
 				std::string message = std::string("Failed to open image at: ") + file_name;
 				throw IOException(message);
-				return NULL;
+				return Image<type>();
 			}
 		}
 		static void saveImage(string file_name, Image<type> *image)
@@ -209,6 +224,18 @@ class Image
 					flattened_length,
 					rank;
 		type 		*data;
+
+		friend void swap(Image& first,Image& second)
+		{
+			using std::swap;
+
+			swap(first.dimensions, second.dimensions);
+			swap(first.bit_depth, second.bit_depth);
+			swap(first.channels, second.channels);
+			swap(first.flattened_length, second.flattened_length);
+			swap(first.rank, second.rank);
+			swap(first.data, second.data);
+		}
 };
 
 } /* namespace elib */

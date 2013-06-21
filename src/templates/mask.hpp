@@ -68,23 +68,23 @@ class Mask
 		{
 			return (int32_t)points->size();
 		}
-		Image<int32_t>* toImage(uint32_t rank, uint32_t *dimensions)
+		Image<int32_t> toImage(uint32_t rank, uint32_t *dimensions)
 		{
-			Image<int32_t> *image;
+			Image<int32_t> image;
 			int32_t *image_data;
 			int32_t pixel;
 			typename std::vector<Point>::iterator it;
 
-			image = new Image<int32_t>(rank, dimensions, bit_depth, 1);
-			image_data = image->getData();
+			image = Image<int32_t>(rank, dimensions, bit_depth, 1);
+			image_data = image.getData();
 			for(it=points->begin(); it!=points->end(); ++it)
 			{
 				for(int32_t i=0; i<rank; ++i)
 				{
-					if((*it)[i] < 0 || (*it)[i]>dimensions[i])
+					if((*it)[i] < 0 || (*it)[i]>=dimensions[i])
 					{
 						//throw GenericException("Mask doesn't fit into the image");
-						return NULL;
+						return Image<int32_t>();
 					}
 				}
 				if(rank==2)
@@ -99,16 +99,16 @@ class Mask
 			}
 			return image;
 		}
-		static Image<int32_t>* masksToImage(uint32_t rank, uint32_t *dimensions, std::unordered_map<int32_t, Mask<Point>* > *masks)
+		static Image<int32_t> masksToImage(uint32_t rank, uint32_t *dimensions, std::unordered_map<int32_t, Mask<Point>* > *masks)
 		{
-			Image<int32_t> *image;
+			Image<int32_t> image;
 			int32_t *image_data, label, pixel;
 			typename std::unordered_map<int32_t, Mask<Point>* >::iterator it;
 			typename std::vector<Point> *points;
 			typename std::vector<Point>::iterator pt_it;
 
-			image = new Image<int32_t>(rank, dimensions, bit_depth, 1);
-			image_data = image->getData();
+			image = Image<int32_t>(rank, dimensions, bit_depth, 1);
+			image_data = image.getData();
 			for(it = masks->begin(); it!=masks->end(); ++it)
 			{
 				label = it->first;
@@ -120,7 +120,7 @@ class Mask
 						if((*pt_it)[i] < 0 || (*pt_it)[i]>dimensions[i])
 						{
 							//throw GenericException("Mask doesn't fit into the image");
-							return NULL;
+							return Image<int32_t>();
 						}
 						if(rank==2)
 						{

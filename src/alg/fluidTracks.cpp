@@ -43,7 +43,7 @@ void FluidTracks::addAppearingObjects(MaskList2D *masks)
 {
 	ComponentsMeasurements cm;
 	ConnectedComponents cc;
-	Image<int32_t> *label_image;
+	Image<int32_t> label_image;
 	Mask2D* new_objects;
 	MaskList2D new_object_masks;
 	unordered_map<int32_t, Mask2D*>::iterator it;
@@ -51,7 +51,7 @@ void FluidTracks::addAppearingObjects(MaskList2D *masks)
 	new_objects = masks->getMask(1);
 	if(new_objects != nullptr)
 	{
-		label_image = cc.getComponents(new_objects->toImage(initial->getRank(), initial->getDimensions()));
+		label_image = cc.getComponents(new_objects->toImage(initial.getRank(), initial.getDimensions()));
 		cm = ComponentsMeasurements(label_image);
 		new_object_masks = cm.getMasks();
 		applySizeConstraints(&new_object_masks);
@@ -60,7 +60,6 @@ void FluidTracks::addAppearingObjects(MaskList2D *masks)
 			masks->addMask(id_counter++, *(it->second));
 		}
 		masks->deleteMask(1);
-		delete label_image;
 	}
 }
 
@@ -90,18 +89,17 @@ void FluidTracks::detectDivisions(MaskList2D *masks)
 {
 	ConnectedComponents cc;
 	ComponentsMeasurements cm;
-	Image<int32_t> *label_image;
+	Image<int32_t> label_image;
 	int32_t max;
 	MaskList2D objects, tmp_masks;
 	unordered_map<int32_t, Mask2D* >::iterator it, it2;
 	vector<int32_t> for_deletion;
 
-	cc = ConnectedComponents();
 	it= masks->begin();
 	while(it!=masks->end())
 	{
-		label_image = cc.getComponents(it->second->toImage(initial->getRank(), initial->getDimensions()));
-		max = label_image->max();
+		label_image = cc.getComponents(it->second->toImage(initial.getRank(), initial.getDimensions()));
+		max = label_image.max();
 		if(max > 1)
 		{
 			for_deletion.push_back(it->first);
@@ -121,7 +119,6 @@ void FluidTracks::detectDivisions(MaskList2D *masks)
 				}
 			}
 		}
-		delete label_image;
 		++it;
 	}
 	masks->deleteMasks(&for_deletion);
@@ -132,7 +129,7 @@ void FluidTracks::track()
 {
 	ConnectedComponents cc;
 	ComponentsMeasurements cm;
-	Image<int32_t> *old_label, *propagated_label;
+	Image<int32_t> image, old_label, *propagated_label;
 	Labeling lbg;
 	MaskList2D masks;
 	try
@@ -144,13 +141,13 @@ void FluidTracks::track()
 			cm = ComponentsMeasurements(initial);
 			masks = cm.getMasks();
 			applySizeConstraints(&masks);
-			initial = masks.masksToImage(initial->getRank(), initial->getDimensions());
+			initial = masks.masksToImage(initial.getRank(), initial.getDimensions());
 		}
 		else
 		{
 			initial = cc.getComponents(Image<int32_t>::openImage(initial_mask_image));
 		}
-		old_label = new Image<int32_t>(*initial);
+		old_label = Image<int32_t>(initial);
 		cm = ComponentsMeasurements(old_label);
 		masks = cm.getMasks();
 		std::cout << "0\n" << masks.toString();
@@ -164,9 +161,10 @@ void FluidTracks::track()
 			{
 				//displace old label with flow i-1
 			}
-			propagated_label = lbg.labeling(old_label, Image<int32_t>::openImage((*images)[i]), params);
-			delete old_label;
-			cm = ComponentsMeasurements(propagated_label);
+			image = Image<int32_t>::openImage((*images)[i]);
+			propagated_label = lbg.labeling(&old_label, &image, params);
+			cm = ComponentsMeasurements(*propagated_label);
+			delete propagated_label;
 			if(include_appearing)
 			{
 				masks = cm.getMasks();
@@ -180,7 +178,7 @@ void FluidTracks::track()
 				detectDivisions(&masks);
 			}
 			frames->push_back(masks);
-			old_label  = masks.masksToImage(initial->getRank(), initial->getDimensions());
+			old_label  = masks.masksToImage(initial.getRank(), initial.getDimensions());
 		}
 	}
 	catch(class IOException &e)
@@ -190,9 +188,9 @@ void FluidTracks::track()
 	}
 }
 
-Image<int32_t>*& FluidTracks::getInitial()
+Image<int32_t>* FluidTracks::getInitial()
 {
-	return initial;
+	return &initial;
 }
 
 vector<MaskList<int32_t, glm::ivec3> >*& FluidTracks::getFrames()

@@ -36,7 +36,7 @@ class ComponentsMeasurements
 		ComponentsMeasurements();
 		ComponentsMeasurements(const ComponentsMeasurements& other);
 		ComponentsMeasurements(ComponentsMeasurements&& other);
-		ComponentsMeasurements(Image<int32_t> *label_image);
+		ComponentsMeasurements(Image<int32_t> label_image);
 		virtual ~ComponentsMeasurements();
 		elib::MaskList<int32_t, glm::ivec3> getMasks();
 		ComponentsMeasurements& operator=(ComponentsMeasurements other)
@@ -46,7 +46,7 @@ class ComponentsMeasurements
 		}
 	private:
 
-		Image<int32_t> *label_image = nullptr;
+		Image<int32_t> label_image;
 		int32_t num_labels = 0;
 		short connectivity = LARGE_CONNECTIVITY;
 		std::set<int32_t> *labels;
