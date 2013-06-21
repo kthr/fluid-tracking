@@ -23,10 +23,34 @@ class Mask
 			points = new std::vector<Point>();
 			outline = new std::vector<Point>();
 		}
+		Mask(const Mask& other)
+		{
+			typename std::vector<Point>::iterator it;
+
+			this->points = new std::vector<Point>();
+			for(it=other.points->begin(); it!=other.points->end(); ++it)
+			{
+				this->points->push_back(*it);
+			}
+			this->outline = new std::vector<Point>();
+			for(it=other.outline->begin(); it!=other.outline->end(); ++it)
+			{
+				this->outline->push_back(*it);
+			}
+		}
+		Mask(const Mask&& other) : Mask()
+		{
+			swap(*this,other);
+		}
 		virtual ~Mask()
 		{
 			delete points;
 			delete outline;
+		}
+		Mask& operator=(Mask other)
+		{
+			swap(*this,other);
+			return *this;
 		}
 		void addPoint(Point p)
 		{
@@ -119,7 +143,7 @@ class Mask
 	private:
 		std::vector<Point> *points;
 		std::vector<Point> *outline;
-		const static int32_t bit_depth = 16;
+		const static uint32_t bit_depth = 16;
 
 		friend void swap(Mask<Point>& first, Mask<Point>& second) // nothrow
 		{

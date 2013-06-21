@@ -38,40 +38,36 @@ class FluidTracks
 		FluidTracks(vector<string> *images, vector<string> *flows, Parameters *params);
 		FluidTracks(vector<string> *images, Parameters *params);
 		virtual ~FluidTracks();
-		void addAppearingObjects(unordered_map<int32_t, mask2D* > &masks);
-		void applySizeConstraints(unordered_map<int32_t, mask2D* > &masks);
-		unordered_map<int32_t, mask2D* > detectDivisions(unordered_map<int32_t, mask2D* > &masks);
+		void addAppearingObjects(MaskList<int32_t, glm::ivec3> *masks);
+		void applySizeConstraints(MaskList<int32_t, glm::ivec3> *masks);
+		void detectDivisions(MaskList<int32_t, glm::ivec3> *masks);
 		void track();
-
 		bool isIncludeAppearing() const
 		{
 			return include_appearing;
 		}
-
 		void setIncludeAppearing(bool includeAppearing = true)
 		{
 			include_appearing = includeAppearing;
 		}
-
 		uint32_t getMinObjectSize() const
 		{
 			return min_object_size;
 		}
-
 		void setMinObjectSize(uint32_t minObjectSize = 0)
 		{
 			min_object_size = minObjectSize;
 		}
-
 		const string& getInitialMaskImage() const
 		{
 			return initial_mask_image;
 		}
-
 		void setInitialMaskImage(const string& initialMaskImage = NULL)
 		{
 			initial_mask_image = initialMaskImage;
 		}
+		Image<int32_t>*& getInitial();
+		vector<MaskList<int32_t, glm::ivec3> >*& getFrames();
 
 	private:
 		bool include_appearing = true;
@@ -82,9 +78,7 @@ class FluidTracks
 		uint32_t id_counter = 0;
 		uint32_t min_object_size=0, max_object_size=UINT32_MAX;
 		vector<string> 	*images=NULL, *flows=NULL;
-		vector<unordered_map<int32_t, mask2D* > > *frames;
-
-		void clearMasks(unordered_map<int32_t, mask2D* > &masks);
+		vector<MaskList<int32_t, glm::ivec3> > *frames;
 };
 
 } /* namespace elib */

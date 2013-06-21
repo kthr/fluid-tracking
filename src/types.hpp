@@ -9,11 +9,13 @@
 #define TYPES_HPP_
 
 #include "templates/mask.hpp"
-#include "utils/vectorComparators.hpp"
+#include "templates/maskList.hpp"
+#include "../lib/glm/glm.hpp"
 
 namespace elib{
 
-	typedef elib::Mask<glm::ivec3> mask2D;
+	typedef elib::Mask<glm::ivec3> Mask2D;
+	typedef elib::MaskList<int32_t, glm::ivec3> MaskList2D;
 
 }
 

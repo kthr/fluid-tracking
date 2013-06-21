@@ -38,7 +38,7 @@ class ComponentsMeasurements
 		ComponentsMeasurements(ComponentsMeasurements&& other);
 		ComponentsMeasurements(Image<int32_t> *label_image);
 		virtual ~ComponentsMeasurements();
-		elib::MaskList<int32_t, elib::mask2D> getMasks();
+		elib::MaskList<int32_t, glm::ivec3> getMasks();
 		ComponentsMeasurements& operator=(ComponentsMeasurements other)
 		{
 			swap(*this, other);
@@ -50,7 +50,7 @@ class ComponentsMeasurements
 		int32_t num_labels = 0;
 		short connectivity = LARGE_CONNECTIVITY;
 		std::set<int32_t> *labels;
-		MaskList<int32_t, mask2D> *masks;
+		MaskList<int32_t, glm::ivec3> *masks;
 
 		void init();
 		friend void swap(ComponentsMeasurements& first, ComponentsMeasurements& second)

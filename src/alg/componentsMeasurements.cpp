@@ -10,12 +10,11 @@
 using elib::ComponentsMeasurements;
 using elib::Image;
 using std::unordered_map;
-using elib::VectorComparators;
 
 ComponentsMeasurements::ComponentsMeasurements()
 {
 	labels = new std::set<int32_t>();
-	masks = new MaskList<int32_t, mask2D>();
+	masks = new MaskList<int32_t, glm::ivec3>();
 }
 ComponentsMeasurements::ComponentsMeasurements(const ComponentsMeasurements& other)
 {
@@ -30,7 +29,7 @@ ComponentsMeasurements::ComponentsMeasurements(Image<int32_t> *label_image)
 {
 	this->label_image = label_image;
 	labels = new std::set<int32_t>();
-	masks = new MaskList<int32_t, mask2D>();
+	masks = new MaskList<int32_t, glm::ivec3>();
 	init();
 }
 ComponentsMeasurements::~ComponentsMeasurements()
@@ -38,7 +37,7 @@ ComponentsMeasurements::~ComponentsMeasurements()
 	delete labels;
 	delete masks;
 }
-elib::MaskList<int32_t, elib::mask2D> ComponentsMeasurements::getMasks()
+elib::MaskList<int32_t, glm::ivec3> ComponentsMeasurements::getMasks()
 {
 	return *masks;
 }
@@ -78,10 +77,10 @@ void ComponentsMeasurements::init()
 				pixel = j * width + i;
 				if (tmp_data[pixel] > 0)
 				{
-					mask2D* mask_ptr;
+					Mask2D* mask_ptr;
 					label = tmp_data[pixel];
 					tmp_data[pixel] = 0;
-					mask_ptr = masks.addMask(label);
+					mask_ptr = masks->addMask(label);
 					mask_ptr->addPoint(glm::ivec3(i, j, 1));
 
 					index = glm::ivec2(i, j);
