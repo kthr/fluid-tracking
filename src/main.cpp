@@ -5,14 +5,19 @@
  *      Author: kthierbach
  */
 
+#include <iostream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "alg/connectedComponents.hpp"
 #include "alg/fluidTracks.hpp"
+#include "io/xmlExport.hpp"
 #include "templates/image.hpp"
 #include "templates/maskList.hpp"
 #include "utils/parameters.hpp"
+#include "utils/rle.hpp"
+#include "types.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -21,6 +26,8 @@ int main(int argc, char *argv[])
 	using elib::Image;
 	using elib::Parameters;
 	using elib::MaskList;
+	using elib::RLE;
+	using elib::XMLExport;
 
 	std::string folder = "/Users/kthierbach/Documents/projects/eclipse/Labeling/tests/";
 	int32_t int_params[1] = {0};
@@ -31,7 +38,7 @@ int main(int argc, char *argv[])
 	FluidTracks ft = FluidTracks(&images, &params);
 	ft.setMinObjectSize(30);
 	ft.track();
-	std::vector<MaskList<int32_t, glm::ivec3> > *frames = ft.getFrames();
+	std::vector<elib::MaskList2D> *frames = ft.getFrames();
 	std::stringstream name;
 	for(int i = 0; i<frames->size(); ++i)
 	{
@@ -39,5 +46,20 @@ int main(int argc, char *argv[])
 		Image<int32_t> image =(*frames)[i].masksToImage(ft.getInitial()->getRank(), ft.getInitial()->getDimensions());
 		Image<int32_t>::saveImage(name.str(), &image);
 		name.str("");
+	}
+
+//	XMLExport xmle;
+//	xmle.write("/Users/kthierbach/test.xml");
+
+	std::unordered_map<int32_t, elib::Mask2D*>::iterator it;
+	for(it=(*frames)[0].begin(); it!=(*frames)[0].end(); ++it)
+	{
+		std::string tmp = it->second->getBoxMask();
+		std::cout << "Length:" << tmp.length() << std::endl;
+		std::cout << tmp << std::endl;
+		std::string encoded = RLE::encode(tmp);
+		std::cout << "Length:" << encoded.length() << std::endl;
+		std::cout << encoded << std::endl;
+//		std::cout << RLE::decode(RLE::encode(tmp)) << std::endl;
 	}
 }

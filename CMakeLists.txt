@@ -8,7 +8,9 @@ set(SOURCES
     src/alg/connectedComponents.cpp
     src/alg/componentsMeasurements.cpp
     src/alg/fluidTracks.cpp
+    src/io/xmlExport.cpp
     src/utils/parameters.cpp
+    src/utils/rle.cpp
     src/gco/graph.cpp
     src/gco/maxflow.cpp
     src/gco/GCoptimization.cpp
@@ -28,7 +30,7 @@ include_directories(
     src/gco
     lib
     lib/glm
-    lib/eigen   
+    /usr/include/libxml2
 )
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
@@ -52,7 +54,7 @@ if(APPLE)
     set_target_properties(Labeling label
         PROPERTIES
         #COMPILE_FLAGS "-g -pipe -Wall -I/opt/local/include"
-        LINK_FLAGS "-v -lstdc++ -lpthread  -L/opt/X11/lib -lX11"
+        LINK_FLAGS "-v -lstdc++ -lpthread  -L/opt/X11/lib -lX11 -L/opt/local/lib -lboost_regex-mt -lxml2"
      )
 endif()
 

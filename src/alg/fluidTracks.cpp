@@ -150,7 +150,6 @@ void FluidTracks::track()
 		old_label = Image<int32_t>(initial);
 		cm = ComponentsMeasurements(old_label);
 		masks = cm.getMasks();
-		std::cout << "0\n" << masks.toString();
 		frames->push_back(masks);
 		id_counter = *(--masks.getLabels()->end())+1;
 		std::cout << "images.size(): " << images->size() << "\n";
@@ -170,7 +169,6 @@ void FluidTracks::track()
 				masks = cm.getMasks();
 				addAppearingObjects(&masks);
 				detectDivisions(&masks);
-				std::cout << i << "\n" << masks.toString();
 			}
 			else
 			{
@@ -193,7 +191,7 @@ Image<int32_t>* FluidTracks::getInitial()
 	return &initial;
 }
 
-vector<MaskList<int32_t, glm::ivec3> >*& FluidTracks::getFrames()
+vector<MaskList2D>*& FluidTracks::getFrames()
 {
 	return frames;
 }

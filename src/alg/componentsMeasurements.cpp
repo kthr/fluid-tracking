@@ -14,7 +14,7 @@ using std::unordered_map;
 ComponentsMeasurements::ComponentsMeasurements()
 {
 	labels = new std::set<int32_t>();
-	masks = new MaskList<int32_t, glm::ivec3>();
+	masks = new MaskList2D();
 }
 ComponentsMeasurements::ComponentsMeasurements(const ComponentsMeasurements& other)
 {
@@ -29,7 +29,7 @@ ComponentsMeasurements::ComponentsMeasurements(Image<int32_t> label_image)
 {
 	this->label_image = label_image;
 	labels = new std::set<int32_t>();
-	masks = new MaskList<int32_t, glm::ivec3>();
+	masks = new MaskList2D();
 	init();
 }
 ComponentsMeasurements::~ComponentsMeasurements()
@@ -37,7 +37,7 @@ ComponentsMeasurements::~ComponentsMeasurements()
 	delete labels;
 	delete masks;
 }
-elib::MaskList<int32_t, glm::ivec3> ComponentsMeasurements::getMasks()
+elib::MaskList2D ComponentsMeasurements::getMasks()
 {
 	return *masks;
 }
@@ -81,7 +81,7 @@ void ComponentsMeasurements::init()
 					label = tmp_data[pixel];
 					tmp_data[pixel] = 0;
 					mask_ptr = masks->addMask(label);
-					mask_ptr->addPoint(glm::ivec3(i, j, 1));
+					mask_ptr->addPoint(glm::ivec2(i, j));
 
 					index = glm::ivec2(i, j);
 					ConnectedComponents::addNeigbours(&indices, neighbours, index, label_image.getRank(), label_image.getDimensions());
@@ -93,7 +93,7 @@ void ComponentsMeasurements::init()
 						if (tmp_data[pixel] == label)
 						{
 							tmp_data[pixel] = 0;
-							mask_ptr->addPoint(glm::ivec3(index.x, index.y, 1));
+							mask_ptr->addPoint(glm::ivec2(index.x, index.y));
 							ConnectedComponents::addNeigbours(&indices, neighbours, index, label_image.getRank(), label_image.getDimensions());
 						}
 					}

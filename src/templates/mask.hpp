@@ -8,13 +8,17 @@
 #ifndef MASK_HPP_
 #define MASK_HPP_
 
+#include <iostream>
 #include <set>
 #include <stdint.h>
 #include <stdlib.h>
+#include <vector>
+
+#include "../lib/glm/glm.hpp"
 
 namespace elib{
 
-template <typename Point>
+template <class Point>
 class Mask
 {
 	public:
@@ -64,10 +68,6 @@ class Mask
 		{
 			return NULL;
 		}
-		int32_t getSize()
-		{
-			return (int32_t)points->size();
-		}
 		Image<int32_t> toImage(uint32_t rank, uint32_t *dimensions)
 		{
 			Image<int32_t> image;
@@ -87,15 +87,8 @@ class Mask
 						return Image<int32_t>();
 					}
 				}
-				if(rank==2)
-				{
-					pixel = (*it)[1]*dimensions[0]+(*it)[0];
-				}
-				else
-				{
-					pixel = (*it)[2]*dimensions[0]*dimensions[1] + (*it)[1]*dimensions[0] + (*it)[0];
-				}
-				image_data[pixel] = (*it)[rank];
+				pixel = Mask::getPixel(*it, dimensions);
+				image_data[pixel] = 1;
 			}
 			return image;
 		}
@@ -122,23 +115,28 @@ class Mask
 							//throw GenericException("Mask doesn't fit into the image");
 							return Image<int32_t>();
 						}
-						if(rank==2)
-						{
-							pixel = (*pt_it)[1]*dimensions[0]+(*pt_it)[0];
-						}
-						else
-						{
-							pixel = (*pt_it)[2]*dimensions[0]*dimensions[1] + (*pt_it)[1]*dimensions[0] + (*pt_it)[0];
-						}
-						image_data[pixel] = label;
 					}
+					pixel = Mask::getPixel(*pt_it, dimensions);
+					image_data[pixel] = label;
 				}
 			}
 			return image;
 		}
+		std::vector<Point> getBoundingBox()
+		{
+			return getBox(points);
+		}
+		std::string getBoxMask()
+		{
+			return boxMask(getBoundingBox(), points);
+		}
 		std::vector<Point>* getPoints()
 		{
 			return points;
+		}
+		int32_t getSize()
+		{
+			return (int32_t)points->size();
 		}
 	private:
 		std::vector<Point> *points;
@@ -153,6 +151,82 @@ class Mask
 			// the two classes are effectively swapped
 			swap(first.points, second.points);
 			swap(first.outline, second.outline);
+		}
+
+		static bool less(glm::ivec2 p1, glm::ivec2 p2)
+		{
+			return (p1[1] < p2[1] && p1[0] < p2[0]);
+		}
+		static bool less(glm::ivec3 p1, glm::ivec3 p2)
+		{
+			return (p1[2] < p2[2] && p1[1] < p2[1] && p1[0] < p2[0]);
+		}
+		static inline int32_t getPixel(glm::ivec2 p, uint32_t *dimensions)
+		{
+			return p[1]*dimensions[0]+p[0];
+		}
+		static inline int32_t getPixel(glm::ivec3 p, uint32_t *dimensions)
+		{
+			return p[2]*dimensions[0]*dimensions[1] + p[1]*dimensions[0] + p[0];
+		}
+		std::vector<glm::ivec2> getBox(std::vector<glm::ivec2> *points)
+		{
+			std::vector<glm::ivec2> box;
+			std::vector<glm::ivec2>::iterator it;
+			int32_t minX = INT32_MAX, minY = INT32_MAX, maxX = 0, maxY = 0;
+			for(it=points->begin(); it!=points->end(); ++it)
+			{
+				minX = std::min(minX, it->x);
+				minY = std::min(minY, it->y);
+				maxX = std::max(maxX, it->x);
+				maxY = std::max(maxY, it->y);
+			}
+			box.push_back(glm::ivec2(minX, minY));
+			box.push_back(glm::ivec2(maxX+1, maxY+1));
+			return box;
+		}
+		std::vector<glm::ivec3> getBox(std::vector<glm::ivec3> *points)
+		{
+			std::vector<glm::ivec3> box;
+			std::vector<glm::ivec3>::iterator it;
+			int32_t minX = INT32_MAX, minY = INT32_MAX, minZ = INT32_MAX, maxX = 0, maxY = 0, maxZ = 0;
+			for(it=points->begin(); it!=points->end(); ++it)
+			{
+				minX = std::min(minX, it->x);
+				minY = std::min(minY, it->y);
+				minZ = std::min(minZ, it->z);
+				maxX = std::max(maxX, it->x);
+				maxY = std::max(maxY, it->y);
+				maxZ = std::max(maxZ, it->z);
+			}
+			box.push_back(glm::ivec3(minX, minY, minZ));
+			box.push_back(glm::ivec3(maxX+1, maxY+1, maxZ+1));
+			return box;
+		}
+		std::string boxMask(std::vector<glm::ivec2> boundingBox, std::vector<glm::ivec2> *points)
+		{
+			glm::ivec2 p, p2;
+			std::vector<char> tmp;
+			std::vector<char>::iterator cit;
+			std::vector<glm::ivec2>::iterator it;
+			uint32_t dimensions[2];
+			int32_t pixel;
+			std::string mask = "";
+
+			p = boundingBox[1] - boundingBox[0];
+			dimensions[0] = p[0];
+			dimensions[1] = p[1];
+			tmp = std::vector<char>(p[0]*p[1], '0');
+			for(it=points->begin(); it!=points->end(); ++it)
+			{
+				pixel = getPixel((*it)-boundingBox[0], dimensions);
+				tmp[pixel] = '1';
+			}
+			for(cit=tmp.begin(); cit!=tmp.end(); ++cit)
+			{
+				mask += *cit;
+			}
+			return mask;
 		}
 };
 
