@@ -24,6 +24,7 @@ class Parameters
 		double getDoubleParam(uint32_t index);
 		bool setDoubleParam(uint32_t index, double value);
 		bool setIntParam(uint32_t index, int32_t value);
+		toXML(xmlTextWriterPtr *writer);
 
 	private:
 		uint32_t int_params_size, double_params_size;

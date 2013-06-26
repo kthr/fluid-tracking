@@ -8,6 +8,9 @@
 #ifndef XMLEXPORT_HPP_
 #define XMLEXPORT_HPP_
 
+#include <libxml/xmlwriter.h>
+#include <libxml/encoding.h>
+
 namespace elib
 {
 
@@ -18,6 +21,8 @@ class XMLExport
 		virtual ~XMLExport();
 
 		void write(const char *uri);
+	private:
+		xmlChar* convertInput(const char *in, const char *encoding);
 };
 
 } /* namespace elib */

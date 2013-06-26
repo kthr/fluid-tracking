@@ -48,8 +48,8 @@ int main(int argc, char *argv[])
 		name.str("");
 	}
 
-//	XMLExport xmle;
-//	xmle.write("/Users/kthierbach/test.xml");
+	XMLExport xmle;
+	xmle.write("/Users/kthierbach/test.xml");
 
 	std::unordered_map<int32_t, elib::Mask2D*>::iterator it;
 	for(it=(*frames)[0].begin(); it!=(*frames)[0].end(); ++it)
