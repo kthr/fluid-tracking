@@ -12,9 +12,9 @@
 #include <stdint.h>
 #include <string>
 
-#include "../c_wrapper.h"
-#include "../lib/CImg.h"
-#include "../exceptions/IOException.hpp"
+#include "c_wrapper.h"
+#include "CImg.h"
+#include "exceptions/IOException.hpp"
 
 namespace elib{
 
@@ -58,7 +58,7 @@ class Image
 			this->data = new type[flattened_length];
 			std::fill_n(this->data, flattened_length, 0);
 		}
-		Image(cimage *image)
+		explicit Image(cimage *image)
 		: bit_depth(image->bit_depth), channels(image->channels), flattened_length(image->flattened_length), rank(image->rank)
 		{
 			dimensions = new uint32_t[rank];
@@ -66,7 +66,7 @@ class Image
 			data = new type[flattened_length];
 			std::copy(image->data, image->data+flattened_length, data);
 		}
-		Image(CImg<type> *image)
+		explicit Image(CImg<type> *image)
 		{
 			if(image->depth() == 1)
 			{

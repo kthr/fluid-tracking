@@ -9,12 +9,17 @@ set(SOURCES
     src/alg/componentsMeasurements.cpp
     src/alg/fluidTracks.cpp
     src/io/xmlExport.cpp
+    src/logic/annotation.cpp
+    src/logic/frame.cpp
+    src/logic/link.cpp
+    src/logic/object.cpp
+    src/logic/trackingData.cpp
+    lib/gco/graph.cpp
+    lib/gco/maxflow.cpp
+    lib/gco/GCoptimization.cpp
+    lib/gco/LinkedBlockList.cpp
     src/utils/parameters.cpp
     src/utils/rle.cpp
-    src/gco/graph.cpp
-    src/gco/maxflow.cpp
-    src/gco/GCoptimization.cpp
-    src/gco/LinkedBlockList.cpp
 )
 
 add_executable(label
@@ -27,9 +32,8 @@ add_library(Labeling SHARED
 )
 
 include_directories(
-    src/gco
+    src/
     lib
-    lib/glm
     /usr/include/libxml2
 )
 

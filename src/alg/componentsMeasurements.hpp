@@ -10,22 +10,11 @@
 
 #include <set>
 #include <stdint.h>
-#include <unordered_map>
-#include <vector>
 
-#include "../lib/glm/glm.hpp"
-#include "../templates/image.hpp"
-#include "../templates/mask.hpp"
-#include "../templates/maskList.hpp"
-#include "../types.hpp"
-#include "../utils/vectorComparators.hpp"
-#include "connectedComponents.hpp"
+#include "types.hpp"
+#include "utils/vectorComparators.hpp"
 
 namespace elib {
-
-using std::unordered_map;
-using elib::VectorComparators;
-
 
 class ComponentsMeasurements
 {

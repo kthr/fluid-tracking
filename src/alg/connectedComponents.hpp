@@ -11,8 +11,8 @@
 #include <queue>
 #include <vector>
 
-#include "../templates/image.hpp"
-#include "../lib/glm/glm.hpp"
+#include "glm/glm.hpp"
+#include "templates/image.hpp"
 
 namespace elib{
 

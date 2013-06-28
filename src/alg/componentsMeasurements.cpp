@@ -7,6 +7,8 @@
 
 #include "componentsMeasurements.hpp"
 
+#include "connectedComponents.hpp"
+
 using elib::ComponentsMeasurements;
 using elib::Image;
 using std::unordered_map;

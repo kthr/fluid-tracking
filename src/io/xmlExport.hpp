@@ -8,8 +8,10 @@
 #ifndef XMLEXPORT_HPP_
 #define XMLEXPORT_HPP_
 
-#include <libxml/xmlwriter.h>
-#include <libxml/encoding.h>
+#include <string>
+
+#include "utils/parameters.hpp"
+#include "logic/trackingData.hpp"
 
 namespace elib
 {
@@ -17,12 +19,15 @@ namespace elib
 class XMLExport
 {
 	public:
-		XMLExport();
+		XMLExport(const Parameters *params, const TrackingData *data);
 		virtual ~XMLExport();
 
 		void write(const char *uri);
 	private:
-		xmlChar* convertInput(const char *in, const char *encoding);
+		const Parameters *params;
+		const TrackingData *data;
+
+		std::string getTime();
 };
 
 } /* namespace elib */

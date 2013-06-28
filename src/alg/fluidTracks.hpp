@@ -8,22 +8,19 @@
 #ifndef FLUIDTRACKS_HPP_
 #define FLUIDTRACKS_HPP_
 
-#include <map>
 #include <stdint.h>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
-#include "../templates/image.hpp"
-#include "../templates/mask.hpp"
-#include "../types.hpp"
-#include "../utils/parameters.hpp"
-#include "../utils/vectorComparators.hpp"
-#include "componentsMeasurements.hpp"
+#include "templates/image.hpp"
+#include "types.hpp"
+#include "utils/parameters.hpp"
+#include "utils/vectorComparators.hpp"
 
 namespace elib
 {
 
+/* bad practice?? */
 using std::string;
 using std::vector;
 using std::map;

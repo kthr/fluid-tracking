@@ -13,6 +13,7 @@
 #include "alg/connectedComponents.hpp"
 #include "alg/fluidTracks.hpp"
 #include "io/xmlExport.hpp"
+#include "logic/trackingData.hpp"
 #include "templates/image.hpp"
 #include "templates/maskList.hpp"
 #include "utils/parameters.hpp"
@@ -24,17 +25,20 @@ int main(int argc, char *argv[])
 	using elib::ConnectedComponents;
 	using elib::FluidTracks;
 	using elib::Image;
-	using elib::Parameters;
 	using elib::MaskList;
+	using elib::Parameters;
 	using elib::RLE;
+	using elib::TrackingData;
 	using elib::XMLExport;
 
 	std::string folder = "/Users/kthierbach/Documents/projects/eclipse/Labeling/tests/";
 	int32_t int_params[1] = {0};
 	double double_params[4] = {.6, .8, 1., 1.}; //c0, c1, lambda, mu
+	std::vector<std::string> int_names({""});
+	std::vector<std::string> double_names({"C0", "C1", "Lambda", "Mu"});
 	std::vector<std::string> images({folder+"initial.png", folder+"smaller002.png", folder+"smaller003.png", folder+"smaller004.png", folder+"smaller005.png"});
 
-	Parameters params = Parameters(1, int_params, 4, double_params);
+	Parameters params = Parameters(1, int_params, int_names, 4, double_params, double_names);
 	FluidTracks ft = FluidTracks(&images, &params);
 	ft.setMinObjectSize(30);
 	ft.track();
@@ -47,8 +51,9 @@ int main(int argc, char *argv[])
 		Image<int32_t>::saveImage(name.str(), &image);
 		name.str("");
 	}
-
-	XMLExport xmle;
+	TrackingData td(ft.getFrames());
+	td.construct();
+	XMLExport xmle(&params, &td);
 	xmle.write("/Users/kthierbach/test.xml");
 
 	std::unordered_map<int32_t, elib::Mask2D*>::iterator it;

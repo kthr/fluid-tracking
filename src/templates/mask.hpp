@@ -12,9 +12,11 @@
 #include <set>
 #include <stdint.h>
 #include <stdlib.h>
+#include <unordered_map>
 #include <vector>
 
-#include "../lib/glm/glm.hpp"
+#include "glm/glm.hpp"
+#include "image.hpp"
 
 namespace elib{
 

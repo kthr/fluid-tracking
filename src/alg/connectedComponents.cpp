@@ -6,7 +6,8 @@
  */
 
 #include "connectedComponents.hpp"
-#include "../lib/glm/glm.hpp"
+
+#include "glm/glm.hpp"
 
 using elib::ConnectedComponents;
 using elib::Image;

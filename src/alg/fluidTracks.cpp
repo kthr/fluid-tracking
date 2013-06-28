@@ -9,9 +9,10 @@
 
 #include <iostream>
 
-#include "../exceptions/IOException.hpp"
-#include "../labeling.hpp"
+#include "componentsMeasurements.hpp"
 #include "connectedComponents.hpp"
+#include "exceptions/IOException.hpp"
+#include "labeling.hpp"
 
 namespace elib
 {
