@@ -262,14 +262,12 @@ int main(int argc, char *argv[])
 		std::cout << "Found " << vector_fields.size() << " vector fields." << std::endl;
 	}
 
-
-	std::cout << c0 << " " << iao << " " << label_image_directory << std::endl;
 	if(label_image_directory.compare("") != 0)
 	{
 		if(getFiles(label_image_directory, std::regex(".*")).size() != 0)
 		{
-			std::cout << "WARNING: Label directory '" << label_image_directory << "' is not empty, files may be overwritten! Continue anyway? (y/n)";
-			std::cin >> in;
+			std::cout << "WARNING: Label directory '" << label_image_directory << "' is not empty, files may be overwritten! Continue anyway? (y/N)";
+			std::getline( std::cin, in);
 			if(in.compare("y") != 0)
 				return EXIT_FAILURE;
 		}
@@ -300,8 +298,13 @@ int main(int argc, char *argv[])
 	td.construct();
 
 	XMLExport xe(&params, &td);
-	std::string output_file = std::string("./") + xe.getTime() + std::string("-data-frame.xml");
+	std::string output_file = std::string("./") + XMLExport::getTime() + std::string("-data-frame.xml");
 	xe.write(output_file.c_str());
+
+	if(label_image_directory.compare("") != 0)
+	{
+		//write label files
+	}
 
 	return EXIT_SUCCESS;
 }

@@ -50,7 +50,7 @@ void XMLExport::write(const char *uri)
 	 *************************************/
 	rc = xmlTextWriterStartElement(writer, BAD_CAST "data-frame");
 	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "version", BAD_CAST "1.0");
-	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "compressed", BAD_CAST "true");
+	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "compressed", BAD_CAST "1");
 
 	/*************************************
 	 * start description
@@ -89,7 +89,7 @@ std::string XMLExport::getTime()
 	struct tm * ptm;
 
 	time(&rawtime);
-	ptm = gmtime(&rawtime);
+	ptm = localtime(&rawtime);
 	tmp << ptm->tm_year + 1900 << "-" << ptm->tm_mon +1 << "-" << ptm->tm_mday << " " << ptm->tm_hour << ":" << ptm->tm_min << ":" << ptm->tm_sec;
 	return tmp.str();
 }
