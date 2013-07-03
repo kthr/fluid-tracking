@@ -19,8 +19,8 @@ TrackingData::TrackingData()
 	data = nullptr;
 }
 
-TrackingData::TrackingData(const std::vector<MaskList2D> *frames) :
-		data(frames)
+TrackingData::TrackingData(std::vector<MaskList2D> *frames, bool compressed)
+: data(frames), compressed(compressed)
 {
 }
 TrackingData::~TrackingData()
@@ -45,40 +45,38 @@ void TrackingData::construct()
 {
 	if (data != nullptr)
 	{
-		Frame *frame;
 		Object *object;
 		Link *link;
-		uint32_t id = 0, frameId = 0;
-		trackId = 0;
-		std::vector<MaskList2D>::iterator it, next;
-		std::vector<Frame>::iterator objectIt;
-		std::unordered_map<uint32_t, Mask2D*>::iterator mask;
+		uint32_t id = 0, frameId = 0, trackId = 0;
+		std::vector<MaskList2D>::iterator it;
+		std::vector<Object>::iterator objectIt;
+		std::unordered_map<int32_t, Mask2D*>::iterator mask;
 
 		for (it = data->begin(); it != data->end(); ++it)
 		{
 			Frame *frame = addFrame();
 			for (mask = it->begin(); mask != it->end(); ++mask)
 			{
-				tracks.insert(mask->first);
+				tracks.insert(mask->first); // insert track id
 				object = frame->addObject(mask->first);
-				object.setId(id);
-				object.setFrameId(frameId);
-				object.setMask(it->second);
+				object->setId(id);
+				object->setFrameId(frameId);
+				object->setMask(mask->second);
 				++id;
 			}
 			++frameId;
 		}
-		for (uint32_t frameId = 0; frameId != data->size() - 1; ++frameId)
+		for (frameId = 0; frameId <= data->size() - 1; ++frameId)
 		{
 			for (objectIt = frames[frameId].begin(); objectIt != frames[frameId].end(); ++objectIt)
 			{
 				trackId = objectIt->getTrackId();
-				if (data[frameId + 1].getMask(trackId) != nullptr)
+				if ((*data)[frameId+1].getMask(trackId) != nullptr)
 				{
 					link = objectIt->addLink();
-					ling->setType(Link::SUCCESSOR);
-					link->setFrom(objectIt);
-					link->setTo(frames[frameId + 1].getObject(trackId));
+					link->setType(Link::SUCCESSOR);
+					link->setFrom(&*objectIt);
+					link->setTo(frames[frameId+1].getObject(trackId));
 				}
 			}
 			++frameId;
@@ -93,6 +91,7 @@ void TrackingData::toXML(const xmlTextWriterPtr writer) const
 	rc = xmlTextWriterStartElement(writer, BAD_CAST "frames"); /* start frames */
 	tmp << getNumFrames();
 	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "number_of_frames", BAD_CAST tmp.str().c_str()); /*  number of frames */
+	tmp.str("");
 	for (uint32_t i = 0; i < frames.size(); ++i)
 	{
 		rc = xmlTextWriterStartElement(writer, BAD_CAST "frame"); /* start frame */
@@ -101,7 +100,11 @@ void TrackingData::toXML(const xmlTextWriterPtr writer) const
 		tmp.str("");
 		tmp << frames[i].getNumObjects();
 		rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "number_of_objects", BAD_CAST tmp.str().c_str()); /*  number of objects */
-		frames[i].toXML(writer);
+		tmp.str("");
+		tmp << frames[i].isValid();
+		rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "v", BAD_CAST tmp.str().c_str()); /*  number of objects */
+		tmp.str("");
+		frames[i].toXML(writer, compressed);
 		rc = xmlTextWriterEndElement(writer); /* end frame */
 	}
 	rc = xmlTextWriterEndElement(writer); /* end frames */

@@ -13,10 +13,10 @@
 #include <unordered_map>
 #include <vector>
 
+#include "object.hpp"
+
 namespace elib
 {
-
-class Object;
 
 class Frame
 {
@@ -24,11 +24,15 @@ class Frame
 		Frame();
 		virtual ~Frame();
 		Object* addObject(uint32_t trackId);
-		Object* getObject(uint32_t trackId) const;
-		std::vector<Object>::iterator begin() const;
-		std::vector<Object>::iterator end() const;
-		void toXML(const xmlTextWriterPtr writer) const;
+		const Object* getObject(uint32_t trackId) const;
+		std::vector<Object>::iterator begin();
+		std::vector<Object>::iterator end();
+		void toXML(const xmlTextWriterPtr writer, bool compressed=true) const;
 		uint32_t getNumObjects() const;
+		const std::vector<Object>& getObjects() const;
+		void setObjects(const std::vector<Object>& objects);
+		bool isValid() const;
+		void setValid(bool valid = true);
 
 	private:
 		bool valid = true;

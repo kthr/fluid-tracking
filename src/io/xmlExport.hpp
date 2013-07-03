@@ -22,12 +22,11 @@ class XMLExport
 		XMLExport(const Parameters *params, const TrackingData *data);
 		virtual ~XMLExport();
 
+		std::string getTime();
 		void write(const char *uri);
 	private:
 		const Parameters *params;
 		const TrackingData *data;
-
-		std::string getTime();
 };
 
 } /* namespace elib */

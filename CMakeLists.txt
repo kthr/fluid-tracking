@@ -22,8 +22,8 @@ set(SOURCES
     src/utils/rle.cpp
 )
 
-add_executable(label
-    src/main.cpp
+add_executable(fluidTracking
+    src/fluidTracking.cpp
     ${SOURCES}
 )
 
@@ -55,7 +55,7 @@ set(CMAKE_C_FLAGS
 
 if(APPLE)
     message("\nEntering configuration for APPLE computers:\n")
-    set_target_properties(Labeling label
+    set_target_properties(Labeling fluidTracking
         PROPERTIES
         #COMPILE_FLAGS "-g -pipe -Wall -I/opt/local/include"
         LINK_FLAGS "-v -lstdc++ -lpthread  -L/opt/X11/lib -lX11 -L/opt/local/lib -lboost_regex-mt -lxml2"

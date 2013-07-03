@@ -32,8 +32,7 @@ class FluidTracks
 {
 	public:
 		FluidTracks();
-		FluidTracks(vector<string> *images, vector<string> *flows, Parameters *params);
-		FluidTracks(vector<string> *images, Parameters *params);
+		FluidTracks(Parameters *params, vector<string> *images, vector<string> *flows);
 		virtual ~FluidTracks();
 		void addAppearingObjects(MaskList2D *masks);
 		void applySizeConstraints(MaskList2D *masks);
@@ -65,6 +64,8 @@ class FluidTracks
 		}
 		Image<int32_t>* getInitial();
 		vector<MaskList2D >*& getFrames();
+		uint32_t getMaxObjectSize() const;
+		void setMaxObjectSize(uint32_t maxObjectSize = UINT32_MAX);
 
 	private:
 		bool include_appearing = true;
@@ -73,8 +74,10 @@ class FluidTracks
 		Parameters *params;
 		string initial_mask_image = "";
 		uint32_t id_counter = 0;
-		uint32_t min_object_size=0, max_object_size=UINT32_MAX;
-		vector<string> 	*images=NULL, *flows=NULL;
+		uint32_t min_object_size=0,
+				 max_object_size=UINT32_MAX;
+		vector<string> 	*images=nullptr,
+						*flows=nullptr;
 		vector<MaskList2D> *frames;
 };
 

@@ -23,21 +23,25 @@ class Object
 		Object();
 		virtual ~Object();
 
-		void toXML(const xmlTextWriterPtr writer);
+		elib::Annotation* addAnnotation();
+		elib::Link* addLink();
+		void toXML(const xmlTextWriterPtr writer, bool compressed=true) const;
 
 		uint32_t getFrameId() const;
 		void setFrameId(uint32_t frameId);
 		uint32_t getId() const;
 		void setId(uint32_t id);
-		const Mask2D*& getMask() const;
-		void setMask(const Mask2D*& mask);
+		const Mask2D* getMask() const;
+		void setMask(const Mask2D* mask);
 		uint32_t getTrackId() const;
 		void setTrackId(uint32_t trackId);
+		bool isValid() const;
+		void setValid(bool valid = true);
 
 	private:
 		bool valid = true;
 		uint32_t id, frameId, trackId;
-		Mask2D *mask;
+		const Mask2D *mask;
 		std::vector<Link> links;
 		std::vector<Annotation> annotations;
 };

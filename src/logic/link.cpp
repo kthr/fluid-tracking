@@ -21,22 +21,22 @@ Link::~Link()
 	// TODO Auto-generated destructor stub
 }
 
-const Object*& Link::getFrom() const
+const Object*& Link::getFrom()
 {
 	return from;
 }
 
-void Link::setFrom(const Object*& from)
+void Link::setFrom(const Object* from)
 {
 	this->from = from;
 }
 
-const Object*& Link::getTo() const
+const Object*& Link::getTo()
 {
 	return to;
 }
 
-void Link::setTo(const Object*& to)
+void Link::setTo(const Object* to)
 {
 	this->to = to;
 }

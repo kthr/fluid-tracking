@@ -22,14 +22,8 @@ FluidTracks::FluidTracks()
 	divisions = new vector<glm::ivec2>;
 	frames = new vector<MaskList2D >();
 }
-FluidTracks::FluidTracks(vector<string> *images, vector<string> *flows, Parameters *params)
+FluidTracks::FluidTracks(Parameters *params, vector<string> *images, vector<string> *flows)
 : params(params), images(images), flows(flows)
-{
-	divisions = new vector<glm::ivec2>;
-	frames = new vector<MaskList2D >();
-}
-FluidTracks::FluidTracks(vector<string> *images, Parameters *params)
-: params(params), images(images)
 {
 	divisions = new vector<glm::ivec2>;
 	frames = new vector<MaskList2D >();
@@ -138,7 +132,14 @@ void FluidTracks::track()
 		cc.setLabelOffset(2);
 		if(initial_mask_image.compare("") == 0)
 		{
-			initial = cc.getComponents(Image<int32_t>::openImage((*images)[0]));
+			try{
+				initial = cc.getComponents(Image<int32_t>::openImage((*images)[0]));
+			}
+			catch(IOException &e)
+			{
+				std::cerr << e.what() << std::endl;
+				throw "ERROR: Tracking couldn't be performed!";
+			}
 			cm = ComponentsMeasurements(initial);
 			masks = cm.getMasks();
 			applySizeConstraints(&masks);
@@ -146,22 +147,35 @@ void FluidTracks::track()
 		}
 		else
 		{
-			initial = cc.getComponents(Image<int32_t>::openImage(initial_mask_image));
+			try{
+				initial = cc.getComponents(Image<int32_t>::openImage(initial_mask_image));
+			}
+			catch(IOException &e)
+			{
+				std::cerr << e.what() << std::endl;
+				throw "ERROR: Tracking couldn't be performed!";
+			}
 		}
 		old_label = Image<int32_t>(initial);
 		cm = ComponentsMeasurements(old_label);
 		masks = cm.getMasks();
 		frames->push_back(masks);
 		id_counter = *(--masks.getLabels()->end())+1;
-		std::cout << "images.size(): " << images->size() << "\n";
 		for(int i=1; i<images->size(); ++i)
 		{
 			params->setIntParam(0, masks.getSize()+2);
-			if(flows != NULL)
+			if(flows->size() != 0)
 			{
 				//displace old label with flow i-1
 			}
-			image = Image<int32_t>::openImage((*images)[i]);
+			try{
+				image = Image<int32_t>::openImage((*images)[i]);
+			}
+			catch(IOException e)
+			{
+				std::cerr << e.what() << std::endl;
+				throw "ERROR: Tracking couldn't be performed!";
+			}
 			propagated_label = lbg.labeling(&old_label, &image, params);
 			cm = ComponentsMeasurements(*propagated_label);
 			delete propagated_label;
@@ -195,6 +209,16 @@ Image<int32_t>* FluidTracks::getInitial()
 vector<MaskList2D>*& FluidTracks::getFrames()
 {
 	return frames;
+}
+
+uint32_t FluidTracks::getMaxObjectSize() const
+{
+	return max_object_size;
+}
+
+void FluidTracks::setMaxObjectSize(uint32_t maxObjectSize)
+{
+	max_object_size = maxObjectSize;
 }
 
 } /* namespace elib */

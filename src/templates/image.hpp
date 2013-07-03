@@ -19,7 +19,7 @@
 namespace elib{
 
 using cimg_library::CImg;
-using cimg_library::CImgIOException;
+using cimg_library::CImgException;
 using std::string;
 
 template <typename type>
@@ -156,9 +156,9 @@ class Image
 				CImg<type> img(file_name.c_str());
 				return Image<type>(&img);
 			}
-			catch(CImgIOException &e)
+			catch(CImgException &e)
 			{
-				std::string message = std::string("Failed to open image at: ") + file_name;
+				std::string message = std::string("ERROR: Failed to open image at: ") + file_name;
 				throw IOException(message);
 				return Image<type>();
 			}
@@ -182,9 +182,9 @@ class Image
 				{
 				}
 			}
-			catch(CImgIOException &e)
+			catch(CImgException &e)
 			{
-				std::string message = std::string("Failed to save image at: ") + file_name;
+				std::string message = std::string("ERROR: Failed to save image at: ") + file_name;
 				throw IOException(message);
 			}
 		}

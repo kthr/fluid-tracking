@@ -23,7 +23,7 @@ Frame::~Frame()
 	// TODO Auto-generated destructor stub
 }
 
-std::vector<Object>::iterator Frame::begin() const
+std::vector<Object>::iterator Frame::begin()
 {
 	return objects.begin();
 }
@@ -33,11 +33,11 @@ Object* Frame::addObject(uint32_t trackId)
 	track2objectId.insert(std::pair<uint32_t, uint32_t> (trackId, objects.size()-1));
 	return &objects.back();
 }
-std::vector<Object>::iterator Frame::end() const
+std::vector<Object>::iterator Frame::end()
 {
 	return objects.end();
 }
-void Frame::toXML(const xmlTextWriterPtr writer) const
+void Frame::toXML(const xmlTextWriterPtr writer, bool compressed) const
 {
 	int rc;
 	std::stringstream tmp;
@@ -48,13 +48,16 @@ void Frame::toXML(const xmlTextWriterPtr writer) const
 		tmp << i;
 		rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "id", BAD_CAST tmp.str().c_str()); /*  frame id */
 		tmp.str("");
-		objects[i].toXML(writer);
+		tmp << objects[i].isValid();
+		rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "v", BAD_CAST tmp.str().c_str()); /*  frame id */
+		tmp.str("");
+		objects[i].toXML(writer, compressed);
 		rc = xmlTextWriterEndElement(writer); /* end object */
 	}
 }
-Object* Frame::getObject(uint32_t trackId) const
+const Object* Frame::getObject(uint32_t trackId) const
 {
-	std::vector<Object>::iterator it = track2objectId.find(trackId);
+	std::unordered_map<uint32_t, uint32_t>::const_iterator it = track2objectId.find(trackId);
 	if(it != track2objectId.end())
 		return &(objects[it->second]);
 	else
@@ -63,6 +66,26 @@ Object* Frame::getObject(uint32_t trackId) const
 uint32_t Frame::getNumObjects() const
 {
 	return objects.size();
+}
+
+const std::vector<Object>& Frame::getObjects() const
+{
+	return objects;
+}
+
+void Frame::setObjects(const std::vector<Object>& objects)
+{
+	this->objects = objects;
+}
+
+bool Frame::isValid() const
+{
+	return valid;
+}
+
+void Frame::setValid(bool valid)
+{
+	this->valid = valid;
 }
 
 } /* namespace elib */

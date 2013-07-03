@@ -16,12 +16,15 @@ namespace elib{
 class IOException : virtual public std::exception {
 
 	public:
-		IOException(const char* message)
+		explicit IOException(const char* message)
 		: message(std::string(message))
 		{
 		}
-		IOException(std::string message)
+		explicit IOException(std::string message)
 		: message(message)
+		{
+		}
+		virtual ~IOException()
 		{
 		}
 		virtual const char* what() const throw() override

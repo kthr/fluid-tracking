@@ -14,16 +14,16 @@
 #include <types.hpp>
 #include <vector>
 
+#include "frame.hpp"
+
 namespace elib
 {
-
-class Frame;
 
 class TrackingData
 {
 	public:
 		TrackingData();
-		explicit TrackingData(const std::vector<MaskList2D> *frames);
+		TrackingData(std::vector<MaskList2D> *frames, bool compressed=true);
 		virtual ~TrackingData();
 
 		Frame* addFrame();
@@ -33,9 +33,10 @@ class TrackingData
 		void toXML(const xmlTextWriterPtr writer) const;
 
 	private:
-		const std::vector<MaskList2D> *data;
+		std::vector<MaskList2D> *data;
 		std::vector<Frame> frames;
 		std::set<uint32_t> tracks;
+		bool compressed;
 };
 
 } /* namespace elib */

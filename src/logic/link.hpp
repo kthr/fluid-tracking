@@ -24,10 +24,10 @@ class Link
 
 		void toXML(const xmlTextWriterPtr writer) const;
 
-		const Object*& getFrom() const;
-		void setFrom(const Object*& from);
-		const Object*& getTo() const;
-		void setTo(const Object*& to);
+		const Object*& getFrom();
+		void setFrom(const Object* from);
+		const Object*& getTo();
+		void setTo(const Object* to);
 		uint32_t getType() const;
 		void setType(uint32_t type);
 

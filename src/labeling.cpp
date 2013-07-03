@@ -62,23 +62,23 @@ Image<int32_t>* Labeling::labeling(Image<int32_t>* label_image, Image<int32_t>* 
 		//label for appearing objects == 1
 		for (int32_t i = 0; i < num_pixels; i++ )
 		{
-			label = label_map.find((int)label_data[i])->second;
-			gc->setDataCost(i,1, int(2*mu*(label_dist(0-label))+fabs((double)image_data[i]-c)));
+			label = label_map.find(static_cast<int>(label_data[i]))->second;
+			gc->setDataCost(i,1, static_cast<int>(2*mu*(label_dist(0-label))+fabs((double)image_data[i]-c)));
 		}
 		for (int l = 2; l < num_labels; l++ )
 		{
 			for (int32_t i = 0; i < num_pixels; i++ )
 			{
-				label = label_map.find((int)label_data[i])->second;
-				gc->setDataCost(i,l, int(mu*(label_dist(l-label))+fabs((double)image_data[i]-c)));
+				label = label_map.find(static_cast<int>(label_data[i]))->second;
+				gc->setDataCost(i,l, static_cast<int>(mu*(label_dist(l-label))+fabs((double)image_data[i]-c)));
 			}
 		}
 		//background labeling == 0
 		c = c0*(pow(2,bit_depth)-1);
 		for (int32_t i = 0; i < num_pixels; i++ )
 		{
-			label = label_map.find((int)label_data[i])->second;
-			gc->setDataCost(i,0, int(mu*(label_dist(0-label)))+fabs((double)image_data[i]-c));
+			label = label_map.find(static_cast<int>(label_data[i]))->second;
+			gc->setDataCost(i,0, static_cast<int>(mu*(label_dist(0-label)))+fabs((double)image_data[i]-c));
 		}
 
 //		 //next set up smoothness costs individually
@@ -108,12 +108,12 @@ int elib::smoothFn(int p1, int p2, int l1, int l2, void *data)
 {
 	ForSmoothFn fsf = *((ForSmoothFn*) data);
 	if(l1==l2)
-		return 0;
+		return static_cast<int>(fsf.lambda*exp(-pow(fsf.image[p1]-fsf.image[p2],2)));
 	else
 		if((l1==1 && l2!=0) || (l1!=0 && l2==1))
 			return GC_INFINITY;
 		else
-			return int(fsf.lambda*(label_dist(l1-l2)) + exp(-pow(fsf.image[p1]-fsf.image[p2],2)));
+			return static_cast<int>((label_dist(l1-l2)) + fsf.lambda*exp(-pow(fsf.image[p1]-fsf.image[p2],2)));
 }
 
 inline int elib::label_dist(int value)
