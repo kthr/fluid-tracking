@@ -90,6 +90,12 @@ void Object::toXML(const xmlTextWriterPtr writer, bool compressed) const
 		rc = xmlTextWriterStartElement(writer, BAD_CAST "outline"); /* start centroid */
 		rc = xmlTextWriterEndElement(writer);
 	}
+	rc = xmlTextWriterStartElement(writer, BAD_CAST "links"); /* start links */
+	for(int i=0; i<links.size(); ++i)
+	{
+		links[i].toXML(writer);
+	}
+	rc = xmlTextWriterEndElement(writer); /* end links */
 }
 
 elib::Annotation* Object::addAnnotation()

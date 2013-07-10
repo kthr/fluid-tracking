@@ -10,7 +10,8 @@
 #include <libxml/encoding.h>
 #include <libxml/xmlwriter.h>
 #include <sstream>
-#include <time.h>
+
+#include "utils/utilities.hpp"
 
 #define ELIB_XML_ENCODING "ISO-8859-1"
 
@@ -56,11 +57,12 @@ void XMLExport::write(const char *uri)
 	 * start description
 	 *************************************/
 	rc = xmlTextWriterStartElement(writer, BAD_CAST "description");
-	xmlTextWriterWriteElement(writer, BAD_CAST "date", BAD_CAST getTime().c_str()); /* date */
+	xmlTextWriterWriteElement(writer, BAD_CAST "date", BAD_CAST Utilities::getTime().c_str()); /* date */
 	xmlTextWriterWriteElement(writer, BAD_CAST "number_of_tracks", BAD_CAST ""); /* number of tracks */
 	xmlTextWriterWriteElement(writer, BAD_CAST "total_number_of_objects", BAD_CAST ""); /* total number of objects */
 	params->toXML(writer); /* tracking parameters */
-	xmlTextWriterWriteElement(writer, BAD_CAST "details ", BAD_CAST ""); /* total number of objects */
+	xmlTextWriterWriteElement(writer, BAD_CAST "details ", BAD_CAST ""); /* details */
+	rc = xmlTextWriterEndElement(writer); /* end details */
 
 	data->toXML(writer);
 
@@ -82,15 +84,4 @@ void XMLExport::write(const char *uri)
 	xmlFreeTextWriter(writer);
 }
 
-std::string XMLExport::getTime()
-{
-	std::stringstream tmp;
-	time_t rawtime;
-	struct tm * ptm;
-
-	time(&rawtime);
-	ptm = localtime(&rawtime);
-	tmp << ptm->tm_year + 1900 << "-" << ptm->tm_mon +1 << "-" << ptm->tm_mday << " " << ptm->tm_hour << ":" << ptm->tm_min << ":" << ptm->tm_sec;
-	return tmp.str();
-}
 } /* namespace elib */

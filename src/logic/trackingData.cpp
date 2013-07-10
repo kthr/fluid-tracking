@@ -18,7 +18,6 @@ TrackingData::TrackingData()
 {
 	data = nullptr;
 }
-
 TrackingData::TrackingData(std::vector<MaskList2D> *frames, bool compressed)
 : data(frames), compressed(compressed)
 {
@@ -64,22 +63,26 @@ void TrackingData::construct()
 				object->setMask(mask->second);
 				++id;
 			}
+			std::cout << it->toString();
 			++frameId;
 		}
-		for (frameId = 0; frameId <= data->size() - 1; ++frameId)
+		for (frameId = 0; frameId < data->size()-1; ++frameId)
 		{
 			for (objectIt = frames[frameId].begin(); objectIt != frames[frameId].end(); ++objectIt)
 			{
 				trackId = objectIt->getTrackId();
-				if ((*data)[frameId+1].getMask(trackId) != nullptr)
+				if (((*data)[frameId+1]).getMask(trackId) != nullptr)
 				{
 					link = objectIt->addLink();
 					link->setType(Link::SUCCESSOR);
 					link->setFrom(&*objectIt);
 					link->setTo(frames[frameId+1].getObject(trackId));
 				}
+				else
+				{
+
+				}
 			}
-			++frameId;
 		}
 	}
 }

@@ -35,7 +35,7 @@ class TrackingData
 	private:
 		std::vector<MaskList2D> *data;
 		std::vector<Frame> frames;
-		std::set<uint32_t> tracks;
+		std::set<int32_t> tracks;
 		bool compressed;
 };
 

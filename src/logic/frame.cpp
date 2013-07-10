@@ -31,6 +31,7 @@ Object* Frame::addObject(uint32_t trackId)
 {
 	objects.push_back(Object());
 	track2objectId.insert(std::pair<uint32_t, uint32_t> (trackId, objects.size()-1));
+	objects.back().setTrackId(trackId);
 	return &objects.back();
 }
 std::vector<Object>::iterator Frame::end()

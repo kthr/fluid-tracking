@@ -17,6 +17,8 @@
 namespace elib
 {
 
+class Link;
+
 class Object
 {
 	public:

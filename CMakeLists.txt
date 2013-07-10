@@ -20,6 +20,7 @@ set(SOURCES
     lib/gco/LinkedBlockList.cpp
     src/utils/parameters.cpp
     src/utils/rle.cpp
+    src/utils/utilities.cpp
 )
 
 add_executable(fluidTracking
@@ -58,7 +59,7 @@ if(APPLE)
     set_target_properties(Labeling fluidTracking
         PROPERTIES
         #COMPILE_FLAGS "-g -pipe -Wall -I/opt/local/include"
-        LINK_FLAGS "-v -lstdc++ -lpthread  -L/opt/X11/lib -lX11 -L/opt/local/lib -lboost_regex-mt -lxml2"
+        LINK_FLAGS "-v -lstdc++ -lpthread  -L/opt/X11/lib -lX11 -L/opt/local/lib -lboost_program_options-mt -lboost_regex-mt -lboost_filesystem-mt -lboost_system-mt -lxml2"
      )
 endif()
 

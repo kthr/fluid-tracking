@@ -206,7 +206,7 @@ Image<int32_t>* FluidTracks::getInitial()
 	return &initial;
 }
 
-vector<MaskList2D>*& FluidTracks::getFrames()
+vector<MaskList2D>* FluidTracks::getFrames()
 {
 	return frames;
 }

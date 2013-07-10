@@ -22,7 +22,6 @@ class XMLExport
 		XMLExport(const Parameters *params, const TrackingData *data);
 		virtual ~XMLExport();
 
-		static std::string getTime();
 		void write(const char *uri);
 	private:
 		const Parameters *params;

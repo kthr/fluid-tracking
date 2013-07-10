@@ -7,6 +7,8 @@
 
 #include "link.hpp"
 
+#include <sstream>
+
 namespace elib
 {
 
@@ -48,6 +50,38 @@ uint32_t Link::getType() const
 
 void Link::toXML(const xmlTextWriterPtr writer) const
 {
+	int rc;
+	std::stringstream tmp;
+
+	rc = xmlTextWriterStartElement(writer, BAD_CAST "link"); /* start centroid */
+	switch(type)
+	{
+		case PREDECCESSOR:
+			tmp << "$PREDECCESSOR$";
+			break;
+		case SUCCESSOR:
+			tmp << "$SUCCESSOR$";
+			break;
+		case DIVISION:
+			tmp << "$DIVISION$";
+			break;
+	}
+	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "type", BAD_CAST tmp.str().c_str());
+	tmp.str("");
+	tmp << 1.;
+	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "probability", BAD_CAST tmp.str().c_str());
+	tmp.str("");
+	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "v", BAD_CAST "1");
+	rc = xmlTextWriterStartElement(writer, BAD_CAST "object"); /* start object */
+	tmp << to->getId();
+	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "objectID", BAD_CAST tmp.str().c_str());
+	tmp.str("");
+	tmp << to->getFrameId();
+	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "frameID", BAD_CAST tmp.str().c_str());
+	tmp.str("");
+	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "v", BAD_CAST "1");
+	rc = xmlTextWriterEndElement(writer); /* end object */
+	rc = xmlTextWriterEndElement(writer);
 }
 
 void Link::setType(uint32_t type)

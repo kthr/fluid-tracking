@@ -44,6 +44,7 @@
 									<listOptionValue builtIn="false" value="/usr/include/c++/4.2.1/tr1"/>
 									<listOptionValue builtIn="false" value="/usr/include/c++/4.2.1/backward"/>
 									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
+									<listOptionValue builtIn="false" value="/opt/local/include"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.2046680496" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>

@@ -63,7 +63,7 @@ class FluidTracks
 			initial_mask_image = initialMaskImage;
 		}
 		Image<int32_t>* getInitial();
-		vector<MaskList2D >*& getFrames();
+		vector<MaskList2D >* getFrames();
 		uint32_t getMaxObjectSize() const;
 		void setMaxObjectSize(uint32_t maxObjectSize = UINT32_MAX);
 

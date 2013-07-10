@@ -15,8 +15,10 @@
 #include <unordered_map>
 #include <vector>
 
+#include "circularLinkedList.hpp"
 #include "glm/glm.hpp"
 #include "image.hpp"
+#include "utils/vectorComparators.hpp"
 
 namespace elib{
 
@@ -229,6 +231,75 @@ class Mask
 				mask += *cit;
 			}
 			return mask;
+		}
+		void getOutline(std::vector<glm::ivec2> *outline, glm::ivec2 *centroid)
+		{
+			std::sort(points->begin(), points->end());
+			if(!points->empty())
+			{
+				outline = new std::vector<glm::ivec2>;
+				centroid = new glm::ivec2();
+				std::set<glm::ivec2, VectorComparators> set;
+				CircularLinkedList<glm::ivec2> neighbours;
+				glm::ivec2 b, c, b0, b1, tmp, c1, previous, current;
+
+				neighbours.addLast(glm::ivec2(-1, 0));
+				neighbours.addLast(glm::ivec2(-1, -1));
+				neighbours.addLast(glm::ivec2(0, -1));
+				neighbours.addLast(glm::ivec2(1, -1));
+				neighbours.addLast(glm::ivec2(1, 0));
+				neighbours.addLast(glm::ivec2(1, 1));
+				neighbours.addLast(glm::ivec2(0, 1));
+				neighbours.addLast(glm::ivec2(-1, 1));
+				neighbours.setActualElement(glm::ivec2(-1, 0));
+
+				b0 = points[0];
+				for (int i = 1; i < neighbours.size(); i++)
+				{
+					previous = neighbours.getActualElementData();
+					current = neighbours.getNext();
+					tmp = new Point(b0.x + current.x, b0.y + current.y);
+					if (set.insert(tmp)) //TODO build hashmap for points
+					{
+						b1 = tmp;
+						c1 = new Point(b0.x + previous.x, b0.y + previous.y);
+						outline->push_back(glm::ivec2(b0.x, b0.y));
+						outline->push_back(glm::ivec2(b1.x, b1.y));
+						break;
+					}
+				}
+				b = b1;
+				c = c1;
+				while (true)
+				{
+					neighbours.setActualElement(new Point(c.x - b.x, c.y - b.y));
+					for (int i = 1; i < 8; i++)
+					{
+						previous = neighbours.getActualElementData();
+						current = neighbours.getNext();
+						tmp = new Point(b.x + current.x, b.y + current.y);
+						if (set.insert(tmp).second) //TODO build hashmap for points
+						{
+							c = new Point(b.x + previous.x, b.y + previous.y);
+							b = tmp;
+							outline->push_back(glm::ivec2(b.x, b.y));
+							break;
+						}
+					}
+					if (b == b0)
+						break;
+				}
+				for(int i=0; i<outline->size(); ++i)
+				{
+					*centroid += (*outline)[i];
+				}
+				*centroid /= outline->size();
+			}
+			else
+			{
+				outline = nullptr;
+				centroid = nullptr;
+			}
 		}
 };
 

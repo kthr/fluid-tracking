@@ -7,10 +7,11 @@
 
 #include "fluidTracking.hpp"
 
-#include <dirent.h>
+#include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
+#include <boost/regex.hpp>
 #include <getopt.h>
 #include <iostream>
-#include <regex>
 #include <string>
 
 #include "alg/fluidTracks.hpp"
@@ -19,66 +20,23 @@
 #include "io/xmlExport.hpp"
 #include "logic/trackingData.hpp"
 #include "utils/parameters.hpp"
-
-//int main(int argc, char *argv[])
-//{
-//	using elib::ConnectedComponents;
-//	using elib::FluidTracks;
-//	using elib::Image;
-//	using elib::MaskList;
-//	using elib::Parameters;
-//	using elib::RLE;
-//	using elib::TrackingData;
-//	using elib::XMLExport;
-//
-//	std::string folder = "/Users/kthierbach/Documents/projects/eclipse/Labeling/tests/";
-//	int32_t int_params[1] = {0};
-//	double double_params[4] = {.6, .8, 1., 1.}; //c0, c1, lambda, mu
-//	std::vector<std::string> int_names({""});
-//	std::vector<std::string> double_names({"C0", "C1", "Lambda", "Mu"});
-//	std::vector<std::string> images({folder+"initial.png", folder+"smaller002.png", folder+"smaller003.png", folder+"smaller004.png", folder+"smaller005.png"});
-//
-//	Parameters params = Parameters(1, int_params, int_names, 4, double_params, double_names);
-//	FluidTracks ft = FluidTracks(&images, &params);
-//	ft.setMinObjectSize(30);
-//	ft.track();
-//	std::vector<elib::MaskList2D> *frames = ft.getFrames();
-//	std::stringstream name;
-//	for(int i = 0; i<frames->size(); ++i)
-//	{
-//		name << "/Users/kthierbach/" << i << ".png";
-//		Image<int32_t> image =(*frames)[i].masksToImage(ft.getInitial()->getRank(), ft.getInitial()->getDimensions());
-//		Image<int32_t>::saveImage(name.str(), &image);
-//		name.str("");
-//	}
-//	TrackingData td(ft.getFrames());
-//	td.construct();
-//	XMLExport xmle(&params, &td);
-//	xmle.write("/Users/kthierbach/test.xml");
-//
-//	std::unordered_map<int32_t, elib::Mask2D*>::iterator it;
-//	for(it=(*frames)[0].begin(); it!=(*frames)[0].end(); ++it)
-//	{
-//		std::string tmp = it->second->getBoxMask();
-//		std::cout << "Length:" << tmp.length() << std::endl;
-//		std::cout << tmp << std::endl;
-//		std::string encoded = RLE::encode(tmp);
-//		std::cout << "Length:" << encoded.length() << std::endl;
-//		std::cout << encoded << std::endl;
-//	}
-//}
-
-std::vector<std::string> getFiles(std::string directory, std::regex regex);
+#include "utils/utilities.hpp"
+#include "templates/image.hpp"
+#include "types.hpp"
 
 int main(int argc, char *argv[])
 {
 	cimg_library::cimg::exception_mode(0);
 
 	using elib::FluidTracks;
+	using elib::Image;
 	using elib::IOException;
 	using elib::Parameters;
 	using elib::TrackingData;
+	using elib::Utilities;
 	using elib::XMLExport;
+	namespace fs = boost::filesystem;
+	namespace po = boost::program_options;
 
 	int32_t min = 0,
 			max = INT32_MAX;
@@ -89,14 +47,48 @@ int main(int argc, char *argv[])
 	std::string initial = "",
 				image_folder,
 				vector_field_folder,
-				label_image_directory = "",
+				label_image_folder = "",
 				in;
-	int iao = false,
-		verbose = false;
+	int iao = 1,
+		verbose = 0;
 	int option, option_index;
 	std::vector<std::string> images,
 							 vector_fields;
 	bool without_flows = false;
+
+//	po::options_description desc("Allowed options");
+//	desc.add_options()
+//		("c0", po::value<double>(&c0)->default_value(.1), "mean background intensity (between 0. and 1.)")
+//		("c1", po::value<double>(&c1)->default_value(.9), "mean foreground intensity (between 0. and 1.)")
+//		("help,h", "produce help message")
+//		("i", po::value<std::string>(&initial)->default_value(""), "initial label image")
+//		("include-appearing-objects,o", po::value<bool>(&iao)->default_value(true), "include appearing objects")
+//		("lambda,l", po::value<double>(&lambda)->default_value(1.), "parameter lambda")
+//		("max", po::value<int>(&max)->default_value(INT32_MAX), "maximal object size in pixels")
+//		("min", po::value<int>(&min)->default_value(0), "minimal object size in pixels")
+//		("mu,m", po::value<double>(&mu)->default_value(1.), "parameter mu")
+//		("write-label-images,w", po::value<std::string>(&label_image_folder), "write label images to the given directory")
+//	;
+//	po::positional_options_description pd;
+//	pd.add("images", 1).add("vector_fields", 1);
+//
+//	po::variables_map vm;
+//	po::store(po::command_line_parser(argc, argv).options(desc).positional(pd).run(), vm);
+//	po::notify(vm);
+//
+//	if (vm.count("help")) {
+//		std::cout << desc << "\n";
+//		return EXIT_SUCCESS;
+//	}
+//
+//	if (vm.count("images")) //TODO print usage message if not found
+//	{
+//		image_folder = vm["images"].as<std::string>();
+//	}
+//	if (vm.count("vector_fields"))
+//	{
+//		vector_field_folder = vm["vector_fields"].as<std::string>();
+//	}
 
 	struct option long_options[] =
 	{
@@ -105,11 +97,10 @@ int main(int argc, char *argv[])
 		{ "c0", required_argument, NULL, '3' },
 		{ "c1", required_argument, NULL, '4' },
 		{ "write-label-images", required_argument, NULL, '5' },
-		{ "include-appearing-objects", no_argument, &iao, 0 },
+		{ "include-appearing-objects", no_argument, &iao, 1 },
 		{ "verbose", no_argument, &verbose, 1 },
 		{ 0, 0, 0, 0 }
 	};
-
 	while (1)
 	{
 		option = getopt_long(argc, argv, "hm:l:i:ow:", long_options, &option_index);
@@ -160,7 +151,7 @@ int main(int argc, char *argv[])
 					fprintf(stderr, "Missing argument for option -%c.\n", option);
 					return EXIT_FAILURE;
 				}
-				label_image_directory = std::string(optarg);
+				label_image_folder = std::string(optarg);
 				break;
 			case 'm': // mu
 				if (optarg == NULL)
@@ -195,7 +186,7 @@ int main(int argc, char *argv[])
 					fprintf(stderr, "Missing argument for option -%c.\n", option);
 					return EXIT_FAILURE;
 				}
-				label_image_directory = std::string(optarg);
+				label_image_folder = std::string(optarg);
 				break;
 			case 'h':
 #ifdef REVISION
@@ -239,18 +230,14 @@ int main(int argc, char *argv[])
 		image_folder = std::string(argv[optind++]);
 		vector_field_folder = std::string(argv[optind]);
 	}
-	images = getFiles(image_folder, std::regex("(.*\\.png$)|(.*\\.jpg$)|(.*\\.jpeg$)|(.*\\.tif$)|(.*\\.tiff$)|(.*\\.PNG$)|(.*\\.JPG$)|(.*\\.JPEG$)|(.*\\.TIF$)|(.*\\.TIFF$)"));
-	vector_fields = getFiles(image_folder, std::regex("(.*\\.dat$)"));
+
+	images = Utilities::getFiles(image_folder, boost::regex("(.*\\.png$)|(.*\\.jpg$)|(.*\\.jpeg$)|(.*\\.tif$)|(.*\\.tiff$)|(.*\\.PNG$)|(.*\\.JPG$)|(.*\\.JPEG$)|(.*\\.TIF$)|(.*\\.TIFF$)"));
+	vector_fields = Utilities::getFiles(image_folder, boost::regex("(.*\\.dat$)"));
 	if(images.size() == 0)
 	{
 		std::cerr << "ERROR: No images found!" << std::endl;
 		return EXIT_FAILURE;
 	}
-
-//	for(int i=0; i<images.size(); ++i)
-//	{
-//		std::cout << images[i] << std::endl;
-//	}
 
 	std::cout << "Found " << images.size() << " images." << std::endl;
 	if(without_flows)
@@ -262,11 +249,11 @@ int main(int argc, char *argv[])
 		std::cout << "Found " << vector_fields.size() << " vector fields." << std::endl;
 	}
 
-	if(label_image_directory.compare("") != 0)
+	if(label_image_folder.compare("") != 0)
 	{
-		if(getFiles(label_image_directory, std::regex(".*")).size() != 0)
+		if(fs::exists(label_image_folder) && fs::is_directory(label_image_folder) && !fs::is_empty(label_image_folder)) //TODO fix this is probably not working on other OS's
 		{
-			std::cout << "WARNING: Label directory '" << label_image_directory << "' is not empty, files may be overwritten! Continue anyway? (y/N)";
+			std::cout << "WARNING: Label directory '" << label_image_folder << "' is not empty, files may be overwritten! Continue anyway? (y/N)";
 			std::getline( std::cin, in);
 			if(in.compare("y") != 0)
 				return EXIT_FAILURE;
@@ -298,42 +285,24 @@ int main(int argc, char *argv[])
 	td.construct();
 
 	XMLExport xe(&params, &td);
-	std::string output_file = std::string("./") + XMLExport::getTime() + std::string("-data-frame.xml");
+	std::string output_file = std::string("./") + Utilities::getTime() + std::string("-data-frame.xml");
 	xe.write(output_file.c_str());
 
-	if(label_image_directory.compare("") != 0)
+	if(label_image_folder.compare("") != 0)
 	{
-		//write label files
+		std::vector<elib::MaskList2D>::iterator it;
+		std::string file_name;
+		Image<int32_t> image;
+		int i = 0;
+		for(it=ft.getFrames()->begin(); it!=ft.getFrames()->end(); ++it)
+		{
+			file_name = Utilities::createFileName(label_image_folder, std::string("label"), std::string(".png"), i);
+			std::cout << file_name << std::endl;
+			image = it->masksToImage(ft.getInitial()->getRank(), ft.getInitial()->getDimensions());
+			Image<int32_t>::saveImage(file_name, &image);
+			++i;
+		}
 	}
 
 	return EXIT_SUCCESS;
-}
-
-std::vector<std::string> getFiles(std::string directory, std::regex regex)
-{
-	DIR *dir = nullptr;
-	struct dirent *drnt = nullptr;
-	std::string file;
-	std::vector<std::string> files;
-
-	if(directory.compare("") != 0)
-	{
-		dir = opendir(directory.c_str());
-		if(dir != nullptr)
-		{
-			while((drnt = readdir(dir)) != nullptr)
-			{
-				file = std::string(drnt->d_name);
-				if(std::regex_match(file, regex))
-					files.push_back(directory + file);
-			}
-			closedir(dir);
-		}
-		else
-		{
-			std::cerr << "ERROR: Directory " << directory << " not found!" << std::endl;
-			abort();
-		}
-	}
-	return files;
 }

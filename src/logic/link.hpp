@@ -11,6 +11,8 @@
 #include <libxml/xmlwriter.h>
 #include <stdint.h>
 
+#include "object.hpp"
+
 namespace elib
 {
 
@@ -31,9 +33,7 @@ class Link
 		uint32_t getType() const;
 		void setType(uint32_t type);
 
-		const static uint32_t 	PREDECCESSOR = 0,
-								SUCCESSOR = 1,
-								DIVISION = 2;
+		enum TYPE {PREDECCESSOR = 0, SUCCESSOR = 1, DIVISION = 2};
 
 	private:
 		bool valid = true;
