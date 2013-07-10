@@ -8,17 +8,18 @@
 #ifndef MASK_HPP_
 #define MASK_HPP_
 
+#include <functional>
 #include <iostream>
 #include <set>
 #include <stdint.h>
 #include <stdlib.h>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "circularLinkedList.hpp"
 #include "glm/glm.hpp"
 #include "image.hpp"
-#include "utils/vectorComparators.hpp"
 
 namespace elib{
 
@@ -29,7 +30,6 @@ class Mask
 		Mask()
 		{
 			points = new std::vector<Point>();
-			outline = new std::vector<Point>();
 		}
 		Mask(const Mask& other)
 		{
@@ -40,11 +40,6 @@ class Mask
 			{
 				this->points->push_back(*it);
 			}
-			this->outline = new std::vector<Point>();
-			for(it=other.outline->begin(); it!=other.outline->end(); ++it)
-			{
-				this->outline->push_back(*it);
-			}
 		}
 		Mask(const Mask&& other) : Mask()
 		{
@@ -53,7 +48,6 @@ class Mask
 		virtual ~Mask()
 		{
 			delete points;
-			delete outline;
 		}
 		Mask& operator=(Mask other)
 		{
@@ -67,10 +61,6 @@ class Mask
 		std::vector<Point>* getMask()
 		{
 			return points;
-		}
-		std::vector<Point>* getOutline()
-		{
-			return NULL;
 		}
 		Image<int32_t> toImage(uint32_t rank, uint32_t *dimensions)
 		{
@@ -142,10 +132,13 @@ class Mask
 		{
 			return (int32_t)points->size();
 		}
+		void getOutline(std::vector<Point> *polygon, Point *centroid)
+		{
+			outline(polygon, centroid);
+		}
 	private:
-		std::vector<Point> *points;
-		std::vector<Point> *outline;
 		const static uint32_t bit_depth = 16;
+		std::vector<Point> *points;
 
 		friend void swap(Mask<Point>& first, Mask<Point>& second) // nothrow
 		{
@@ -154,16 +147,6 @@ class Mask
 			// by swapping the members of two classes,
 			// the two classes are effectively swapped
 			swap(first.points, second.points);
-			swap(first.outline, second.outline);
-		}
-
-		static bool less(glm::ivec2 p1, glm::ivec2 p2)
-		{
-			return (p1[1] < p2[1] && p1[0] < p2[0]);
-		}
-		static bool less(glm::ivec3 p1, glm::ivec3 p2)
-		{
-			return (p1[2] < p2[2] && p1[1] < p2[1] && p1[0] < p2[0]);
 		}
 		static inline int32_t getPixel(glm::ivec2 p, uint32_t *dimensions)
 		{
@@ -232,16 +215,16 @@ class Mask
 			}
 			return mask;
 		}
-		void getOutline(std::vector<glm::ivec2> *outline, glm::ivec2 *centroid)
+		void outline(std::vector<glm::ivec2> *outline, glm::ivec2 *centroid)
 		{
-			std::sort(points->begin(), points->end());
-			if(!points->empty())
+//			std::sort(points->begin(), points->end(), VectorSortComparator);
+			if (!points->empty())
 			{
 				outline = new std::vector<glm::ivec2>;
 				centroid = new glm::ivec2();
-				std::set<glm::ivec2, VectorComparators> set;
+				std::unordered_set<glm::ivec2, VectorHashFunctor, VectorEqualFunctor> set;
 				CircularLinkedList<glm::ivec2> neighbours;
-				glm::ivec2 b, c, b0, b1, tmp, c1, previous, current;
+				glm::ivec2 b, c, b0, b1, tmp, c1, *previous, *current;
 
 				neighbours.addLast(glm::ivec2(-1, 0));
 				neighbours.addLast(glm::ivec2(-1, -1));
@@ -253,16 +236,16 @@ class Mask
 				neighbours.addLast(glm::ivec2(-1, 1));
 				neighbours.setActualElement(glm::ivec2(-1, 0));
 
-				b0 = points[0];
+				b0 = (*points)[0];
 				for (int i = 1; i < neighbours.size(); i++)
 				{
 					previous = neighbours.getActualElementData();
 					current = neighbours.getNext();
-					tmp = new Point(b0.x + current.x, b0.y + current.y);
-					if (set.insert(tmp)) //TODO build hashmap for points
+					tmp = glm::ivec2(b0.x + current->x, b0.y + current->y);
+					if (set.find(tmp) != set.end())
 					{
 						b1 = tmp;
-						c1 = new Point(b0.x + previous.x, b0.y + previous.y);
+						c1 = glm::ivec2(b0.x + previous->x, b0.y + previous->y);
 						outline->push_back(glm::ivec2(b0.x, b0.y));
 						outline->push_back(glm::ivec2(b1.x, b1.y));
 						break;
@@ -272,15 +255,15 @@ class Mask
 				c = c1;
 				while (true)
 				{
-					neighbours.setActualElement(new Point(c.x - b.x, c.y - b.y));
+					neighbours.setActualElement(glm::ivec2(c.x - b.x, c.y - b.y));
 					for (int i = 1; i < 8; i++)
 					{
 						previous = neighbours.getActualElementData();
 						current = neighbours.getNext();
-						tmp = new Point(b.x + current.x, b.y + current.y);
-						if (set.insert(tmp).second) //TODO build hashmap for points
+						tmp = glm::ivec2(b.x + current->x, b.y + current->y);
+						if (set.find(tmp) != set.end())
 						{
-							c = new Point(b.x + previous.x, b.y + previous.y);
+							c = glm::ivec2(b.x + previous->x, b.y + previous->y);
 							b = tmp;
 							outline->push_back(glm::ivec2(b.x, b.y));
 							break;
@@ -289,7 +272,7 @@ class Mask
 					if (b == b0)
 						break;
 				}
-				for(int i=0; i<outline->size(); ++i)
+				for (int i = 0; i < outline->size(); ++i)
 				{
 					*centroid += (*outline)[i];
 				}
@@ -301,6 +284,20 @@ class Mask
 				centroid = nullptr;
 			}
 		}
+		struct VectorHashFunctor
+		{
+			size_t operator()(const glm::ivec2 &v) const
+			{
+				return std::hash<int>()(v.x) ^ std::hash<int>()(v.y);
+			}
+		};
+		struct VectorEqualFunctor
+		{
+			bool operator()(const glm::ivec2 &v1, const glm::ivec2 &v2) const
+			{
+				return (v1.x==v2.x && v1.y==v2.y);
+			}
+		};
 };
 
 } /* namespace elib */

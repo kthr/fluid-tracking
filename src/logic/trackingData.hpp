@@ -32,6 +32,8 @@ class TrackingData
 		void construct();
 		void toXML(const xmlTextWriterPtr writer) const;
 
+		const static int DEFAULT_VALIDITY = 0;
+
 	private:
 		std::vector<MaskList2D> *data;
 		std::vector<Frame> frames;

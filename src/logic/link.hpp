@@ -36,7 +36,6 @@ class Link
 		enum TYPE {PREDECCESSOR = 0, SUCCESSOR = 1, DIVISION = 2};
 
 	private:
-		bool valid = true;
 		uint32_t type;
 		const Object *from, *to;
 		double probability = 1.;

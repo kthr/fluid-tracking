@@ -7,6 +7,10 @@
 
 #include "object.hpp"
 
+#include <sstream>
+
+#include "trackingData.hpp"
+
 namespace elib
 {
 
@@ -58,26 +62,23 @@ void Object::setTrackId(uint32_t trackId)
 {
 	this->trackId = trackId;
 }
-bool Object::isValid() const
-{
-	return valid;
-}
-
-void Object::setValid(bool valid)
-{
-	this->valid = valid;
-}
 void Object::toXML(const xmlTextWriterPtr writer, bool compressed) const
 {
 	int rc;
 	std::stringstream tmp;
 
+	std::vector<glm::ivec2> *outline;
+	glm::ivec2 *centroid;
+	const_cast<Mask2D*>(mask)->getOutline(outline, centroid);
+
 	rc = xmlTextWriterStartElement(writer, BAD_CAST "centroid"); /* start centroid */
 	rc = xmlTextWriterStartElement(writer, BAD_CAST "p"); /* start point */
-	tmp << "";
+	tmp << centroid->x;
 	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "x", BAD_CAST tmp.str().c_str()); /*  x */
 	tmp << "";
+	tmp << centroid->y;
 	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "y", BAD_CAST tmp.str().c_str()); /*  y */
+	tmp.str("");
 	rc = xmlTextWriterEndElement(writer); /* end p */
 	rc = xmlTextWriterEndElement(writer); /* end centroid */
 	if(compressed)
@@ -88,8 +89,21 @@ void Object::toXML(const xmlTextWriterPtr writer, bool compressed) const
 	else
 	{
 		rc = xmlTextWriterStartElement(writer, BAD_CAST "outline"); /* start centroid */
+		for(int i=0; i<outline->size();++i)
+		{
+			rc = xmlTextWriterStartElement(writer, BAD_CAST "p"); /* start point */
+			tmp << (*outline)[i].x;
+			rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "x", BAD_CAST tmp.str().c_str()); /*  x */
+			tmp << "";
+			tmp << (*outline)[i].y;
+			rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "y", BAD_CAST tmp.str().c_str()); /*  y */
+			tmp.str("");
+		}
 		rc = xmlTextWriterEndElement(writer);
 	}
+	delete outline;
+	delete centroid;
+
 	rc = xmlTextWriterStartElement(writer, BAD_CAST "links"); /* start links */
 	for(int i=0; i<links.size(); ++i)
 	{

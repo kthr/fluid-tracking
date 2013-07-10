@@ -31,11 +31,8 @@ class Frame
 		uint32_t getNumObjects() const;
 		const std::vector<Object>& getObjects() const;
 		void setObjects(const std::vector<Object>& objects);
-		bool isValid() const;
-		void setValid(bool valid = true);
 
 	private:
-		bool valid = true;
 		std::vector<Object> objects;
 		std::unordered_map<uint32_t, uint32_t> track2objectId;
 };

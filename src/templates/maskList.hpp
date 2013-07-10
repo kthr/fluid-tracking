@@ -164,7 +164,7 @@ class MaskList
 		{
 			return masks->size();
 		}
-		string toString()
+		std::string toString()
 		{
 			std::stringstream ss;
 			typename std::set<Label>::iterator it;

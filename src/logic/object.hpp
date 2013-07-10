@@ -37,11 +37,8 @@ class Object
 		void setMask(const Mask2D* mask);
 		uint32_t getTrackId() const;
 		void setTrackId(uint32_t trackId);
-		bool isValid() const;
-		void setValid(bool valid = true);
 
 	private:
-		bool valid = true;
 		uint32_t id, frameId, trackId;
 		const Mask2D *mask;
 		std::vector<Link> links;

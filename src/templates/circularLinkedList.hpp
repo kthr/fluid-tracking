@@ -17,7 +17,9 @@ template <class T>
 class CircularLinkedList
 {
 	public:
-		CircularLinkedList();
+		CircularLinkedList()
+		{
+		}
 		virtual ~CircularLinkedList()
 		{
 			ListNode<T> *next;
@@ -73,7 +75,7 @@ class CircularLinkedList
 				numberOfElements++;
 			}
 		}
-		T getActualElementData()
+		T* getActualElementData()
 		{
 			if (!isEmpty())
 			{
@@ -85,7 +87,7 @@ class CircularLinkedList
 			}
 			return nullptr;
 		}
-		T getNext()
+		T* getNext()
 		{
 			if (isEmpty())
 				return nullptr;
@@ -99,7 +101,7 @@ class CircularLinkedList
 		bool setActualElement(T data)
 		{
 			int tmpIndex = index;
-			if (data == actualElement->data)
+			if (data == *(actualElement->data))
 				return true;
 			index = (index + 1) % numberOfElements;
 			if (index == 0)
@@ -108,7 +110,7 @@ class CircularLinkedList
 				actualElement = actualElement->next;
 			while ((index != tmpIndex))
 			{
-				if (data == actualElement->data)
+				if (data == *(actualElement->data))
 					return true;
 				index = (index + 1) % numberOfElements;
 				if (index == 0)

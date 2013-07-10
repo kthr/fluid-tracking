@@ -9,6 +9,8 @@
 
 #include <sstream>
 
+#include "trackingData.hpp"
+
 namespace elib
 {
 
@@ -71,7 +73,9 @@ void Link::toXML(const xmlTextWriterPtr writer) const
 	tmp << 1.;
 	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "probability", BAD_CAST tmp.str().c_str());
 	tmp.str("");
-	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "v", BAD_CAST "1");
+	tmp << TrackingData::DEFAULT_VALIDITY;
+	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "v", BAD_CAST tmp.str().c_str());
+	tmp.str("");
 	rc = xmlTextWriterStartElement(writer, BAD_CAST "object"); /* start object */
 	tmp << to->getId();
 	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "objectID", BAD_CAST tmp.str().c_str());
@@ -79,7 +83,8 @@ void Link::toXML(const xmlTextWriterPtr writer) const
 	tmp << to->getFrameId();
 	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "frameID", BAD_CAST tmp.str().c_str());
 	tmp.str("");
-	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "v", BAD_CAST "1");
+	tmp << TrackingData::DEFAULT_VALIDITY;
+	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "v", BAD_CAST tmp.str().c_str());
 	rc = xmlTextWriterEndElement(writer); /* end object */
 	rc = xmlTextWriterEndElement(writer);
 }

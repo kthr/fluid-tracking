@@ -9,6 +9,8 @@
 
 #include <sstream>
 
+#include "trackingData.hpp"
+
 namespace elib
 {
 
@@ -49,7 +51,7 @@ void Frame::toXML(const xmlTextWriterPtr writer, bool compressed) const
 		tmp << i;
 		rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "id", BAD_CAST tmp.str().c_str()); /*  frame id */
 		tmp.str("");
-		tmp << objects[i].isValid();
+		tmp << TrackingData::DEFAULT_VALIDITY;
 		rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "v", BAD_CAST tmp.str().c_str()); /*  frame id */
 		tmp.str("");
 		objects[i].toXML(writer, compressed);
@@ -78,15 +80,4 @@ void Frame::setObjects(const std::vector<Object>& objects)
 {
 	this->objects = objects;
 }
-
-bool Frame::isValid() const
-{
-	return valid;
-}
-
-void Frame::setValid(bool valid)
-{
-	this->valid = valid;
-}
-
 } /* namespace elib */

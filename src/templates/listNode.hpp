@@ -16,14 +16,17 @@ class ListNode
 {
 
 	public:
-		ListNode(T data, ListNode<T> *head) :
-				head(head), data(data)
+		ListNode(T& data, ListNode<T> *head)
+		:head(head), data(new T(data))
 		{
 		}
-	private:
+		~ListNode()
+		{
+			delete data;
+		}
 		ListNode<T> *head = nullptr,
 					*next = nullptr;
-		T data;
+		T* data;
 
 };
 

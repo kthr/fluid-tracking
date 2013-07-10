@@ -20,10 +20,6 @@
 
 namespace elib{
 
-using cimg_library::CImg;
-using cimg_library::CImgException;
-using std::string;
-
 template <typename type>
 class Image
 {
@@ -68,7 +64,7 @@ class Image
 			data = new type[flattened_length];
 			std::copy(image->data, image->data+flattened_length, data);
 		}
-		explicit Image(CImg<type> *image)
+		explicit Image(cimg_library::CImg<type> *image)
 		{
 			if(image->depth() == 1)
 			{
@@ -88,7 +84,7 @@ class Image
 			channels = 1;
 			if(image->spectrum()>1)
 			{
-				CImg<type> tmp = image->get_channel(0);
+				cimg_library::CImg<type> tmp = image->get_channel(0);
 				flattened_length = tmp.size();
 				data = new type[flattened_length];
 				std::copy(tmp.data(), tmp.data() + tmp.size(), data);
@@ -183,21 +179,21 @@ class Image
 
 			return new_image;
 		}
-		static Image<type> openImage(string file_name)
+		static Image<type> openImage(std::string file_name)
 		{
 			try
 			{
-				CImg<type> img(file_name.c_str());
+				cimg_library::CImg<type> img(file_name.c_str());
 				return Image<type>(&img);
 			}
-			catch(CImgException &e)
+			catch(cimg_library::CImgException &e)
 			{
 				std::string message = std::string("ERROR: Failed to open image at: ") + file_name;
 				throw IOException(message);
 				return Image<type>();
 			}
 		}
-		static void saveImage(string file_name, Image<type> *image)
+		static void saveImage(std::string file_name, Image<type> *image)
 		{
 			try
 			{
@@ -208,7 +204,7 @@ class Image
 					width = image->getDimensions()[0];
 					height = image->getDimensions()[1];
 					spectrum = image->getChannels();
-					CImg<type> img(width, height, 1, spectrum);
+					cimg_library::CImg<type> img(width, height, 1, spectrum);
 					std::copy(image->getData(), image->getData()+image->getFlattenedLength(), img.data());
 					img.save(file_name.c_str());
 				}
@@ -216,7 +212,7 @@ class Image
 				{
 				}
 			}
-			catch(CImgException &e)
+			catch(cimg_library::CImgException &e)
 			{
 				std::string message = std::string("ERROR: Failed to save image at: ") + file_name;
 				throw IOException(message);

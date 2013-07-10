@@ -17,6 +17,10 @@
 namespace elib
 {
 
+using std::vector;
+using std::unordered_map;
+using std::string;
+
 FluidTracks::FluidTracks()
 {
 	divisions = new vector<glm::ivec2>;

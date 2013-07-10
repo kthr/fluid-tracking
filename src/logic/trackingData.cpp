@@ -104,7 +104,7 @@ void TrackingData::toXML(const xmlTextWriterPtr writer) const
 		tmp << frames[i].getNumObjects();
 		rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "number_of_objects", BAD_CAST tmp.str().c_str()); /*  number of objects */
 		tmp.str("");
-		tmp << frames[i].isValid();
+		tmp << DEFAULT_VALIDITY;
 		rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "v", BAD_CAST tmp.str().c_str()); /*  number of objects */
 		tmp.str("");
 		frames[i].toXML(writer, compressed);

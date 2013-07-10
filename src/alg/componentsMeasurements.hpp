@@ -12,7 +12,6 @@
 #include <stdint.h>
 
 #include "types.hpp"
-#include "utils/vectorComparators.hpp"
 
 namespace elib {
 
