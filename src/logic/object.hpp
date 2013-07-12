@@ -43,6 +43,8 @@ class Object
 		const Mask2D *mask;
 		std::vector<Link> links;
 		std::vector<Annotation> annotations;
+
+		void writePoint(const xmlTextWriterPtr writer, const glm::ivec2 &point) const;
 };
 
 } /* namespace elib */

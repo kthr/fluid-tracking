@@ -167,6 +167,7 @@ void FluidTracks::track()
 		id_counter = *(--masks.getLabels()->end())+1;
 		for(int i=1; i<images->size(); ++i)
 		{
+			std::cout << i << std::endl;
 			params->setIntParam(0, masks.getSize()+2);
 			if(flows->size() != 0)
 			{

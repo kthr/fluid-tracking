@@ -11,6 +11,7 @@
 #include <libxml/xmlwriter.h>
 #include <sstream>
 
+#include "fluidTracking.hpp"
 #include "utils/utilities.hpp"
 
 #define ELIB_XML_ENCODING "ISO-8859-1"
@@ -58,9 +59,22 @@ void XMLExport::write(const char *uri)
 	 *************************************/
 	rc = xmlTextWriterStartElement(writer, BAD_CAST "description");
 	xmlTextWriterWriteElement(writer, BAD_CAST "date", BAD_CAST Utilities::getTime().c_str()); /* date */
-	xmlTextWriterWriteElement(writer, BAD_CAST "number_of_tracks", BAD_CAST ""); /* number of tracks */
+	tmp << data->getNumTracks();
+	xmlTextWriterWriteElement(writer, BAD_CAST "number_of_tracks", BAD_CAST tmp.str().c_str()); /* number of tracks */
+	tmp.str("");
 	xmlTextWriterWriteElement(writer, BAD_CAST "total_number_of_objects", BAD_CAST ""); /* total number of objects */
+	xmlTextWriterStartElement(writer, BAD_CAST "tracking_info"); /* start tracking info */
+	tmp << REVISION;
+	xmlTextWriterWriteElement(writer, BAD_CAST "revision", BAD_CAST tmp.str().c_str()); /* number of tracks */
+	tmp.str("");
+	tmp << data->getImagePath();
+	xmlTextWriterWriteElement(writer, BAD_CAST "image-path", BAD_CAST tmp.str().c_str()); /* number of tracks */
+	tmp.str("");
+	tmp << data->getFlowPath();
+	xmlTextWriterWriteElement(writer, BAD_CAST "flow-path", BAD_CAST tmp.str().c_str()); /* number of tracks */
+	tmp.str("");
 	params->toXML(writer); /* tracking parameters */
+	rc = xmlTextWriterEndElement(writer); /* end tracking info */
 	xmlTextWriterWriteElement(writer, BAD_CAST "details ", BAD_CAST ""); /* details */
 	rc = xmlTextWriterEndElement(writer); /* end details */
 

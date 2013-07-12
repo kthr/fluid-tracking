@@ -27,24 +27,34 @@ RLE::~RLE()
 }
 
 
-std::string RLE::encode( const std::string & to_encode )
+std::string RLE::binary_encode( const std::string & to_encode )
 {
-   std::string::size_type found = 0 , nextfound = 0 ;
-   std::ostringstream oss ;
-   nextfound = to_encode.find_first_not_of( to_encode[ found ] , found ) ;
-   while ( nextfound != std::string::npos ) {
-      oss << nextfound - found ;
-      oss << to_encode[ found ] ;
-      found = nextfound ;
-      nextfound = to_encode.find_first_not_of( to_encode[ found ] , found ) ;
-   }
-   //since we must not discard the last characters we add them at the end of the string
-   std::string rest ( to_encode.substr( found ) ) ;//last run of characters starts at position found
-   oss << rest.length( ) << to_encode[ found ] ;
-   return oss.str( ) ;
+	char current, code;
+	int count;
+	std::string::const_iterator it;
+	std::stringstream encoded;
+
+	it = to_encode.begin();
+	while(it!=to_encode.end())
+	{
+		current = *it;
+		count = 1;
+		++it;
+		while(it!=to_encode.end() && current == *it)
+		{
+			++count;
+			++it;
+		}
+		if(current == '0')
+			code = 'B';
+		else
+			code = 'W';
+		encoded << count << code;
+	}
+	return encoded.str();
 }
 
-std::string RLE::decode ( const std::string & to_decode )
+std::string RLE::binary_decode( const std::string & to_decode )
 {
    boost::regex e ( "(\\d+)(\\w)" ) ;
    boost::match_results<std::string::const_iterator> matches ;

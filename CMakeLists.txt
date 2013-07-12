@@ -47,19 +47,33 @@ else(
 )
 endif()
 
+if(WIN32)
+        # Execute Win32 Specific commands - none yet.
+else(WIN32)
+    # Execute commands for other platforms
+    message("Create command")
+    add_custom_command(
+        OUTPUT revision
+        COMMAND ${CMAKE_SOURCE_DIR}/version.sh
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Creates/updates git Revision Header"
+    )
+endif(WIN32)
+message(${CMAKE_SOURCE_DIR}/version.sh)
+add_custom_target(version ALL DEPENDS revision)
+
 set(CMAKE_CXX_FLAGS
-    "-g -pipe -Wall -I/opt/local/include -std=c++11 -stdlib=libc++"
+    "-g -pipe -Wall -I/Users/kthierbach/dev/boost-c++11/include -I/opt/local/include -std=c++11 -stdlib=libc++"
 )
 set(CMAKE_C_FLAGS
-    "-g -pipe -Wall -I/opt/local/include"
+    "-g -pipe -Wall -I/Users/kthierbach/dev/boost-c++11/include"
 )
 
 if(APPLE)
     message("\nEntering configuration for APPLE computers:\n")
     set_target_properties(Labeling fluidTracking
         PROPERTIES
-        #COMPILE_FLAGS "-g -pipe -Wall -I/opt/local/include"
-        LINK_FLAGS "-v -lstdc++ -lpthread  -L/opt/X11/lib -lX11 -L/opt/local/lib -lboost_program_options-mt -lboost_regex-mt -lboost_filesystem-mt -lboost_system-mt -lxml2"
+        LINK_FLAGS "-v -lstdc++ -lpthread  -L/opt/X11/lib -lX11 -L/Users/kthierbach/dev/boost-c++11/lib -lboost_program_options -lboost_regex -lboost_filesystem -lboost_system -lxml2"
      )
 endif()
 

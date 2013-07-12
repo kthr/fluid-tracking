@@ -132,7 +132,7 @@ class Mask
 		{
 			return (int32_t)points->size();
 		}
-		void getOutline(std::vector<Point> *polygon, Point *centroid)
+		void getOutline(std::vector<Point> &polygon, Point &centroid)
 		{
 			outline(polygon, centroid);
 		}
@@ -215,16 +215,23 @@ class Mask
 			}
 			return mask;
 		}
-		void outline(std::vector<glm::ivec2> *outline, glm::ivec2 *centroid)
+		void outline(std::vector<glm::ivec2> &outline, glm::ivec2 &centroid)
 		{
 //			std::sort(points->begin(), points->end(), VectorSortComparator);
 			if (!points->empty())
 			{
-				outline = new std::vector<glm::ivec2>;
-				centroid = new glm::ivec2();
+				if(points->size() == 1)
+				{
+					//prevents function from infinite loop when the mask only contains one pixel
+					centroid += points->front();
+					outline.push_back(points->front());
+					return;
+				}
 				std::unordered_set<glm::ivec2, VectorHashFunctor, VectorEqualFunctor> set;
 				CircularLinkedList<glm::ivec2> neighbours;
 				glm::ivec2 b, c, b0, b1, tmp, c1, *previous, *current;
+
+				set.insert(points->begin(), points->end());
 
 				neighbours.addLast(glm::ivec2(-1, 0));
 				neighbours.addLast(glm::ivec2(-1, -1));
@@ -246,8 +253,8 @@ class Mask
 					{
 						b1 = tmp;
 						c1 = glm::ivec2(b0.x + previous->x, b0.y + previous->y);
-						outline->push_back(glm::ivec2(b0.x, b0.y));
-						outline->push_back(glm::ivec2(b1.x, b1.y));
+						outline.push_back(glm::ivec2(b0.x, b0.y));
+						outline.push_back(glm::ivec2(b1.x, b1.y));
 						break;
 					}
 				}
@@ -265,23 +272,18 @@ class Mask
 						{
 							c = glm::ivec2(b.x + previous->x, b.y + previous->y);
 							b = tmp;
-							outline->push_back(glm::ivec2(b.x, b.y));
+							outline.push_back(glm::ivec2(b.x, b.y));
 							break;
 						}
 					}
 					if (b == b0)
 						break;
 				}
-				for (int i = 0; i < outline->size(); ++i)
+				for (int i = 0; i < outline.size(); ++i)
 				{
-					*centroid += (*outline)[i];
+					centroid += outline[i];
 				}
-				*centroid /= outline->size();
-			}
-			else
-			{
-				outline = nullptr;
-				centroid = nullptr;
+				centroid /= outline.size();
 			}
 		}
 		struct VectorHashFunctor

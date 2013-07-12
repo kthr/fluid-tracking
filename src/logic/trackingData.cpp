@@ -7,6 +7,7 @@
 
 #include "trackingData.hpp"
 
+#include <boost/filesystem.hpp>
 #include <sstream>
 
 #include "object.hpp"
@@ -18,8 +19,8 @@ TrackingData::TrackingData()
 {
 	data = nullptr;
 }
-TrackingData::TrackingData(std::vector<MaskList2D> *frames, bool compressed)
-: data(frames), compressed(compressed)
+TrackingData::TrackingData(elib::FluidTracks *ft, bool compressed)
+: ft(ft), data(ft->getFrames()), compressed(compressed)
 {
 }
 TrackingData::~TrackingData()
@@ -44,6 +45,15 @@ void TrackingData::construct()
 {
 	if (data != nullptr)
 	{
+		namespace fs = boost::filesystem;
+		if(ft->getImages()->size() !=0)
+		{
+			image_path = fs::canonical(fs::complete(fs::path((*(ft->getImages()))[0]).remove_filename())).string();
+		}
+		if(ft->getFlows()->size() !=0)
+		{
+			flow_path = fs::canonical(fs::complete(fs::path((*(ft->getFlows()))[0]).remove_filename())).string();
+		}
 		Object *object;
 		Link *link;
 		uint32_t id = 0, frameId = 0, trackId = 0;
@@ -53,6 +63,7 @@ void TrackingData::construct()
 
 		for (it = data->begin(); it != data->end(); ++it)
 		{
+			id=0;
 			Frame *frame = addFrame();
 			for (mask = it->begin(); mask != it->end(); ++mask)
 			{
@@ -63,7 +74,6 @@ void TrackingData::construct()
 				object->setMask(mask->second);
 				++id;
 			}
-			std::cout << it->toString();
 			++frameId;
 		}
 		for (frameId = 0; frameId < data->size()-1; ++frameId)

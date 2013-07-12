@@ -12,7 +12,7 @@ if [ $LOCALVER \> 1 ] ; then
     fi
 	VER=`echo ${VER} | sed 's/\ //'`
 	echo "Revision=${VER}"
-    echo "Creating fluidReg.hpp."
+    echo "Creating fluidTracking.hpp."
     OUT="#ifndef FLUIDTRACKING_HPP_\n #define FLUIDTRACKING_HPP_ \n\n #define REVISION \"${VER}\" \n\n #endif" 
     echo -e $OUT > ./src/fluidTracking.hpp
 fi

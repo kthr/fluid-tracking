@@ -14,6 +14,7 @@
 #include <types.hpp>
 #include <vector>
 
+#include "alg/fluidTracks.hpp"
 #include "frame.hpp"
 
 namespace elib
@@ -23,7 +24,7 @@ class TrackingData
 {
 	public:
 		TrackingData();
-		TrackingData(std::vector<MaskList2D> *frames, bool compressed=true);
+		TrackingData(elib::FluidTracks *frames, bool compressed=true);
 		virtual ~TrackingData();
 
 		Frame* addFrame();
@@ -32,13 +33,26 @@ class TrackingData
 		void construct();
 		void toXML(const xmlTextWriterPtr writer) const;
 
+		const std::string& getFlowPath() const
+		{
+			return flow_path;
+		}
+
+		const std::string& getImagePath() const
+		{
+			return image_path;
+		}
+
 		const static int DEFAULT_VALIDITY = 0;
 
 	private:
+		elib::FluidTracks *ft;
 		std::vector<MaskList2D> *data;
 		std::vector<Frame> frames;
 		std::set<int32_t> tracks;
 		bool compressed;
+		std::string image_path = "",
+					flow_path = "";
 };
 
 } /* namespace elib */

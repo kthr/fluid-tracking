@@ -33,7 +33,7 @@ std::string Utilities::createFileName(std::string folder, std::string file_name,
 	boost::filesystem::path dir(folder);
 	name << file_name << std::setw(length) << std::setfill('0') << index << extension;
 	dir /= name.str();
-	return name.str();
+	return dir.string();
 
 }
 std::vector<std::string> Utilities::getFiles(std::string directory, boost::regex regex)
@@ -52,7 +52,9 @@ std::vector<std::string> Utilities::getFiles(std::string directory, boost::regex
 			{
 				file = std::string(drnt->d_name);
 				if(boost::regex_match(file, regex))
-					files.push_back(directory + file);
+				{
+					files.push_back((boost::filesystem::path(directory) / file).string());
+				}
 			}
 			closedir(dir);
 		}

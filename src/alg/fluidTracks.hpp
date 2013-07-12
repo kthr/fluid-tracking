@@ -58,6 +58,16 @@ class FluidTracks
 		uint32_t getMaxObjectSize() const;
 		void setMaxObjectSize(uint32_t maxObjectSize = UINT32_MAX);
 
+		std::vector<std::string>* getFlows() const
+		{
+			return flows;
+		}
+
+		std::vector<std::string>* getImages() const
+		{
+			return images;
+		}
+
 	private:
 		bool include_appearing = true;
 		Image<int32_t> initial;

@@ -84,7 +84,7 @@ void Parameters::toXML(const xmlTextWriterPtr writer) const
 {
 	int rc;
 
-	rc = xmlTextWriterStartElement(writer, BAD_CAST "tracking_parameters"); /* start tracking parameters */
+	rc = xmlTextWriterStartElement(writer, BAD_CAST "parameters"); /* start tracking parameters */
 	writeParameters(writer, int_params_size, int_names, int_params);
 	writeParameters(writer, double_params_size, double_names, double_params);
 	rc = xmlTextWriterEndElement(writer); /* end tracking parameters */

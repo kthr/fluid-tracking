@@ -18,8 +18,8 @@ class RLE
 	public:
 		RLE();
 		virtual ~RLE();
-		static std::string encode( const std::string & to_encode );
-		static std::string decode ( const std::string & to_decode );
+		static std::string binary_encode( const std::string & to_encode );
+		static std::string binary_decode( const std::string & to_decode );
 };
 
 } /* namespace elib */

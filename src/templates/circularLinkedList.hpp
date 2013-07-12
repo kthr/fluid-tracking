@@ -23,6 +23,7 @@ class CircularLinkedList
 		virtual ~CircularLinkedList()
 		{
 			ListNode<T> *next;
+			actualElement = head;
 			while(!isEmpty())
 			{
 				next = actualElement->next;
@@ -39,23 +40,6 @@ class CircularLinkedList
 		int size()
 		{
 			return numberOfElements;
-		}
-		void addFirst(T data)
-		{
-			if (isEmpty())
-			{
-				ListNode<T> *listNode = new ListNode<T>(data, head);
-				head = listNode;
-				tail = listNode;
-				numberOfElements++;
-				actualElement = head;
-			}
-			else
-			{
-				ListNode<T> *listNode = new ListNode<T>(data, head);
-				head = listNode;
-				numberOfElements++;
-			}
 		}
 		void addLast(T data)
 		{

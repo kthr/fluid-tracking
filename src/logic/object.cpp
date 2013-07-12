@@ -10,6 +10,7 @@
 #include <sstream>
 
 #include "trackingData.hpp"
+#include "utils/rle.hpp"
 
 namespace elib
 {
@@ -67,42 +68,35 @@ void Object::toXML(const xmlTextWriterPtr writer, bool compressed) const
 	int rc;
 	std::stringstream tmp;
 
-	std::vector<glm::ivec2> *outline;
-	glm::ivec2 *centroid;
+	std::vector<glm::ivec2> outline;
+	glm::ivec2 centroid(0,0);
 	const_cast<Mask2D*>(mask)->getOutline(outline, centroid);
 
 	rc = xmlTextWriterStartElement(writer, BAD_CAST "centroid"); /* start centroid */
-	rc = xmlTextWriterStartElement(writer, BAD_CAST "p"); /* start point */
-	tmp << centroid->x;
-	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "x", BAD_CAST tmp.str().c_str()); /*  x */
-	tmp << "";
-	tmp << centroid->y;
-	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "y", BAD_CAST tmp.str().c_str()); /*  y */
-	tmp.str("");
-	rc = xmlTextWriterEndElement(writer); /* end p */
+	writePoint(writer, centroid);
 	rc = xmlTextWriterEndElement(writer); /* end centroid */
 	if(compressed)
 	{
-		rc = xmlTextWriterStartElement(writer, BAD_CAST "mask"); /* start centroid */
-		rc = xmlTextWriterEndElement(writer);
+		rc = xmlTextWriterStartElement(writer, BAD_CAST "mask"); /* start mask */
+		rc = xmlTextWriterStartElement(writer, BAD_CAST "bbox"); /* start bbox */
+		std::vector<glm::ivec2> bbox = const_cast<Mask2D*>(mask)->getBoundingBox();
+		for(int i=0; i<bbox.size(); ++i)
+		{
+			writePoint(writer, bbox[i]);
+		}
+		rc = xmlTextWriterEndElement(writer); /* end mask */
+		rc = xmlTextWriterWriteElement(writer, BAD_CAST "d", BAD_CAST RLE::binary_encode(const_cast<Mask2D*>(mask)->getBoxMask()).c_str()); /* start centroid */
+		rc = xmlTextWriterEndElement(writer); /* end mask */
 	}
 	else
 	{
-		rc = xmlTextWriterStartElement(writer, BAD_CAST "outline"); /* start centroid */
-		for(int i=0; i<outline->size();++i)
+		rc = xmlTextWriterStartElement(writer, BAD_CAST "outline"); /* start outline */
+		for(int i=0; i<outline.size();++i)
 		{
-			rc = xmlTextWriterStartElement(writer, BAD_CAST "p"); /* start point */
-			tmp << (*outline)[i].x;
-			rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "x", BAD_CAST tmp.str().c_str()); /*  x */
-			tmp << "";
-			tmp << (*outline)[i].y;
-			rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "y", BAD_CAST tmp.str().c_str()); /*  y */
-			tmp.str("");
+			writePoint(writer, outline[i]);
 		}
-		rc = xmlTextWriterEndElement(writer);
+		rc = xmlTextWriterEndElement(writer); /* end outline */
 	}
-	delete outline;
-	delete centroid;
 
 	rc = xmlTextWriterStartElement(writer, BAD_CAST "links"); /* start links */
 	for(int i=0; i<links.size(); ++i)
@@ -124,5 +118,18 @@ elib::Link* Object::addLink()
 	return &(links.back());
 }
 
+void Object::writePoint(const xmlTextWriterPtr writer, const glm::ivec2 &point) const
+{
+	int rc;
+	std::stringstream tmp;
+
+	rc = xmlTextWriterStartElement(writer, BAD_CAST "p"); /* start point */
+	tmp << point.x;
+	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "x", BAD_CAST tmp.str().c_str()); /*  x */
+	tmp.str("");
+	tmp << point.y;
+	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "y", BAD_CAST tmp.str().c_str()); /*  y */
+	rc = xmlTextWriterEndElement(writer); /* end point */
+}
 } /* namespace elib */
 

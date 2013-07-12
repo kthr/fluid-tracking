@@ -23,6 +23,9 @@
 							<builder buildPath="${workspace_loc:/Labeling}/Debug" id="cdt.managedbuild.target.gnu.builder.macosx.exe.debug.1343695408" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.macosx.exe.debug"/>
 							<tool id="cdt.managedbuild.tool.macosx.c.linker.macosx.exe.debug.1446631974" name="MacOS X C Linker" superClass="cdt.managedbuild.tool.macosx.c.linker.macosx.exe.debug"/>
 							<tool id="cdt.managedbuild.tool.macosx.cpp.linker.macosx.exe.debug.673500524" name="MacOS X C++ Linker" superClass="cdt.managedbuild.tool.macosx.cpp.linker.macosx.exe.debug">
+								<option id="macosx.cpp.link.option.paths.108582213" name="Library search path (-L)" superClass="macosx.cpp.link.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="/Users/kthierbach/dev/boost-c++11/lib"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.macosx.cpp.linker.input.1225739060" superClass="cdt.managedbuild.tool.macosx.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -44,7 +47,7 @@
 									<listOptionValue builtIn="false" value="/usr/include/c++/4.2.1/tr1"/>
 									<listOptionValue builtIn="false" value="/usr/include/c++/4.2.1/backward"/>
 									<listOptionValue builtIn="false" value="/usr/include/libxml2"/>
-									<listOptionValue builtIn="false" value="/opt/local/include"/>
+									<listOptionValue builtIn="false" value="/Users/kthierbach/dev/boost-c++11/include"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.2046680496" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
