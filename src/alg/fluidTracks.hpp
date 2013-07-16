@@ -57,15 +57,23 @@ class FluidTracks
 		std::vector<MaskList2D >* getFrames();
 		uint32_t getMaxObjectSize() const;
 		void setMaxObjectSize(uint32_t maxObjectSize = UINT32_MAX);
-
-		std::vector<std::string>* getFlows() const
+		std::string getImage(int i)
 		{
-			return flows;
+			if(images->size() > i)
+				return (*images)[i];
+			else
+				return std::string("");
 		}
-
-		std::vector<std::string>* getImages() const
+		std::string getFlow(int i)
 		{
-			return images;
+			if(flows->size() > i)
+				return (*flows)[i];
+			else
+				return std::string("");
+		}
+		const std::vector<glm::ivec2>* getDivisions() const
+		{
+			return divisions;
 		}
 
 	private:

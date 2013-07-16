@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
 			Utilities::getFiles(image_folder,
 					boost::regex(
 							"(.*\\.png$)|(.*\\.jpg$)|(.*\\.jpeg$)|(.*\\.tif$)|(.*\\.tiff$)|(.*\\.PNG$)|(.*\\.JPG$)|(.*\\.JPEG$)|(.*\\.TIF$)|(.*\\.TIFF$)"));
-	vector_fields = Utilities::getFiles(image_folder, boost::regex("(.*\\.dat$)"));
+	vector_fields = Utilities::getFiles(vector_field_folder, boost::regex("(.*\\.dat$)"));
 	if (images.size() == 0)
 	{
 		std::cerr << "ERROR: No images found!" << std::endl;
@@ -277,36 +277,44 @@ int main(int argc, char *argv[])
 	ft.setInitialMaskImage(initial);
 	ft.setIncludeAppearing(iao);
 
-	try
+//	try
+//	{
+//		ft.track();
+//	} catch (const char* e)
+//	{
+//		std::cerr << e << std::endl;
+//		return EXIT_FAILURE;
+//	}
+//
+//	TrackingData td(&ft, compressed);
+//	td.construct();
+//
+//	XMLExport xe(&params, &td);
+//	std::string output_file = std::string("./") + Utilities::getTime() + std::string("-data-frame.xml");
+//	xe.write(output_file.c_str());
+//
+//	if (label_image_folder.compare("") != 0)
+//	{
+//		std::vector<elib::MaskList2D>::iterator it;
+//		std::string file_name;
+//		Image<int32_t> image;
+//		int i = 0;
+//		for (it = ft.getFrames()->begin(); it != ft.getFrames()->end(); ++it)
+//		{
+//			file_name = Utilities::createFileName(label_image_folder, std::string("label"), std::string(".png"), i);
+//			image = it->masksToImage(ft.getInitial()->getRank(), ft.getInitial()->getDimensions());
+//			Image<int32_t>::saveImage(file_name, &image);
+//			++i;
+//		}
+//	}
+
+	Image<int32_t> image = Image<int32_t>::openImage(images[0]);
+	VectorArray2D va;
+	for(int i=0; i<vector_fields.size(); ++i)
 	{
-		ft.track();
-	} catch (const char* e)
-	{
-		std::cerr << e << std::endl;
-		return EXIT_FAILURE;
+		va.load(vector_fields[i].c_str());
+		image.displaceByVectorField(va);
+		image.saveImage(Utilities::createFileName("/Users/kthierbach/Documents/current/emb/refdata_smaller/displaced","image",".png",i,4),&image);
 	}
-
-	TrackingData td(&ft, compressed);
-	td.construct();
-
-	XMLExport xe(&params, &td);
-	std::string output_file = std::string("./") + Utilities::getTime() + std::string("-data-frame.xml");
-	xe.write(output_file.c_str());
-
-	if (label_image_folder.compare("") != 0)
-	{
-		std::vector<elib::MaskList2D>::iterator it;
-		std::string file_name;
-		Image<int32_t> image;
-		int i = 0;
-		for (it = ft.getFrames()->begin(); it != ft.getFrames()->end(); ++it)
-		{
-			file_name = Utilities::createFileName(label_image_folder, std::string("label"), std::string(".png"), i);
-			image = it->masksToImage(ft.getInitial()->getRank(), ft.getInitial()->getDimensions());
-			Image<int32_t>::saveImage(file_name, &image);
-			++i;
-		}
-	}
-
 	return EXIT_SUCCESS;
 }

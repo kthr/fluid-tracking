@@ -10,6 +10,7 @@
 
 #include <libxml/xmlwriter.h>
 #include <stdint.h>
+#include <vector>
 
 #include "object.hpp"
 
@@ -28,16 +29,16 @@ class Link
 
 		const Object*& getFrom();
 		void setFrom(const Object* from);
-		const Object*& getTo();
 		void setTo(const Object* to);
 		uint32_t getType() const;
 		void setType(uint32_t type);
 
-		enum TYPE {PREDECCESSOR = 0, SUCCESSOR = 1, DIVISION = 2};
+		enum TYPE {SUCCESSOR = 0, DIVISION = 1};
 
 	private:
 		uint32_t type;
-		const Object *from, *to;
+		const Object *from;
+		std::vector<const Object*> to;
 		double probability = 1.;
 };
 

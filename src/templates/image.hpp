@@ -131,35 +131,36 @@ class Image
 				maximum = std::max(maximum, data[i]);
 			return maximum;
 		}
-		void displaceByVectorField(VectorArray2D field)
+		void displaceByVectorField(VectorArray2D &field)
 		{
-			Image tmp = this;
-			type data = tmp.getData();
+			Image tmp = Image<type>(this->getRank(),this->getDimensions(),this->getBitDepth(),this->getChannels());
+			type *data = tmp.getData();
 
 			if(rank==2)
 			{
-				uint32_t width = dimensions[0],
-						height = dimensions[1],
-						k, l;
+				int width = dimensions[0],
+					height = dimensions[1],
+					k, l;
 				Vector2D v;
-				for(uint32_t j=0; j<height; ++j)
+				for(int j=0; j<height; ++j)
 				{
-					for(uint32_t i=0; i<width; ++i)
+					for(int i=0; i<width; ++i)
 					{
 						v = field.get(i,j);
-						k = static_cast<uint32_t>(j+v.y);
-						l = static_cast<uint32_t>(i+v.x);
-						if(0<l && l<width && 0<k && k<height)
+						l = static_cast<int>(i-round(v.x));
+						k = static_cast<int>(j-round(v.y));
+						if(0<=l && l<width && 0<=k && k<height)
 						{
 							data[i+j*width] = this->data[l+k*width];
 						}
 						else
 						{
-							data[i+j*width] = this->data[i+j*width];
+//							data[i+j*width] = this->data[i+j*width];
+							data[i+j*width] = 0.;
 						}
 					}
 				}
-				this = tmp;
+				*this = tmp;
 			}
 		}
 		cimage* to_cimage()

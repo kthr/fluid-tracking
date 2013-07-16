@@ -46,14 +46,18 @@ void TrackingData::construct()
 	if (data != nullptr)
 	{
 		namespace fs = boost::filesystem;
-		if(ft->getImages()->size() !=0)
+		std::string path = ft->getImage(0);
+		if(path.compare("") != 0)
 		{
-			image_path = fs::canonical(fs::complete(fs::path((*(ft->getImages()))[0]).remove_filename())).string();
+			image_path = fs::canonical(fs::complete(fs::path(path).remove_filename())).string();
 		}
-		if(ft->getFlows()->size() !=0)
+		path = ft->getFlow(0);
+		if(path.compare("") != 0)
 		{
-			flow_path = fs::canonical(fs::complete(fs::path((*(ft->getFlows()))[0]).remove_filename())).string();
+			flow_path = fs::canonical(fs::complete(fs::path(path).remove_filename())).string();
 		}
+		constructDivisions();
+
 		Object *object;
 		Link *link;
 		uint32_t id = 0, frameId = 0, trackId = 0;
@@ -90,9 +94,41 @@ void TrackingData::construct()
 				}
 				else
 				{
-
+					std::unordered_map<int32_t, std::set<int32_t> >::iterator it;
+					it = divisions.find(trackId);
+					if(it != divisions.end())
+					{
+						link = objectIt->addLink();
+						link->setType(Link::DIVISION);
+						link->setFrom(&*objectIt);
+						std::set<int32_t>::iterator sit;
+						for(sit=it->second.begin(); sit!=it->second.end(); ++sit)
+						{
+							link->setTo(frames[frameId+1].getObject(*sit));
+						}
+					}
 				}
 			}
+		}
+	}
+}
+void TrackingData::constructDivisions()
+{
+	const std::vector<glm::ivec2> div = *(ft->getDivisions());
+	std::unordered_map<int32_t, std::set<int32_t> >::iterator it;
+
+	for(int i=0; i<div.size(); ++i)
+	{
+		it = divisions.find((div[i].x));
+		if(it == divisions.end())
+		{
+			divisions.insert(std::pair<int32_t,std::set<int32_t> >(div[i].x,std::set<int32_t>()));
+			it = divisions.find((div[i].x));
+			it->second.insert(div[i].y);
+		}
+		else
+		{
+			it->second.insert(div[i].y);
 		}
 	}
 }

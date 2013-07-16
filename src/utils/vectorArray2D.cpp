@@ -28,11 +28,7 @@ VectorArray2D::VectorArray2D(VectorArray2D &orig) :
 	size_t size = nx * ny;
 	vx = new double[2 * size];
 	vy = vx + size;
-	for (unsigned int i = 0; i < size; i++)
-	{
-		vx[i] = orig.vx[i];
-		vy[i] = orig.vy[i];
-	}
+	std::copy(orig.vx, orig.vx+2*size,vx);
 }
 VectorArray2D::~VectorArray2D()
 {
@@ -1215,8 +1211,7 @@ bool VectorArray2D::save(const char*fname)
 	fclose(f);
 	return true;
 }
-
-bool VectorArray2D::save(const char* fname, struct fparameters *param)
+bool VectorArray2D::save(const char *fname, fparameters *param)
 {
 	FILE * f;
 	int magic = VectorArrayMagic2;
@@ -1257,9 +1252,11 @@ bool VectorArray2D::load(const char*fname)
 		fread(&dy, sizeof(double), 1, f);
 		fread(&nx, sizeof(int), 1, f);
 		fread(&ny, sizeof(int), 1, f);
+		size_t size = nx * ny;
 		if (vx)
 			delete vx;
-		vx = new double[2 * nx * ny];
+		vx = new double[2*size];
+		vy = vx + size;
 		fread(vx, sizeof(double), 2 * nx * ny, f);
 		fclose(f);
 		return true;
@@ -1267,6 +1264,28 @@ bool VectorArray2D::load(const char*fname)
 	}
 	if(magic == VectorArrayMagic2)
 	{
+		fparameters param;
+		char buffer[BUFFER_SIZE];
+		fread(&dx, sizeof(double), 1, f);
+		fread(&dy, sizeof(double), 1, f);
+		fread(&nx, sizeof(int), 1, f);
+		fread(&ny, sizeof(int), 1, f);
+		fread(&param.end, sizeof(double), 1, f);
+		fread(&param.error, sizeof(double), 1, f);
+		fread(&param.alpha, sizeof(double), 1, f);
+		fread(&param.vortex_weight, sizeof(double), 1, f);
+		fread(&param.mu, sizeof(double), 1, f);
+		fread(&param.lambda, sizeof(double), 1, f);
+		fgets(buffer, BUFFER_SIZE, f);
+		fgets(buffer, BUFFER_SIZE, f);
+		fread(&param.actual_error, sizeof(double), 1, f);
+		fread(&param.actual_time, sizeof(double), 1, f);
+		size_t size = nx * ny;
+		if (vx)
+			delete vx;
+		vx = new double[2*size];
+		vy = vx + size;
+		fread(vx, sizeof(double), 2 * nx * ny, f);
 		fclose(f);
 		return true;
 	}

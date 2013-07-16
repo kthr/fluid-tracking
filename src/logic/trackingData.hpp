@@ -12,6 +12,7 @@
 #include <set>
 #include <stdint.h>
 #include <types.hpp>
+#include <unordered_map>
 #include <vector>
 
 #include "alg/fluidTracks.hpp"
@@ -50,9 +51,12 @@ class TrackingData
 		std::vector<MaskList2D> *data;
 		std::vector<Frame> frames;
 		std::set<int32_t> tracks;
+		std::unordered_map<int32_t, std::set<int32_t> > divisions;
 		bool compressed;
 		std::string image_path = "",
 					flow_path = "";
+
+		void constructDivisions();
 };
 
 } /* namespace elib */

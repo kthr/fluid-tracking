@@ -11,7 +11,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <string>
 
 #include "vector2D.hpp"
 
@@ -30,6 +30,20 @@ public:
 	VectorArray2D(int _nx, int _ny, double _dx = 1.0, double _dy = 1.0);
 	VectorArray2D(VectorArray2D &orig);
 	~VectorArray2D();
+
+	typedef struct
+	{
+			double end;
+			double error;
+			double alpha;
+			double vortex_weight;
+			double mu;
+			double lambda;
+			std::string boundary;
+			std::string method;
+			double actual_error;
+			double actual_time;
+	} fparameters;
 
 	Vector2D get(int i, int j) const;
 	double getx(int i, int j) const;
@@ -54,20 +68,10 @@ public:
 	Vector2D laplace(int i, int j);
 	bool load(const char *fname);
 	bool save(const char *fname);
-	bool save(const char *fname, struct fparameters *param);
+	bool save(const char *fname, fparameters *param);
+
 private:
-	struct fparameters{
-		double end;
-		double error;
-		double alpha;
-		double vortex_weight;
-		double mu;
-		double lambda;
-		std::string boundary;
-		std::string method;
-		double actual_error;
-		double actual_time;
-	};
+	const static int BUFFER_SIZE = 1024;
 };
 
 

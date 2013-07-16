@@ -13,6 +13,7 @@
 #include "connectedComponents.hpp"
 #include "exceptions/IOException.hpp"
 #include "labeling.hpp"
+#include "utils/vectorArray2D.hpp"
 
 namespace elib
 {
@@ -113,7 +114,7 @@ void FluidTracks::detectDivisions(MaskList2D *masks)
 			{
 				for(it2=objects.begin(); it2!=objects.end(); ++it2)
 				{
-					divisions->push_back(glm::ivec2(it2->first, id_counter));
+					divisions->push_back(glm::ivec2(it->first, id_counter));
 					tmp_masks.addMask(id_counter++,*(it2->second));
 				}
 			}
@@ -137,13 +138,19 @@ void FluidTracks::track()
 		if(initial_mask_image.compare("") == 0)
 		{
 			try{
-				initial = cc.getComponents(Image<int32_t>::openImage((*images)[0]));
+				initial = Image<int32_t>::openImage((*images)[0]);
 			}
 			catch(IOException &e)
 			{
 				std::cerr << e.what() << std::endl;
 				throw "ERROR: Tracking couldn't be performed!";
 			}
+			Image<int32_t> emptyLabel(initial.getRank(), initial.getDimensions(), 16, initial.getChannels());
+			params->setIntParam(0,2);
+			propagated_label = lbg.labeling(&emptyLabel, &initial, params);
+			initial = *propagated_label;
+			delete propagated_label;
+			initial = cc.getComponents(initial);
 			cm = ComponentsMeasurements(initial);
 			masks = cm.getMasks();
 			applySizeConstraints(&masks);
@@ -165,13 +172,15 @@ void FluidTracks::track()
 		masks = cm.getMasks();
 		frames->push_back(masks);
 		id_counter = *(--masks.getLabels()->end())+1;
+		VectorArray2D va;
 		for(int i=1; i<images->size(); ++i)
 		{
-			std::cout << i << std::endl;
+			std::cout << "frame: " << i << std::endl;
 			params->setIntParam(0, masks.getSize()+2);
 			if(flows->size() != 0)
 			{
-				//displace old label with flow i-1
+				va.load((*flows)[i-1].c_str());
+				old_label.displaceByVectorField(va);
 			}
 			try{
 				image = Image<int32_t>::openImage((*images)[i]);

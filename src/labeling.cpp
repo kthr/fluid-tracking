@@ -11,6 +11,8 @@
 #include <unordered_map>
 #include <set>
 
+#include <iostream>
+
 #include "gco/GCoptimization.h"
 #include "../lib/glm/glm.hpp"
 
@@ -92,6 +94,7 @@ Image<int32_t>* Labeling::labeling(Image<int32_t>* label_image, Image<int32_t>* 
 		data.lambda = lambda;
 		gc->setSmoothCost(&smoothFn, &data);
 
+		gc->setVerbosity(0);
 		gc->swap();
 		for (int32_t i = 0; i < num_pixels; i++)
 			new_label_image->getData()[i] = label_array[gc->whatLabel(i)];

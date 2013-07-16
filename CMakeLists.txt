@@ -21,6 +21,7 @@ set(SOURCES
     src/utils/parameters.cpp
     src/utils/rle.cpp
     src/utils/utilities.cpp
+    src/utils/vectorArray2D.cpp
 )
 
 add_executable(fluidTracking
@@ -73,7 +74,7 @@ if(APPLE)
     message("\nEntering configuration for APPLE computers:\n")
     set_target_properties(Labeling fluidTracking
         PROPERTIES
-        LINK_FLAGS "-v -lstdc++ -lpthread  -L/opt/X11/lib -lX11 -L/Users/kthierbach/dev/boost-c++11/lib -lboost_program_options -lboost_regex -lboost_filesystem -lboost_system -lxml2"
+        LINK_FLAGS "-v -lstdc++ -lpthread  -L/opt/X11/lib -lX11 -lxml2 -L/Users/kthierbach/dev/boost-c++11/lib -lboost_program_options -lboost_regex -lboost_filesystem -lboost_system"
      )
 endif()
 
