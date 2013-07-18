@@ -43,7 +43,9 @@ int main(int argc, char *argv[])
 	int32_t min = 0, max = INT32_MAX;
 	double c0 = .1, c1 = .9, mu = 1., lambda = 1.;
 	std::string initial = "", image_folder, vector_field_folder, label_image_folder = "", in;
-	int iao = 1, verbose = 0;
+	int iao = 1,
+		verbosity = 0,
+		cycles = -1;
 	bool compressed = false;
 	int option, option_index;
 	std::vector<std::string> images, vector_fields;
@@ -85,14 +87,16 @@ int main(int argc, char *argv[])
 
 	struct option long_options[] =
 	{
-	{ "min", required_argument, NULL, '1' },
-	{ "max", required_argument, NULL, '2' },
-	{ "c0", required_argument, NULL, '3' },
-	{ "c1", required_argument, NULL, '4' },
-	{ "write-label-images", required_argument, NULL, '5' },
-	{ "include-appearing-objects", no_argument, &iao, 1 },
-	{ "verbose", no_argument, &verbose, 1 },
-	{ 0, 0, 0, 0 } };
+		{ "min", required_argument, NULL, '1' },
+		{ "max", required_argument, NULL, '2' },
+		{ "c0", required_argument, NULL, '3' },
+		{ "c1", required_argument, NULL, '4' },
+		{ "write-label-images", required_argument, NULL, '5' },
+		{ "include-appearing-objects", no_argument, &iao, 1 },
+		{ "verbosity", required_argument, NULL, '6'},
+		{ "cycles", required_argument, NULL, '7'},
+		{ 0, 0, 0, 0 }
+	};
 	while (1)
 	{
 		option = getopt_long(argc, argv, "chm:l:i:ow:", long_options, &option_index);
@@ -145,6 +149,22 @@ int main(int argc, char *argv[])
 				}
 				label_image_folder = std::string(optarg);
 				break;
+			case '6': // label_image_directory
+				if (optarg == NULL)
+				{
+					fprintf(stderr, "Missing argument for option -%c.\n", option);
+					return EXIT_FAILURE;
+				}
+				verbosity = atoi(optarg);
+				break;
+			case '7': // label_image_directory
+				if (optarg == NULL)
+				{
+					fprintf(stderr, "Missing argument for option -%c.\n", option);
+					return EXIT_FAILURE;
+				}
+				cycles = atoi(optarg);
+				break;
 			case 'm': // mu
 				if (optarg == NULL)
 				{
@@ -191,20 +211,17 @@ int main(int argc, char *argv[])
 #endif
 				std::cout << "\t --c0 NUM" << std::endl << "\t\t mean background intensity (default=.1)" << std::endl;
 				std::cout << "\t --c1 NUM" << std::endl << "\t\t mean foreground intensity (default=.9)" << std::endl;
-				std::cout << "\t --max NUM" << std::endl << "\t\t maximal object size in pixels  (default=" << INT32_MAX
-						<< ")" << std::endl;
-				std::cout << "\t --min NUM" << std::endl << "\t\t minimal object size in pixels (default=0)"
-						<< std::endl;
+				std::cout << "\t --cycles NUM" << std::endl << "\t\t number of iteration cycles of expansion algorithm  (default=-1)" << std::endl;
+				std::cout << "\t --max NUM" << std::endl << "\t\t maximal object size in pixels  (default=" << INT32_MAX << ")" << std::endl;
+				std::cout << "\t --min NUM" << std::endl << "\t\t minimal object size in pixels (default=0)" << std::endl;
+				std::cout << "\t --verbosity NUM" << std::endl << "\t\t verbosity level 0,1 or 2 (default=0)" << std::endl;
 				std::cout << "\t -c" << std::endl << "\t\t turn on compression" << std::endl;
 				std::cout << "\t -i IMAGE" << std::endl << "\t\t initial label image" << std::endl;
 				std::cout << "\t -l NUM" << std::endl << "\t\t parameter lambda (default=1.)" << std::endl;
 				std::cout << "\t -m NUM" << std::endl << "\t\t parameter mu (default=1.)" << std::endl;
-				std::cout << "\t -o, --include-appearing-objects" << std::endl
-						<< "\t\t include appearing objects (default=true)" << std::endl;
-				std::cout << "\t -w, --write-label-images DIR" << std::endl
-						<< "\t\t write label images to the given directory" << std::endl;
-				std::cout << "Example: fluidTracking --c0 .6 --c1 .9 --iao --min 25 images/ vector_fields/"
-						<< std::endl;
+				std::cout << "\t -o, --include-appearing-objects" << std::endl << "\t\t include appearing objects (default=true)" << std::endl;
+				std::cout << "\t -w, --write-label-images DIR" << std::endl << "\t\t write label images to the given directory" << std::endl;
+				std::cout << "Example: fluidTracking --c0 .6 --c1 .9 --iao --min 25 images/ vector_fields/" << std::endl;
 				std::cout << "Tracking parameters:" << std::endl;
 				std::cout << "Usage: fluidTracking [OPTIONS]... IMAGE_FOLDER [VECTOR_FIELD_FOLDER]" << std::endl;
 				return EXIT_SUCCESS;
@@ -276,6 +293,8 @@ int main(int argc, char *argv[])
 	ft.setMaxObjectSize(max);
 	ft.setInitialMaskImage(initial);
 	ft.setIncludeAppearing(iao);
+	ft.setVerbosity(verbosity);
+	ft.setCycles(cycles);
 
 	try
 	{

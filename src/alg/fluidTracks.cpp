@@ -132,6 +132,11 @@ void FluidTracks::track()
 	Image<int32_t> image, old_label, *propagated_label;
 	Labeling lbg;
 	MaskList2D masks;
+
+	std::cout << verbosity << " " << cycles << std::endl;
+
+	lbg.setVerbosity(verbosity);
+	lbg.setCycles(cycles);
 	try
 	{
 		cc.setLabelOffset(2);

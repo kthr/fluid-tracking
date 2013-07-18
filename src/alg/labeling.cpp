@@ -93,9 +93,9 @@ Image<int32_t>* Labeling::labeling(Image<int32_t>* label_image, Image<int32_t>* 
 		data.image = input_image->getData();
 		data.lambda = lambda;
 		gc->setSmoothCost(&smoothFn, &data);
-
-		gc->setVerbosity(1);
-		gc->expansion(20);
+		std::cout << verbosity <<" " <<cycles << std::endl;
+		gc->setVerbosity(verbosity);
+		gc->expansion(cycles);
 		for (int32_t i = 0; i < num_pixels; i++)
 			new_label_image->getData()[i] = label_array[gc->whatLabel(i)];
 

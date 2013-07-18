@@ -19,6 +19,19 @@ class Labeling
 		Labeling(){}
 		~Labeling(){}
 		Image<int32_t>* labeling(Image<int32_t>* label_image, Image<int32_t>* input_image, Parameters *input_params);
+
+		void setCycles(int cycles = 0)
+		{
+			this->cycles = cycles;
+		}
+		void setVerbosity(int verbosity = 0)
+		{
+			this->verbosity = verbosity;
+		}
+
+		private:
+		int verbosity = 0,
+			cycles = -1;
 };
 
 struct ForSmoothFn
