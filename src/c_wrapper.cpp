@@ -5,11 +5,12 @@
  *      Author: kthierbach
  */
 
+#include "c_wrapper.h"
+
 #include <algorithm>
 #include <stdlib.h>
 
-#include "c_wrapper.h"
-#include "labeling.hpp"
+#include "alg/labeling.hpp"
 #include "templates/image.hpp"
 #include "utils/parameters.hpp"
 

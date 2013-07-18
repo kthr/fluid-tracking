@@ -4,7 +4,7 @@ project(Labeling)
 set(SOURCES 
     src/libraryLink.c
     src/c_wrapper.cpp
-    src/labeling.cpp
+    src/alg/labeling.cpp
     src/alg/connectedComponents.cpp
     src/alg/componentsMeasurements.cpp
     src/alg/fluidTracks.cpp
