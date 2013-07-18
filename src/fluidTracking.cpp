@@ -277,44 +277,44 @@ int main(int argc, char *argv[])
 	ft.setInitialMaskImage(initial);
 	ft.setIncludeAppearing(iao);
 
-//	try
-//	{
-//		ft.track();
-//	} catch (const char* e)
-//	{
-//		std::cerr << e << std::endl;
-//		return EXIT_FAILURE;
-//	}
-//
-//	TrackingData td(&ft, compressed);
-//	td.construct();
-//
-//	XMLExport xe(&params, &td);
-//	std::string output_file = std::string("./") + Utilities::getTime() + std::string("-data-frame.xml");
-//	xe.write(output_file.c_str());
-//
-//	if (label_image_folder.compare("") != 0)
-//	{
-//		std::vector<elib::MaskList2D>::iterator it;
-//		std::string file_name;
-//		Image<int32_t> image;
-//		int i = 0;
-//		for (it = ft.getFrames()->begin(); it != ft.getFrames()->end(); ++it)
-//		{
-//			file_name = Utilities::createFileName(label_image_folder, std::string("label"), std::string(".png"), i);
-//			image = it->masksToImage(ft.getInitial()->getRank(), ft.getInitial()->getDimensions());
-//			Image<int32_t>::saveImage(file_name, &image);
-//			++i;
-//		}
-//	}
-
-	Image<int32_t> image = Image<int32_t>::openImage(images[0]);
-	VectorArray2D va;
-	for(int i=0; i<vector_fields.size(); ++i)
+	try
 	{
-		va.load(vector_fields[i].c_str());
-		image.displaceByVectorField(va);
-		image.saveImage(Utilities::createFileName("/Users/kthierbach/Documents/current/emb/refdata_smaller/displaced","image",".png",i,4),&image);
+		ft.track();
+	} catch (const char* e)
+	{
+		std::cerr << e << std::endl;
+		return EXIT_FAILURE;
 	}
+
+	TrackingData td(&ft, compressed);
+	td.construct();
+
+	XMLExport xe(&params, &td);
+	std::string output_file = std::string("./") + Utilities::getTime() + std::string("-data-frame.xml");
+	xe.write(output_file.c_str());
+
+	if (label_image_folder.compare("") != 0)
+	{
+		std::vector<elib::MaskList2D>::iterator it;
+		std::string file_name;
+		Image<int32_t> image;
+		int i = 0;
+		for (it = ft.getFrames()->begin(); it != ft.getFrames()->end(); ++it)
+		{
+			file_name = Utilities::createFileName(label_image_folder, std::string("label"), std::string(".png"), i);
+			image = it->masksToImage(ft.getInitial()->getRank(), ft.getInitial()->getDimensions());
+			Image<int32_t>::saveImage(file_name, &image);
+			++i;
+		}
+	}
+
+//	Image<int32_t> image = Image<int32_t>::openImage(images[0]);
+//	VectorArray2D va;
+//	for(int i=0; i<vector_fields.size(); ++i)
+//	{
+//		va.load(vector_fields[i].c_str());
+//		image.displaceByVectorField(va);
+//		image.saveImage(Utilities::createFileName("/Users/kthierbach/Documents/current/emb/refdata_smaller/displaced","image",".png",i,4),&image);
+//	}
 	return EXIT_SUCCESS;
 }

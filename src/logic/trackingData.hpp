@@ -44,6 +44,16 @@ class TrackingData
 			return image_path;
 		}
 
+		bool isCompressed() const
+		{
+			return compressed;
+		}
+
+		void setCompressed(bool compressed)
+		{
+			this->compressed = compressed;
+		}
+
 		const static int DEFAULT_VALIDITY = 0;
 
 	private:

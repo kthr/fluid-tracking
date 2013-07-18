@@ -52,7 +52,16 @@ void XMLExport::write(const char *uri)
 	 *************************************/
 	rc = xmlTextWriterStartElement(writer, BAD_CAST "data-frame");
 	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "version", BAD_CAST "1.0");
-	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "compressed", BAD_CAST "1");
+	if(data->isCompressed())
+	{
+		tmp << 1;
+	}
+	else
+	{
+		tmp << 0;
+	}
+	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "compressed", BAD_CAST tmp.str().c_str());
+	tmp.str("");
 
 	/*************************************
 	 * start description

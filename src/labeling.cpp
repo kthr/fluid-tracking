@@ -95,7 +95,7 @@ Image<int32_t>* Labeling::labeling(Image<int32_t>* label_image, Image<int32_t>* 
 		gc->setSmoothCost(&smoothFn, &data);
 
 		gc->setVerbosity(0);
-		gc->swap();
+		gc->expansion();
 		for (int32_t i = 0; i < num_pixels; i++)
 			new_label_image->getData()[i] = label_array[gc->whatLabel(i)];
 
@@ -111,12 +111,19 @@ int elib::smoothFn(int p1, int p2, int l1, int l2, void *data)
 {
 	ForSmoothFn fsf = *((ForSmoothFn*) data);
 	if(l1==l2)
-		return static_cast<int>(fsf.lambda*exp(-pow(fsf.image[p1]-fsf.image[p2],2)));
+		return static_cast<int>(fsf.lambda*exp(-fabs(fsf.image[p1]-fsf.image[p2])));
 	else
+	{
 		if((l1==1 && l2!=0) || (l1!=0 && l2==1))
+		{
 			return GC_INFINITY;
+		}
 		else
-			return static_cast<int>((label_dist(l1-l2)) + fsf.lambda*exp(-pow(fsf.image[p1]-fsf.image[p2],2)));
+		{
+			return static_cast<int>((label_dist(l1-l2)) + fsf.lambda*exp(-fabs(fsf.image[p1]-fsf.image[p2])));
+//			return GC_INFINITY;
+		}
+	}
 }
 
 inline int elib::label_dist(int value)

@@ -7,6 +7,8 @@
 
 #include "VectorArray2D.hpp"
 
+#include <fstream>
+
 VectorArray2D::VectorArray2D(void) :
 		nx(0), ny(0), dx(1.0), dy(1.0), vx(NULL), vy(NULL)
 {
@@ -1240,55 +1242,49 @@ bool VectorArray2D::save(const char *fname, fparameters *param)
 
 bool VectorArray2D::load(const char*fname)
 {
-	FILE * f;
+	std::ifstream ifs;
 	int magic;
-	f = fopen(fname, "rb");
-	if (!f)
-		return false;
-	fread(&magic, sizeof(int), 1, f);
-	if (magic == VectorArrayMagic)
-	{
-		fread(&dx, sizeof(double), 1, f);
-		fread(&dy, sizeof(double), 1, f);
-		fread(&nx, sizeof(int), 1, f);
-		fread(&ny, sizeof(int), 1, f);
-		size_t size = nx * ny;
-		if (vx)
-			delete vx;
-		vx = new double[2*size];
-		vy = vx + size;
-		fread(vx, sizeof(double), 2 * nx * ny, f);
-		fclose(f);
-		return true;
 
-	}
-	if(magic == VectorArrayMagic2)
+	ifs.open (fname, std::ifstream::in);
+	if(ifs.good())
 	{
-		fparameters param;
-		char buffer[BUFFER_SIZE];
-		fread(&dx, sizeof(double), 1, f);
-		fread(&dy, sizeof(double), 1, f);
-		fread(&nx, sizeof(int), 1, f);
-		fread(&ny, sizeof(int), 1, f);
-		fread(&param.end, sizeof(double), 1, f);
-		fread(&param.error, sizeof(double), 1, f);
-		fread(&param.alpha, sizeof(double), 1, f);
-		fread(&param.vortex_weight, sizeof(double), 1, f);
-		fread(&param.mu, sizeof(double), 1, f);
-		fread(&param.lambda, sizeof(double), 1, f);
-		fgets(buffer, BUFFER_SIZE, f);
-		fgets(buffer, BUFFER_SIZE, f);
-		fread(&param.actual_error, sizeof(double), 1, f);
-		fread(&param.actual_time, sizeof(double), 1, f);
-		size_t size = nx * ny;
-		if (vx)
-			delete vx;
-		vx = new double[2*size];
-		vy = vx + size;
-		fread(vx, sizeof(double), 2 * nx * ny, f);
-		fclose(f);
+		ifs.read( reinterpret_cast<char*>(&magic), sizeof(magic));
+		if(magic == VectorArrayMagic || magic == VectorArrayMagic2)
+		{
+			ifs.read( reinterpret_cast<char*>(&dx), sizeof(dx));
+			ifs.read( reinterpret_cast<char*>(&dy), sizeof(dy));
+			ifs.read( reinterpret_cast<char*>(&nx), sizeof(nx));
+			ifs.read( reinterpret_cast<char*>(&ny), sizeof(ny));
+			size_t size = nx * ny;
+			if (vx)
+				delete vx;
+			vx = new double[2*size];
+			vy = vx + size;
+			if(magic == VectorArrayMagic2)
+			{
+				fparameters param;
+				ifs.read( reinterpret_cast<char*>(&param.end), sizeof(param.end));
+				ifs.read( reinterpret_cast<char*>(&param.error), sizeof(param.error));
+				ifs.read( reinterpret_cast<char*>(&param.alpha), sizeof(param.alpha));
+				ifs.read( reinterpret_cast<char*>(&param.vortex_weight), sizeof(param.vortex_weight));
+				ifs.read( reinterpret_cast<char*>(&param.mu), sizeof(param.mu));
+				ifs.read( reinterpret_cast<char*>(&param.lambda), sizeof(param.lambda));
+				std::getline(ifs, param.boundary, '\0');
+				std::getline(ifs, param.method, '\0');
+				ifs.read( reinterpret_cast<char*>(&param.actual_error), sizeof(param.actual_error));
+				ifs.read( reinterpret_cast<char*>(&param.actual_time), sizeof(param.actual_time));
+			}
+			for(int i=0; i<2*size; ++i)
+			{
+				ifs.read(reinterpret_cast<char*>(&(vx[i])), sizeof(double));
+			}
+		}
+		else
+		{
+
+		}
+		ifs.close();
 		return true;
 	}
-	fclose(f);
 	return false;
 }

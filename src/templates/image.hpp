@@ -147,16 +147,16 @@ class Image
 					for(int i=0; i<width; ++i)
 					{
 						v = field.get(i,j);
-						l = static_cast<int>(i-round(v.x));
-						k = static_cast<int>(j-round(v.y));
+						l = i-round(v.x);
+						k = j-round(v.y);
 						if(0<=l && l<width && 0<=k && k<height)
 						{
 							data[i+j*width] = this->data[l+k*width];
 						}
 						else
 						{
-//							data[i+j*width] = this->data[i+j*width];
-							data[i+j*width] = 0.;
+							data[i+j*width] = this->data[std::min(width,std::max(0,l))+std::min(height,std::max(0,k))*width];
+//							data[i+j*width] = 0.;
 						}
 					}
 				}
