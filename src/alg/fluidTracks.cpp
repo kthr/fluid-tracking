@@ -133,8 +133,6 @@ void FluidTracks::track()
 	Labeling lbg;
 	MaskList2D masks;
 
-	std::cout << verbosity << " " << cycles << std::endl;
-
 	lbg.setVerbosity(verbosity);
 	lbg.setCycles(cycles);
 	try
