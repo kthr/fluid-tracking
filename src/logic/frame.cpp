@@ -9,6 +9,7 @@
 
 #include <sstream>
 
+#include "io/xmlExport.hpp"
 #include "trackingData.hpp"
 
 namespace elib
@@ -42,20 +43,13 @@ std::vector<Object>::iterator Frame::end()
 }
 void Frame::toXML(const xmlTextWriterPtr writer, bool compressed) const
 {
-	int rc;
-	std::stringstream tmp;
-
 	for(uint32_t i=0; i<objects.size(); ++i)
 	{
-		rc = xmlTextWriterStartElement(writer, BAD_CAST "object"); /* start object */
-		tmp << i;
-		rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "id", BAD_CAST tmp.str().c_str()); /*  frame id */
-		tmp.str("");
-		tmp << TrackingData::DEFAULT_VALIDITY;
-		rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "v", BAD_CAST tmp.str().c_str()); /*  frame id */
-		tmp.str("");
+		xmlTextWriterStartElement(writer, BAD_CAST "object"); /* start object */
+		XMLExport::writeAttribute(writer, "id", i);
+		XMLExport::writeAttribute(writer, "v", TrackingData::DEFAULT_VALIDITY);
 		objects[i].toXML(writer, compressed);
-		rc = xmlTextWriterEndElement(writer); /* end object */
+		xmlTextWriterEndElement(writer); /* end object */
 	}
 }
 const Object* Frame::getObject(uint32_t trackId) const

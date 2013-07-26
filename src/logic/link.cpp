@@ -9,6 +9,7 @@
 
 #include <sstream>
 
+#include "io/xmlExport.hpp"
 #include "trackingData.hpp"
 
 namespace elib
@@ -46,45 +47,33 @@ uint32_t Link::getType() const
 
 void Link::toXML(const xmlTextWriterPtr writer) const
 {
-	int rc;
-	std::stringstream tmp;
+	std::string typeName;
 
-	rc = xmlTextWriterStartElement(writer, BAD_CAST "link"); /* start link */
+	xmlTextWriterStartElement(writer, BAD_CAST "link"); /* start link */
 	switch(type)
 	{
 		case SUCCESSOR:
-			tmp << "$SUCCESSOR$";
+			typeName = "$SUCCESSOR$";
 			break;
 		case DIVISION:
-			tmp << "$DIVISION$";
+			typeName = "$DIVISION$";
 			break;
 		default:
-			tmp << "$ERROR$";
+			typeName = "$ERROR$";
 			break;
 	}
-	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "type", BAD_CAST tmp.str().c_str());
-	tmp.str("");
-	tmp << probability;
-	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "probability", BAD_CAST tmp.str().c_str());
-	tmp.str("");
-	tmp << TrackingData::DEFAULT_VALIDITY;
-	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "v", BAD_CAST tmp.str().c_str());
-	tmp.str("");
+	XMLExport::writeAttribute(writer, "type", typeName);
+	XMLExport::writeAttribute(writer, "probability", probability);
+	XMLExport::writeAttribute(writer, "v", TrackingData::DEFAULT_VALIDITY);
 	for(int i=0; i<to.size(); ++i)
 	{
-		rc = xmlTextWriterStartElement(writer, BAD_CAST "object"); /* start object */
-		tmp << to[i]->getId();
-		rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "objectID", BAD_CAST tmp.str().c_str());
-		tmp.str("");
-		tmp << to[i]->getFrameId();
-		rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "frameID", BAD_CAST tmp.str().c_str());
-		tmp.str("");
-		tmp << TrackingData::DEFAULT_VALIDITY;
-		rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "v", BAD_CAST tmp.str().c_str());
-		tmp.str("");
-		rc = xmlTextWriterEndElement(writer); /* end object */
+		xmlTextWriterStartElement(writer, BAD_CAST "object"); /* start object */
+		XMLExport::writeAttribute(writer, "objectID", to[i]->getId());
+		XMLExport::writeAttribute(writer, "frameID", to[i]->getFrameId());
+		XMLExport::writeAttribute(writer, "v", TrackingData::DEFAULT_VALIDITY);
+		xmlTextWriterEndElement(writer); /* end object */
 	}
-	rc = xmlTextWriterEndElement(writer); /* end link */
+	xmlTextWriterEndElement(writer); /* end link */
 }
 
 void Link::setType(uint32_t type)

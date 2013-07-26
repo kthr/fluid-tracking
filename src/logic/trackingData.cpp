@@ -10,6 +10,7 @@
 #include <boost/filesystem.hpp>
 #include <sstream>
 
+#include "io/xmlExport.hpp"
 #include "object.hpp"
 
 namespace elib
@@ -40,6 +41,16 @@ uint32_t TrackingData::getNumFrames() const
 uint32_t TrackingData::getNumTracks() const
 {
 	return tracks.size();
+}
+uint32_t TrackingData::getNumberObjects() const
+{
+	uint32_t count = 0;
+
+	for(int i=0; i<data->size(); ++i)
+	{
+		count += (*data)[i].getSize();
+	}
+	return count;
 }
 void TrackingData::construct()
 {
@@ -134,29 +145,18 @@ void TrackingData::constructDivisions()
 }
 void TrackingData::toXML(const xmlTextWriterPtr writer) const
 {
-	int rc;
-	std::stringstream tmp;
-
-	rc = xmlTextWriterStartElement(writer, BAD_CAST "frames"); /* start frames */
-	tmp << getNumFrames();
-	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "number_of_frames", BAD_CAST tmp.str().c_str()); /*  number of frames */
-	tmp.str("");
+	xmlTextWriterStartElement(writer, BAD_CAST "frames"); /* start frames */
+	XMLExport::writeAttribute(writer, "number_of_frames", getNumFrames());
 	for (uint32_t i = 0; i < frames.size(); ++i)
 	{
-		rc = xmlTextWriterStartElement(writer, BAD_CAST "frame"); /* start frame */
-		tmp << i;
-		rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "id", BAD_CAST tmp.str().c_str()); /*  frame id */
-		tmp.str("");
-		tmp << frames[i].getNumObjects();
-		rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "number_of_objects", BAD_CAST tmp.str().c_str()); /*  number of objects */
-		tmp.str("");
-		tmp << DEFAULT_VALIDITY;
-		rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "v", BAD_CAST tmp.str().c_str()); /*  number of objects */
-		tmp.str("");
+		xmlTextWriterStartElement(writer, BAD_CAST "frame"); /* start frame */
+		XMLExport::writeAttribute(writer, "id", i);
+		XMLExport::writeAttribute(writer, "number_of_objects", frames[i].getNumObjects());
+		XMLExport::writeAttribute(writer, "v", DEFAULT_VALIDITY);
 		frames[i].toXML(writer, compressed);
-		rc = xmlTextWriterEndElement(writer); /* end frame */
+		xmlTextWriterEndElement(writer); /* end frame */
 	}
-	rc = xmlTextWriterEndElement(writer); /* end frames */
+	xmlTextWriterEndElement(writer); /* end frames */
 
 }
 

@@ -31,6 +31,7 @@ class TrackingData
 		Frame* addFrame();
 		uint32_t getNumFrames() const;
 		uint32_t getNumTracks() const;
+		uint32_t getNumberObjects() const;
 		void construct();
 		void toXML(const xmlTextWriterPtr writer) const;
 
@@ -52,6 +53,11 @@ class TrackingData
 		void setCompressed(bool compressed)
 		{
 			this->compressed = compressed;
+		}
+
+		elib::FluidTracks* getFluidTracks() const
+		{
+			return ft;
 		}
 
 		const static int DEFAULT_VALIDITY = 0;

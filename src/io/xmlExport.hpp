@@ -23,6 +23,20 @@ class XMLExport
 		virtual ~XMLExport();
 
 		void write(const char *uri);
+		template <typename T>
+		static int writeElement(xmlTextWriterPtr writer, std::string name, T value)
+		{
+			std::stringstream tmp;
+			tmp << value;
+			return xmlTextWriterWriteElement(writer, BAD_CAST name.c_str(), BAD_CAST tmp.str().c_str());
+		}
+		template <typename T>
+		static int writeAttribute(xmlTextWriterPtr writer, std::string name, T value)
+		{
+			std::stringstream tmp;
+			tmp << value;
+			return xmlTextWriterWriteAttribute(writer, BAD_CAST name.c_str(), BAD_CAST tmp.str().c_str());
+		}
 	private:
 		const Parameters *params;
 		const TrackingData *data;

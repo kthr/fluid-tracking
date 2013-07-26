@@ -9,6 +9,7 @@
 
 #include <sstream>
 
+#include "io/xmlExport.hpp"
 #include "trackingData.hpp"
 #include "utils/rle.hpp"
 
@@ -65,45 +66,42 @@ void Object::setTrackId(uint32_t trackId)
 }
 void Object::toXML(const xmlTextWriterPtr writer, bool compressed) const
 {
-	int rc;
-	std::stringstream tmp;
-
 	std::vector<glm::ivec2> outline;
 	glm::ivec2 centroid(0,0);
 	const_cast<Mask2D*>(mask)->getOutline(outline, centroid);
 
-	rc = xmlTextWriterStartElement(writer, BAD_CAST "centroid"); /* start centroid */
+	xmlTextWriterStartElement(writer, BAD_CAST "centroid"); /* start centroid */
 	writePoint(writer, centroid);
-	rc = xmlTextWriterEndElement(writer); /* end centroid */
+	xmlTextWriterEndElement(writer); /* end centroid */
 	if(compressed)
 	{
-		rc = xmlTextWriterStartElement(writer, BAD_CAST "mask"); /* start mask */
-		rc = xmlTextWriterStartElement(writer, BAD_CAST "bbox"); /* start bbox */
+		xmlTextWriterStartElement(writer, BAD_CAST "mask"); /* start mask */
+		xmlTextWriterStartElement(writer, BAD_CAST "bbox"); /* start bbox */
 		std::vector<glm::ivec2> bbox = const_cast<Mask2D*>(mask)->getBoundingBox();
 		for(int i=0; i<bbox.size(); ++i)
 		{
 			writePoint(writer, bbox[i]);
 		}
-		rc = xmlTextWriterEndElement(writer); /* end mask */
-		rc = xmlTextWriterWriteElement(writer, BAD_CAST "d", BAD_CAST RLE::binary_encode(const_cast<Mask2D*>(mask)->getBoxMask()).c_str()); /* start centroid */
-		rc = xmlTextWriterEndElement(writer); /* end mask */
+		xmlTextWriterEndElement(writer); /* end mask */
+		xmlTextWriterWriteElement(writer, BAD_CAST "d", BAD_CAST RLE::binary_encode(const_cast<Mask2D*>(mask)->getBoxMask()).c_str()); /* start centroid */
+		xmlTextWriterEndElement(writer); /* end mask */
 	}
 	else
 	{
-		rc = xmlTextWriterStartElement(writer, BAD_CAST "outline"); /* start outline */
+		xmlTextWriterStartElement(writer, BAD_CAST "outline"); /* start outline */
 		for(int i=0; i<outline.size();++i)
 		{
 			writePoint(writer, outline[i]);
 		}
-		rc = xmlTextWriterEndElement(writer); /* end outline */
+		xmlTextWriterEndElement(writer); /* end outline */
 	}
 
-	rc = xmlTextWriterStartElement(writer, BAD_CAST "links"); /* start links */
+	xmlTextWriterStartElement(writer, BAD_CAST "links"); /* start links */
 	for(int i=0; i<links.size(); ++i)
 	{
 		links[i].toXML(writer);
 	}
-	rc = xmlTextWriterEndElement(writer); /* end links */
+	xmlTextWriterEndElement(writer); /* end links */
 }
 
 elib::Annotation* Object::addAnnotation()
