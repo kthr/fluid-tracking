@@ -183,6 +183,7 @@ void FluidTracks::track()
 		{
 			std::cout << "frame: " << i << std::endl;
 			params->setIntParam(0, masks.getSize()+2);
+			std::cout << "#masks: " << masks.getSize() << std::endl;
 			if(flows->size() != 0)
 			{
 				va.load((*flows)[i-1].c_str());
@@ -198,10 +199,10 @@ void FluidTracks::track()
 			}
 			propagated_label = lbg.labeling(&old_label, &image, params);
 			cm = ComponentsMeasurements(*propagated_label);
+			masks = cm.getMasks();
 			delete propagated_label;
 			if(include_appearing)
 			{
-				masks = cm.getMasks();
 				addAppearingObjects(&masks);
 			}
 			else
@@ -210,7 +211,7 @@ void FluidTracks::track()
 			}
 			detectDivisions(&masks);
 			frames->push_back(masks);
-			old_label  = masks.masksToImage(initial.getRank(), initial.getDimensions());
+			old_label = masks.masksToImage(initial.getRank(), initial.getDimensions());
 		}
 	}
 	catch(class IOException &e)

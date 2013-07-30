@@ -162,9 +162,11 @@ class MaskList
 			typename std::unordered_map<Label, Mask<Point>*>::iterator it;
 			int id = 1+offset;
 
+			labels->clear();
 			for(it = masks->begin(); it!=masks->end(); ++it)
 			{
 				tmp->insert(std::pair<Label,Mask<Point>*>(id, it->second));
+				labels->insert(id);
 				++id;
 			}
 			delete masks;
