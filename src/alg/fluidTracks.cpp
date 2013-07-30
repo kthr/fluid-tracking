@@ -159,10 +159,13 @@ void FluidTracks::track()
 			applySizeConstraints(&masks);
 			initial = masks.masksToImage(initial.getRank(), initial.getDimensions());
 		}
-		else
+		else /* open initial label image */
 		{
 			try{
-				initial = cc.getComponents(Image<int32_t>::openImage(initial_mask_image));
+				initial = Image<int32_t>::openImage(initial_mask_image);
+				cm = ComponentsMeasurements(initial);
+				cm.getMasks().relabel(1);
+				initial = cm.getMasks().masksToImage(initial.getRank(), initial.getDimensions());
 			}
 			catch(IOException &e)
 			{
@@ -200,13 +203,12 @@ void FluidTracks::track()
 			{
 				masks = cm.getMasks();
 				addAppearingObjects(&masks);
-				detectDivisions(&masks);
 			}
 			else
 			{
 				masks.deleteMask(1);
-				detectDivisions(&masks);
 			}
+			detectDivisions(&masks);
 			frames->push_back(masks);
 			old_label  = masks.masksToImage(initial.getRank(), initial.getDimensions());
 		}

@@ -156,6 +156,20 @@ class MaskList
 		{
 			return Mask<Point>::masksToImage(rank, dimensions, masks);
 		}
+		void relabel(int offset = 0)
+		{
+			typename std::unordered_map<Label, Mask<Point>*> *tmp = new std::unordered_map<Label, Mask<Point>*>();
+			typename std::unordered_map<Label, Mask<Point>*>::iterator it;
+			int id = 1+offset;
+
+			for(it = masks->begin(); it!=masks->end(); ++it)
+			{
+				tmp->insert(std::pair<Label,Mask<Point>*>(id, it->second));
+				++id;
+			}
+			delete masks;
+			masks = tmp;
+		}
 		std::set<Label>* getLabels()
 		{
 			return labels;
