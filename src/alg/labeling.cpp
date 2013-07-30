@@ -63,7 +63,7 @@ Image<int32_t>* Labeling::labeling(Image<int32_t>* label_image, Image<int32_t>* 
 		for (int32_t i = 0; i < num_pixels; i++ )
 		{
 			label = label_map.find(static_cast<float>(label_data[i]))->second;
-			gc->setDataCost(i,1, static_cast<float>(2*mu*(label_dist(0-label))+fabs((double)image_data[i]-c)));
+			gc->setDataCost(i,1, static_cast<float>(mu*(label_dist(0-label))+fabs((double)image_data[i]-c)));
 		}
 		for (int l = 2; l < num_labels; l++ )
 		{

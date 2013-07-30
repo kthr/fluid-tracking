@@ -164,8 +164,10 @@ void FluidTracks::track()
 			try{
 				initial = Image<int32_t>::openImage(initial_mask_image);
 				cm = ComponentsMeasurements(initial);
-				cm.getMasks().relabel(1);
-				initial = cm.getMasks().masksToImage(initial.getRank(), initial.getDimensions());
+				masks = cm.getMasks();
+				masks.relabel(1);
+				applySizeConstraints(&masks);
+				initial = masks.masksToImage(initial.getRank(), initial.getDimensions());
 			}
 			catch(IOException &e)
 			{
