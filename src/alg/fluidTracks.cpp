@@ -14,6 +14,7 @@
 #include "exceptions/IOException.hpp"
 #include "labeling.hpp"
 #include "utils/vectorArray2D.hpp"
+#include "utils/utilities.hpp"
 
 namespace elib
 {
@@ -181,15 +182,21 @@ void FluidTracks::track()
 		frames->push_back(masks);
 		id_counter = *(--masks.getLabels()->end())+1;
 		VectorArray2D va;
+		if(verbosity)
+			std::cout << "frame: " << 0 << ", #objects: " << masks.getSize() << std::endl;
 		for(int i=1; i<images->size(); ++i)
 		{
-			std::cout << "frame: " << i << std::endl;
-			params->setIntParam(0, masks.getSize()+2);
-			std::cout << "#masks: " << masks.getSize() << std::endl;
+			if(verbosity)
+				std::cout << "frame: " << i << ", #objects: " << masks.getSize() << std::endl;
+;
 			if(flows->size() != 0)
 			{
 				va.load((*flows)[i-1].c_str());
+				Image<int32_t>::saveImage(Utilities::createFileName("/Users/kthierbach/Documents/current/emb/refdataB/label","before",".png",i,4),&old_label);
 				old_label.displaceByVectorField(va);
+				Image<int32_t>::saveImage(Utilities::createFileName("/Users/kthierbach/Documents/current/emb/refdataB/label","after",".png",i,4),&old_label);
+				cm = ComponentsMeasurements(old_label);
+				masks = cm.getMasks();
 			}
 			try{
 				image = Image<int32_t>::openImage((*images)[i]);
@@ -199,6 +206,7 @@ void FluidTracks::track()
 				std::cerr << e.what() << std::endl;
 				throw "ERROR: Tracking couldn't be performed!";
 			}
+			params->setIntParam(0, masks.getSize()+2);
 			propagated_label = lbg.labeling(&old_label, &image, params);
 			cm = ComponentsMeasurements(*propagated_label);
 			masks = cm.getMasks();

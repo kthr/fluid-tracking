@@ -42,7 +42,7 @@ struct ForSmoothFn
 };
 
 inline int label_dist(int value);
-float smoothFn(int p1, int p2, int l1, int l2, void *data);
+int smoothFn(int p1, int p2, int l1, int l2, void *data);
 
 } /* namespace elib */
 

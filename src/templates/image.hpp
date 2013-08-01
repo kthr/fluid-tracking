@@ -140,6 +140,8 @@ class Image
 			{
 				int width = dimensions[0],
 					height = dimensions[1],
+					max_index_width = width-1,
+					max_index_height = height-1,
 					k, l;
 				Vector2D v;
 				for(int j=0; j<height; ++j)
@@ -155,7 +157,9 @@ class Image
 						}
 						else
 						{
-							data[i+j*width] = this->data[std::min(width,std::max(0,l))+std::min(height,std::max(0,k))*width];
+							using std::min;
+							using std::max;
+							data[i+j*width] = this->data[min(max_index_width,max(0,l))+min(max_index_height,max(0,k))*width];
 //							data[i+j*width] = 0.;
 						}
 					}
