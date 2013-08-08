@@ -64,10 +64,10 @@ message(${CMAKE_SOURCE_DIR}/version.sh)
 add_custom_target(version ALL DEPENDS revision)
 
 set(CMAKE_CXX_FLAGS
-    "-O3 -pipe -Wall -I/Users/kthierbach/dev/boost-c++11/include -I/opt/local/include -std=c++11 -stdlib=libc++"
+    "-O4 -pipe -Wall -I/Users/kthierbach/dev/boost-c++11/include -I/opt/local/include -std=c++11 -stdlib=libc++"
 )
 set(CMAKE_C_FLAGS
-    "-O3 -pipe -Wall -I/Users/kthierbach/dev/boost-c++11/include"
+    "-O4 -pipe -Wall -I/Users/kthierbach/dev/boost-c++11/include"
 )
 
 if(APPLE)

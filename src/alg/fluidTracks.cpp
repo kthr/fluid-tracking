@@ -192,9 +192,7 @@ void FluidTracks::track()
 			if(flows->size() != 0)
 			{
 				va.load((*flows)[i-1].c_str());
-				Image<int32_t>::saveImage(Utilities::createFileName("/Users/kthierbach/Documents/current/emb/refdataB/label","before",".png",i,4),&old_label);
 				old_label.displaceByVectorField(va);
-				Image<int32_t>::saveImage(Utilities::createFileName("/Users/kthierbach/Documents/current/emb/refdataB/label","after",".png",i,4),&old_label);
 				cm = ComponentsMeasurements(old_label);
 				masks = cm.getMasks();
 			}
