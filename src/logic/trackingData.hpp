@@ -29,9 +29,9 @@ class TrackingData
 		virtual ~TrackingData();
 
 		Frame* addFrame();
-		uint32_t getNumFrames() const;
-		uint32_t getNumTracks() const;
-		uint32_t getNumberObjects() const;
+		int getNumFrames() const;
+		int getNumTracks() const;
+		int getNumberObjects() const;
 		void construct();
 		void toXML(const xmlTextWriterPtr writer) const;
 
@@ -66,8 +66,8 @@ class TrackingData
 		elib::FluidTracks *ft;
 		std::vector<MaskList2D> *data;
 		std::vector<Frame> frames;
-		std::set<int32_t> tracks;
-		std::unordered_map<int32_t, std::set<int32_t> > divisions;
+		std::set<int> tracks;
+		std::unordered_map<int, std::set<int> > divisions;
 		bool compressed;
 		std::string image_path = "",
 					flow_path = "";

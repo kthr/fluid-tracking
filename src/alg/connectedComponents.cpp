@@ -24,15 +24,15 @@ ConnectedComponents::~ConnectedComponents()
 	// TODO Auto-generated destructor stub
 }
 
-Image<int32_t> ConnectedComponents::getComponents(Image<int32_t> image)
+Image<int> ConnectedComponents::getComponents(Image<int> image)
 {
-	Image<int32_t> label_image, tmp_image;
-	int32_t *tmp_data, *label_data;
-	uint32_t width, height, *dimensions;
+	Image<int> label_image, tmp_image;
+	int *tmp_data, *label_data;
+	int width, height, *dimensions;
 
-	tmp_image = Image<int32_t>(image);
+	tmp_image = Image<int>(image);
 	tmp_data = tmp_image.getData();
-	label_image = Image<int32_t>(image.getRank(), image.getDimensions(), 16, 1);
+	label_image = Image<int>(image.getRank(), image.getDimensions(), 16, 1);
 	label_data = label_image.getData();
 
 	if(image.getRank() == 2) //2d-image

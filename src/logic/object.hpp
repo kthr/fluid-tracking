@@ -29,17 +29,17 @@ class Object
 		elib::Link* addLink();
 		void toXML(const xmlTextWriterPtr writer, bool compressed=true) const;
 
-		uint32_t getFrameId() const;
-		void setFrameId(uint32_t frameId);
-		uint32_t getId() const;
-		void setId(uint32_t id);
+		int getFrameId() const;
+		void setFrameId(int frameId);
+		int getId() const;
+		void setId(int id);
 		const Mask2D* getMask() const;
 		void setMask(const Mask2D* mask);
-		uint32_t getTrackId() const;
-		void setTrackId(uint32_t trackId);
+		int getTrackId() const;
+		void setTrackId(int trackId);
 
 	private:
-		uint32_t id, frameId, trackId;
+		int id, frameId, trackId;
 		const Mask2D *mask;
 		std::vector<Link> links;
 		std::vector<Annotation> annotations;

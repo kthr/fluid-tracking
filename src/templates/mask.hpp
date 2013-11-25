@@ -62,23 +62,23 @@ class Mask
 		{
 			return points;
 		}
-		Image<int32_t> toImage(uint32_t rank, uint32_t *dimensions)
+		Image<int> toImage(int rank, int *dimensions)
 		{
-			Image<int32_t> image;
-			int32_t *image_data;
-			int32_t pixel;
+			Image<int> image;
+			int *image_data;
+			int pixel;
 			typename std::vector<Point>::iterator it;
 
-			image = Image<int32_t>(rank, dimensions, bit_depth, 1);
+			image = Image<int>(rank, dimensions, bit_depth, 1);
 			image_data = image.getData();
 			for(it=points->begin(); it!=points->end(); ++it)
 			{
-				for(int32_t i=0; i<rank; ++i)
+				for(int i=0; i<rank; ++i)
 				{
 					if((*it)[i] < 0 || (*it)[i]>=dimensions[i])
 					{
 						//throw GenericException("Mask doesn't fit into the image");
-						return Image<int32_t>();
+						return Image<int>();
 					}
 				}
 				pixel = Mask::getPixel(*it, dimensions);
@@ -86,15 +86,15 @@ class Mask
 			}
 			return image;
 		}
-		static Image<int32_t> masksToImage(uint32_t rank, uint32_t *dimensions, std::unordered_map<int32_t, Mask<Point>* > *masks)
+		static Image<int> masksToImage(int rank, int *dimensions, std::unordered_map<int, Mask<Point>* > *masks)
 		{
-			Image<int32_t> image;
-			int32_t *image_data, label, pixel;
-			typename std::unordered_map<int32_t, Mask<Point>* >::iterator it;
+			Image<int> image;
+			int *image_data, label, pixel;
+			typename std::unordered_map<int, Mask<Point>* >::iterator it;
 			typename std::vector<Point> *points;
 			typename std::vector<Point>::iterator pt_it;
 
-			image = Image<int32_t>(rank, dimensions, bit_depth, 1);
+			image = Image<int>(rank, dimensions, bit_depth, 1);
 			image_data = image.getData();
 			for(it = masks->begin(); it!=masks->end(); ++it)
 			{
@@ -102,12 +102,12 @@ class Mask
 				points = it->second->getPoints();
 				for(pt_it=points->begin(); pt_it!=points->end(); ++pt_it)
 				{
-					for(int32_t i=0; i<rank; ++i)
+					for(int i=0; i<rank; ++i)
 					{
 						if((*pt_it)[i] < 0 || (*pt_it)[i]>dimensions[i])
 						{
 							//throw GenericException("Mask doesn't fit into the image");
-							return Image<int32_t>();
+							return Image<int>();
 						}
 					}
 					pixel = Mask::getPixel(*pt_it, dimensions);
@@ -128,16 +128,16 @@ class Mask
 		{
 			return points;
 		}
-		int32_t getSize()
+		int getSize()
 		{
-			return (int32_t)points->size();
+			return (int)points->size();
 		}
 		void getOutline(std::vector<Point> &polygon, Point &centroid)
 		{
 			outline(polygon, centroid);
 		}
 	private:
-		const static uint32_t bit_depth = 16;
+		const static int bit_depth = 16;
 		std::vector<Point> *points;
 
 		friend void swap(Mask<Point>& first, Mask<Point>& second) // nothrow
@@ -148,11 +148,11 @@ class Mask
 			// the two classes are effectively swapped
 			swap(first.points, second.points);
 		}
-		static inline int32_t getPixel(glm::ivec2 p, uint32_t *dimensions)
+		static inline int getPixel(glm::ivec2 p, int *dimensions)
 		{
 			return p[1]*dimensions[0]+p[0];
 		}
-		static inline int32_t getPixel(glm::ivec3 p, uint32_t *dimensions)
+		static inline int getPixel(glm::ivec3 p, int *dimensions)
 		{
 			return p[2]*dimensions[0]*dimensions[1] + p[1]*dimensions[0] + p[0];
 		}
@@ -160,7 +160,7 @@ class Mask
 		{
 			std::vector<glm::ivec2> box;
 			std::vector<glm::ivec2>::iterator it;
-			int32_t minX = INT32_MAX, minY = INT32_MAX, maxX = 0, maxY = 0;
+			int minX = INT32_MAX, minY = INT32_MAX, maxX = 0, maxY = 0;
 			for(it=points->begin(); it!=points->end(); ++it)
 			{
 				minX = std::min(minX, it->x);
@@ -176,7 +176,7 @@ class Mask
 		{
 			std::vector<glm::ivec3> box;
 			std::vector<glm::ivec3>::iterator it;
-			int32_t minX = INT32_MAX, minY = INT32_MAX, minZ = INT32_MAX, maxX = 0, maxY = 0, maxZ = 0;
+			int minX = INT32_MAX, minY = INT32_MAX, minZ = INT32_MAX, maxX = 0, maxY = 0, maxZ = 0;
 			for(it=points->begin(); it!=points->end(); ++it)
 			{
 				minX = std::min(minX, it->x);
@@ -196,8 +196,8 @@ class Mask
 			std::vector<char> tmp;
 			std::vector<char>::iterator cit;
 			std::vector<glm::ivec2>::iterator it;
-			uint32_t dimensions[2];
-			int32_t pixel;
+			int dimensions[2];
+			int pixel;
 			std::string mask = "";
 
 			p = boundingBox[1] - boundingBox[0];
@@ -279,7 +279,7 @@ class Mask
 					if (b == b0)
 						break;
 				}
-				for (int i = 0; i < outline.size(); ++i)
+				for (unsigned int i = 0; i < outline.size(); ++i)
 				{
 					centroid += outline[i];
 				}

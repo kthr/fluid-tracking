@@ -25,22 +25,22 @@ Object::~Object()
 	// TODO Auto-generated destructor stub
 }
 
-uint32_t Object::getFrameId() const
+int Object::getFrameId() const
 {
 	return frameId;
 }
 
-void Object::setFrameId(uint32_t frameId)
+void Object::setFrameId(int frameId)
 {
 	this->frameId = frameId;
 }
 
-uint32_t Object::getId() const
+int Object::getId() const
 {
 	return id;
 }
 
-void Object::setId(uint32_t id)
+void Object::setId(int id)
 {
 	this->id = id;
 }
@@ -55,12 +55,12 @@ void Object::setMask(const Mask2D* mask)
 	this->mask = mask;
 }
 
-uint32_t Object::getTrackId() const
+int Object::getTrackId() const
 {
 	return trackId;
 }
 
-void Object::setTrackId(uint32_t trackId)
+void Object::setTrackId(int trackId)
 {
 	this->trackId = trackId;
 }
@@ -78,7 +78,7 @@ void Object::toXML(const xmlTextWriterPtr writer, bool compressed) const
 		xmlTextWriterStartElement(writer, BAD_CAST "mask"); /* start mask */
 		xmlTextWriterStartElement(writer, BAD_CAST "bbox"); /* start bbox */
 		std::vector<glm::ivec2> bbox = const_cast<Mask2D*>(mask)->getBoundingBox();
-		for(int i=0; i<bbox.size(); ++i)
+		for(unsigned int i=0; i<bbox.size(); ++i)
 		{
 			writePoint(writer, bbox[i]);
 		}
@@ -89,7 +89,7 @@ void Object::toXML(const xmlTextWriterPtr writer, bool compressed) const
 	else
 	{
 		xmlTextWriterStartElement(writer, BAD_CAST "outline"); /* start outline */
-		for(int i=0; i<outline.size();++i)
+		for(unsigned int i=0; i<outline.size();++i)
 		{
 			writePoint(writer, outline[i]);
 		}
@@ -97,7 +97,7 @@ void Object::toXML(const xmlTextWriterPtr writer, bool compressed) const
 	}
 
 	xmlTextWriterStartElement(writer, BAD_CAST "links"); /* start links */
-	for(int i=0; i<links.size(); ++i)
+	for(unsigned int i=0; i<links.size(); ++i)
 	{
 		links[i].toXML(writer);
 	}
@@ -118,16 +118,15 @@ elib::Link* Object::addLink()
 
 void Object::writePoint(const xmlTextWriterPtr writer, const glm::ivec2 &point) const
 {
-	int rc;
 	std::stringstream tmp;
 
-	rc = xmlTextWriterStartElement(writer, BAD_CAST "p"); /* start point */
+	xmlTextWriterStartElement(writer, BAD_CAST "p"); /* start point */
 	tmp << point.x;
-	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "x", BAD_CAST tmp.str().c_str()); /*  x */
+	xmlTextWriterWriteAttribute(writer, BAD_CAST "x", BAD_CAST tmp.str().c_str()); /*  x */
 	tmp.str("");
 	tmp << point.y;
-	rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "y", BAD_CAST tmp.str().c_str()); /*  y */
-	rc = xmlTextWriterEndElement(writer); /* end point */
+	xmlTextWriterWriteAttribute(writer, BAD_CAST "y", BAD_CAST tmp.str().c_str()); /*  y */
+	xmlTextWriterEndElement(writer); /* end point */
 }
 } /* namespace elib */
 

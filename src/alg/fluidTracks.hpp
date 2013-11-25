@@ -37,11 +37,11 @@ class FluidTracks
 		{
 			include_appearing = includeAppearing;
 		}
-		uint32_t getMinObjectSize() const
+		int getMinObjectSize() const
 		{
 			return min_object_size;
 		}
-		void setMinObjectSize(uint32_t minObjectSize = 0)
+		void setMinObjectSize(int minObjectSize = 0)
 		{
 			min_object_size = minObjectSize;
 		}
@@ -53,18 +53,18 @@ class FluidTracks
 		{
 			initial_mask_image = initialMaskImage;
 		}
-		Image<int32_t>* getInitial();
+		Image<int>* getInitial();
 		std::vector<MaskList2D >* getFrames();
-		uint32_t getMaxObjectSize() const;
-		void setMaxObjectSize(uint32_t maxObjectSize = UINT32_MAX);
-		std::string getImage(int i)
+		int getMaxObjectSize() const;
+		void setMaxObjectSize(int maxObjectSize = UINT32_MAX);
+		std::string getImage(unsigned int i)
 		{
 			if(images->size() > i)
 				return (*images)[i];
 			else
 				return std::string("");
 		}
-		std::string getFlow(int i)
+		std::string getFlow(unsigned int i)
 		{
 			if(flows->size() > i)
 				return (*flows)[i];
@@ -88,13 +88,13 @@ class FluidTracks
 
 	private:
 		bool include_appearing = true;
-		Image<int32_t> initial;
+		Image<int> initial;
 		std::vector<glm::ivec2> *divisions;
 		Parameters *params;
 		std::string initial_mask_image = "";
-		uint32_t id_counter = 0;
-		uint32_t min_object_size=0,
-				 max_object_size=UINT32_MAX;
+		int id_counter = 0;
+		int min_object_size=0,
+			max_object_size=INT32_MAX;
 		std::vector<std::string> 	*images=nullptr,
 						*flows=nullptr;
 		std::vector<MaskList2D> *frames;

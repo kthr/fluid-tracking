@@ -30,13 +30,13 @@ class Link
 		const Object*& getFrom();
 		void setFrom(const Object* from);
 		void setTo(const Object* to);
-		uint32_t getType() const;
-		void setType(uint32_t type);
+		int getType() const;
+		void setType(int type);
 
 		enum TYPE {SUCCESSOR = 0, DIVISION = 1};
 
 	private:
-		uint32_t type;
+		int type;
 		const Object *from;
 		std::vector<const Object*> to;
 		double probability = 1.;

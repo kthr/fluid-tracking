@@ -12,7 +12,6 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
-#include "../c_wrapper.h"
 
 namespace elib{
 
@@ -20,24 +19,23 @@ class Parameters
 {
 	public:
 		Parameters();
-		Parameters(uint32_t int_params_size, int32_t *int_params, std::vector<std::string> int_names, uint32_t double_params_size, double *double_params, std::vector<std::string> double_names);
-		Parameters(parameters *param);
+		Parameters(int int_params_size, int *int_params, std::vector<std::string> int_names, int double_params_size, double *double_params, std::vector<std::string> double_names);
 		virtual ~Parameters();
-		int32_t getIntegerParam(uint32_t index) const;
-		double getDoubleParam(uint32_t index) const;
-		bool setDoubleParam(uint32_t index, double value);
-		bool setIntParam(uint32_t index, int32_t value);
+		int getIntegerParam(int index) const;
+		double getDoubleParam(int index) const;
+		bool setDoubleParam(int index, double value);
+		bool setIntParam(int index, int value);
 		void toXML(const xmlTextWriterPtr writer) const;
 
 	private:
-		uint32_t 	int_params_size = 0,
+		int 	int_params_size = 0,
 					double_params_size = 0;
 		double *double_params;
-		int32_t *int_params;
+		int *int_params;
 		std::vector<std::string> int_names, double_names;
 
 		template <typename type>
-		void writeParameters(const xmlTextWriterPtr writer, uint32_t size, std::vector<std::string> names, type *values) const;
+		void writeParameters(const xmlTextWriterPtr writer, int size, std::vector<std::string> names, type *values) const;
 
 };
 

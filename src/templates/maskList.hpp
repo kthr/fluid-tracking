@@ -8,8 +8,8 @@
 #ifndef MASKLIST_HPP_
 #define MASKLIST_HPP_
 
-#include <unordered_map>
 #include <sstream>
+#include <unordered_map>
 #include <vector>
 
 #include "mask.hpp"
@@ -152,7 +152,7 @@ class MaskList
 		{
 			return masks->end();
 		}
-		Image<int32_t> masksToImage(uint32_t rank, uint32_t *dimensions)
+		Image<int> masksToImage(int rank, int *dimensions)
 		{
 			return Mask<Point>::masksToImage(rank, dimensions, masks);
 		}
@@ -176,7 +176,7 @@ class MaskList
 		{
 			return labels;
 		}
-		int32_t getSize()
+		int getSize()
 		{
 			return masks->size();
 		}
@@ -195,7 +195,7 @@ class MaskList
 private:
 		std::set<Label> *labels;
 		std::unordered_map<Label, Mask<Point>*> *masks;
-		const static uint32_t bit_depth = 16;
+		const static int bit_depth = 16;
 
 		friend void swap(MaskList& first, MaskList& second) // nothrow
 		{

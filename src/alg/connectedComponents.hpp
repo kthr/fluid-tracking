@@ -26,7 +26,7 @@ class ConnectedComponents
 		const static short LARGE_CONNECTIVITY = 1;
 		static std::vector<glm::ivec2> SMALL_2D, LARGE_2D;
 
-		Image<int32_t> getComponents(Image<int32_t> image);
+		Image<int> getComponents(Image<int> image);
 		short getConnectivity() const
 		{
 			return connectivity;
@@ -35,17 +35,17 @@ class ConnectedComponents
 		{
 			this->connectivity = connectivity;
 		}
-		int32_t getLabelOffset() const
+		int getLabelOffset() const
 		{
 			return label;
 		}
-		void setLabelOffset(int32_t label = 1)
+		void setLabelOffset(int label = 1)
 		{
 			this->label = label;
 		}
 
 		template<typename Point>
-		inline static void addNeigbours(std::queue<Point> *indices, std::vector<Point> *neighbours, Point index, uint32_t rank, uint32_t *dimensions)
+		inline static void addNeigbours(std::queue<Point> *indices, std::vector<Point> *neighbours, Point index, int rank, int *dimensions)
 		{
 			typename std::vector<Point>::iterator it;
 			Point neighbour;
@@ -55,7 +55,7 @@ class ConnectedComponents
 			{
 				neighbour = index+*it;
 				push = true;
-				for(uint32_t i=0; i<rank; ++i)
+				for(int i=0; i<rank; ++i)
 				{
 					if(neighbour[i] < 0 || neighbour[i] >= dimensions[i])
 						push = false;
@@ -67,7 +67,7 @@ class ConnectedComponents
 			}
 		}
 	private:
-		int32_t label = 1;
+		int label = 1;
 		short connectivity = LARGE_CONNECTIVITY;
 };
 

@@ -22,7 +22,7 @@ class Annotation
 		void toXML(const xmlTextWriterPtr writer) const;
 
 	private:
-		bool valid = true;
+//		bool valid = true;
 		std::string type = "";
 		std::string value = "";
 };

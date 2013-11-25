@@ -20,10 +20,10 @@ Parameters::Parameters()
 	int_names = std::vector<std::string>();
 	double_names = std::vector<std::string>();
 }
-Parameters::Parameters(uint32_t int_params_size, int32_t *int_params, std::vector<std::string> int_names, uint32_t double_params_size, double *double_params, std::vector<std::string> double_names)
+Parameters::Parameters(int int_params_size, int *int_params, std::vector<std::string> int_names, int double_params_size, double *double_params, std::vector<std::string> double_names)
 : int_params_size(int_params_size), double_params_size(double_params_size)
 {
-	this->int_params = new int32_t[int_params_size];
+	this->int_params = new int[int_params_size];
 	this->double_params = new double[double_params_size];
 	this->int_names = std::vector<std::string>(int_params_size,"");
 	this->double_names = std::vector<std::string>(double_params_size,"");
@@ -33,34 +33,21 @@ Parameters::Parameters(uint32_t int_params_size, int32_t *int_params, std::vecto
 	std::copy(int_names.begin(), int_names.end(), this->int_names.begin());
 	std::copy(double_names.begin(), double_names.end(), this->double_names.begin());
 }
-Parameters::Parameters(parameters *params)
-{
-	this->int_params_size = (uint32_t)params->int_params_size;
-	this->int_params = new int32_t[int_params_size];
-	this->double_params_size = (uint32_t)params->double_params_size;
-	this->double_params = new double[double_params_size];
-	this->int_names = std::vector<std::string>(int_params_size,"");
-	this->double_names = std::vector<std::string>(double_params_size,"");
-
-	std::copy(params->int_params, params->int_params+this->int_params_size, this->int_params);
-	std::copy(params->double_params, params->double_params+this->double_params_size, this->double_params);
-}
-
 Parameters::~Parameters()
 {
 	delete[] int_params;
 	delete[] double_params;
 }
 
-int32_t Parameters::getIntegerParam(uint32_t index) const
+int Parameters::getIntegerParam(int index) const
 {
 	return int_params[index];
 }
-double Parameters::getDoubleParam(uint32_t index) const
+double Parameters::getDoubleParam(int index) const
 {
 	return double_params[index];
 }
-bool Parameters::setDoubleParam(uint32_t index, double value)
+bool Parameters::setDoubleParam(int index, double value)
 {
 	if(index >= double_params_size)
 		return false;
@@ -70,7 +57,7 @@ bool Parameters::setDoubleParam(uint32_t index, double value)
 		return true;
 	}
 }
-bool Parameters::setIntParam(uint32_t index, int32_t value)
+bool Parameters::setIntParam(int index, int value)
 {
 	if(index >= int_params_size)
 			return false;
@@ -90,12 +77,12 @@ void Parameters::toXML(const xmlTextWriterPtr writer) const
 	rc = xmlTextWriterEndElement(writer); /* end tracking parameters */
 }
 template <typename type>
-void Parameters::writeParameters(const xmlTextWriterPtr writer, uint32_t size, std::vector<std::string> names, type *values) const
+void Parameters::writeParameters(const xmlTextWriterPtr writer, int size, std::vector<std::string> names, type *values) const
 {
 	int rc;
 	std::stringstream tmp;
 
-	for (uint32_t i = 0; i < size; ++i)
+	for (int i = 0; i < size; ++i)
 	{
 		if (names[i].compare("") != 0)
 		{

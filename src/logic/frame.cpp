@@ -30,10 +30,10 @@ std::vector<Object>::iterator Frame::begin()
 {
 	return objects.begin();
 }
-Object* Frame::addObject(uint32_t trackId)
+Object* Frame::addObject(int trackId)
 {
 	objects.push_back(Object());
-	track2objectId.insert(std::pair<uint32_t, uint32_t> (trackId, objects.size()-1));
+	track2objectId.insert(std::pair<int, int> (trackId, objects.size()-1));
 	objects.back().setTrackId(trackId);
 	return &objects.back();
 }
@@ -43,7 +43,7 @@ std::vector<Object>::iterator Frame::end()
 }
 void Frame::toXML(const xmlTextWriterPtr writer, bool compressed) const
 {
-	for(uint32_t i=0; i<objects.size(); ++i)
+	for(unsigned int i=0; i<objects.size(); ++i)
 	{
 		xmlTextWriterStartElement(writer, BAD_CAST "object"); /* start object */
 		XMLExport::writeAttribute(writer, "id", i);
@@ -52,15 +52,15 @@ void Frame::toXML(const xmlTextWriterPtr writer, bool compressed) const
 		xmlTextWriterEndElement(writer); /* end object */
 	}
 }
-const Object* Frame::getObject(uint32_t trackId) const
+const Object* Frame::getObject(int trackId) const
 {
-	std::unordered_map<uint32_t, uint32_t>::const_iterator it = track2objectId.find(trackId);
+	std::unordered_map<int, int>::const_iterator it = track2objectId.find(trackId);
 	if(it != track2objectId.end())
 		return &(objects[it->second]);
 	else
 		return nullptr;
 }
-uint32_t Frame::getNumObjects() const
+int Frame::getNumObjects() const
 {
 	return objects.size();
 }

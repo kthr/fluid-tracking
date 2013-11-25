@@ -12,9 +12,8 @@
 #include <stdint.h>
 #include <string>
 
-#include "c_wrapper.h"
+//#include "c_wrapper.h"
 #include "CImg.h"
-#include "exceptions/IOException.hpp"
 #include "utils/vector2D.hpp"
 #include "utils/vectorArray2D.hpp"
 
@@ -32,7 +31,7 @@ class Image
 		Image(const Image &other)
 		: bit_depth(other.bit_depth), channels(other.channels), flattened_length(other.flattened_length), rank(other.rank)
 		{
-			dimensions = new uint32_t[rank];
+			dimensions = new int[rank];
 			data = new type[flattened_length];
 
 			std::copy(other.dimensions, other.dimensions+rank, dimensions);
@@ -43,40 +42,40 @@ class Image
 		{
 			this->operator=(other);
 		}
-		Image(uint32_t rank, uint32_t *dimensions, uint32_t bit_depth, uint32_t channels)
+		Image(int rank, int *dimensions, int bit_depth, int channels)
 		: bit_depth(bit_depth), channels(channels), rank(rank)
 		{
-			this->dimensions  = new uint32_t[rank];
+			this->dimensions  = new int[rank];
 			std::copy(dimensions, dimensions+rank, this->dimensions);
 			this->flattened_length = channels;
-			for(uint32_t i=0; i<rank; ++i)
+			for(int i=0; i<rank; ++i)
 			{
 				this->flattened_length*=dimensions[i];
 			}
 			this->data = new type[flattened_length];
 			std::fill_n(this->data, flattened_length, 0);
 		}
-		explicit Image(cimage *image)
-		: bit_depth(image->bit_depth), channels(image->channels), flattened_length(image->flattened_length), rank(image->rank)
-		{
-			dimensions = new uint32_t[rank];
-			std::copy(image->dimensions, image->dimensions+rank, dimensions);
-			data = new type[flattened_length];
-			std::copy(image->data, image->data+flattened_length, data);
-		}
+//		explicit Image(cimage *image)
+//		: bit_depth(image->bit_depth), channels(image->channels), flattened_length(image->flattened_length), rank(image->rank)
+//		{
+//			dimensions = new int[rank];
+//			std::copy(image->dimensions, image->dimensions+rank, dimensions);
+//			data = new type[flattened_length];
+//			std::copy(image->data, image->data+flattened_length, data);
+//		}
 		explicit Image(cimg_library::CImg<type> *image)
 		{
 			if(image->depth() == 1)
 			{
 				rank = 2;
-				dimensions = new uint32_t[rank];
+				dimensions = new int[rank];
 				dimensions[0] = image->width();
 				dimensions[1] = image->height();
 			}
 			else
 			{
 				rank = 3;
-				dimensions = new uint32_t[rank];
+				dimensions = new int[rank];
 				dimensions[0] = image->width();
 				dimensions[1] = image->height();
 				dimensions[2] = image->depth();
@@ -118,7 +117,7 @@ class Image
 			type minimum;
 
 			minimum = data[0];
-			for(uint32_t i=1; i<flattened_length; ++i)
+			for(int i=1; i<flattened_length; ++i)
 				minimum = std::min(minimum, data[i]);
 			return minimum;
 		}
@@ -127,7 +126,7 @@ class Image
 			type maximum;
 
 			maximum = data[0];
-			for(uint32_t i=1; i<flattened_length; ++i)
+			for(int i=1; i<flattened_length; ++i)
 				maximum = std::max(maximum, data[i]);
 			return maximum;
 		}
@@ -167,35 +166,33 @@ class Image
 				*this = tmp;
 			}
 		}
-		cimage* to_cimage()
-		{
-			cimage *new_image;
-
-			new_image = (cimage*)malloc(sizeof(cimage));
-			new_image->bit_depth = this->getBitDepth();
-			new_image->channels = this->getChannels();
-			new_image->rank = this->getRank();
-			new_image->dimensions = (mint*)malloc(sizeof(mint)*this->getRank());
-			std::copy(this->getDimensions(), this->getDimensions()+this->getRank(), new_image->dimensions);
-			new_image->flattened_length = this->getFlattenedLength();
-			new_image->data = (mint*)malloc(sizeof(mint)*new_image->flattened_length);
-			std::copy(this->getData(), this->getData()+new_image->flattened_length, new_image->data);
-			new_image->shared = 0;
-
-			return new_image;
-		}
-		static Image<type> openImage(std::string file_name)
+//		cimage* to_cimage()
+//		{
+//			cimage *new_image;
+//
+//			new_image = (cimage*)malloc(sizeof(cimage));
+//			new_image->bit_depth = this->getBitDepth();
+//			new_image->channels = this->getChannels();
+//			new_image->rank = this->getRank();
+//			new_image->dimensions = (mint*)malloc(sizeof(mint)*this->getRank());
+//			std::copy(this->getDimensions(), this->getDimensions()+this->getRank(), new_image->dimensions);
+//			new_image->flattened_length = this->getFlattenedLength();
+//			new_image->data = (mint*)malloc(sizeof(mint)*new_image->flattened_length);
+//			std::copy(this->getData(), this->getData()+new_image->flattened_length, new_image->data);
+//			new_image->shared = 0;
+//
+//			return new_image;
+//		}
+		static Image<type>* openImage(std::string file_name)
 		{
 			try
 			{
 				cimg_library::CImg<type> img(file_name.c_str());
-				return Image<type>(&img);
+				return new Image<type>(&img);
 			}
 			catch(cimg_library::CImgException &e)
 			{
-				std::string message = std::string("ERROR: Failed to open image at: ") + file_name;
-				throw IOException(message);
-				return Image<type>();
+				return nullptr;
 			}
 		}
 		static void saveImage(std::string file_name, Image<type> *image)
@@ -204,7 +201,7 @@ class Image
 			{
 				if(image->getRank() == 2)
 				{
-					uint32_t width, height, spectrum;
+					int width, height, spectrum;
 
 					width = image->getDimensions()[0];
 					height = image->getDimensions()[1];
@@ -220,14 +217,13 @@ class Image
 			catch(cimg_library::CImgException &e)
 			{
 				std::string message = std::string("ERROR: Failed to save image at: ") + file_name;
-				throw IOException(message);
 			}
 		}
-		uint32_t getBitDepth() const
+		int getBitDepth() const
 		{
 			return bit_depth;
 		}
-		uint32_t getChannels() const
+		int getChannels() const
 		{
 			return channels;
 		}
@@ -235,15 +231,15 @@ class Image
 		{
 			return data;
 		}
-		uint32_t* getDimensions() const
+		int* getDimensions() const
 		{
 			return dimensions;
 		}
-		uint32_t getFlattenedLength() const
+		int getFlattenedLength() const
 		{
 			return flattened_length;
 		}
-		uint32_t getRank() const
+		int getRank() const
 		{
 			return rank;
 		}
@@ -253,7 +249,7 @@ class Image
 		}
 
 	private:
-		uint32_t 	*dimensions,
+		int 	*dimensions,
 					bit_depth,
 					channels,
 					flattened_length,

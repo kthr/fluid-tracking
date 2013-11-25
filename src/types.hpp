@@ -15,7 +15,7 @@
 namespace elib{
 
 	typedef elib::Mask<glm::ivec2> Mask2D;
-	typedef elib::MaskList<int32_t, glm::ivec2> MaskList2D;
+	typedef elib::MaskList<int, glm::ivec2> MaskList2D;
 
 }
 

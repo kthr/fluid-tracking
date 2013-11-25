@@ -34,19 +34,19 @@ Frame* TrackingData::addFrame()
 	frames.push_back(Frame());
 	return &(frames.back());
 }
-uint32_t TrackingData::getNumFrames() const
+int TrackingData::getNumFrames() const
 {
 	return frames.size();
 }
-uint32_t TrackingData::getNumTracks() const
+int TrackingData::getNumTracks() const
 {
 	return tracks.size();
 }
-uint32_t TrackingData::getNumberObjects() const
+int TrackingData::getNumberObjects() const
 {
-	uint32_t count = 0;
+	int count = 0;
 
-	for(int i=0; i<data->size(); ++i)
+	for(unsigned int i=0; i<data->size(); ++i)
 	{
 		count += (*data)[i].getSize();
 	}
@@ -71,10 +71,11 @@ void TrackingData::construct()
 
 		Object *object;
 		Link *link;
-		uint32_t id = 0, frameId = 0, trackId = 0;
+		int id = 0, trackId = 0;
+		unsigned int frameId = 0;
 		std::vector<MaskList2D>::iterator it;
 		std::vector<Object>::iterator objectIt;
-		std::unordered_map<int32_t, Mask2D*>::iterator mask;
+		std::unordered_map<int, Mask2D*>::iterator mask;
 
 		for (it = data->begin(); it != data->end(); ++it)
 		{
@@ -105,14 +106,14 @@ void TrackingData::construct()
 				}
 				else
 				{
-					std::unordered_map<int32_t, std::set<int32_t> >::iterator it;
+					std::unordered_map<int, std::set<int> >::iterator it;
 					it = divisions.find(trackId);
 					if(it != divisions.end())
 					{
 						link = objectIt->addLink();
 						link->setType(Link::DIVISION);
 						link->setFrom(&*objectIt);
-						std::set<int32_t>::iterator sit;
+						std::set<int>::iterator sit;
 						for(sit=it->second.begin(); sit!=it->second.end(); ++sit)
 						{
 							link->setTo(frames[frameId+1].getObject(*sit));
@@ -126,14 +127,14 @@ void TrackingData::construct()
 void TrackingData::constructDivisions()
 {
 	const std::vector<glm::ivec2> div = *(ft->getDivisions());
-	std::unordered_map<int32_t, std::set<int32_t> >::iterator it;
+	std::unordered_map<int, std::set<int> >::iterator it;
 
-	for(int i=0; i<div.size(); ++i)
+	for(unsigned int i=0; i<div.size(); ++i)
 	{
 		it = divisions.find((div[i].x));
 		if(it == divisions.end())
 		{
-			divisions.insert(std::pair<int32_t,std::set<int32_t> >(div[i].x,std::set<int32_t>()));
+			divisions.insert(std::pair<int,std::set<int> >(div[i].x,std::set<int>()));
 			it = divisions.find((div[i].x));
 			it->second.insert(div[i].y);
 		}
@@ -147,7 +148,7 @@ void TrackingData::toXML(const xmlTextWriterPtr writer) const
 {
 	xmlTextWriterStartElement(writer, BAD_CAST "frames"); /* start frames */
 	XMLExport::writeAttribute(writer, "number_of_frames", getNumFrames());
-	for (uint32_t i = 0; i < frames.size(); ++i)
+	for (unsigned int i = 0; i < frames.size(); ++i)
 	{
 		xmlTextWriterStartElement(writer, BAD_CAST "frame"); /* start frame */
 		XMLExport::writeAttribute(writer, "id", i);

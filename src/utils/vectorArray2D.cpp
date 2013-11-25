@@ -128,8 +128,9 @@ void VectorArray2D::copy(VectorArray2D*source)
 {
 	if (nx != source->nx || ny != source->ny)
 		return;
-	memcpy(vx, source->vx, sizeof(double) * nx * ny);
-	memcpy(vy, source->vy, sizeof(double) * nx * ny);
+//	memcpy(vx, source->vx, sizeof(double) * nx * ny);
+//	memcpy(vy, source->vy, sizeof(double) * nx * ny);
+	std::copy(source->vx, source->vx+2*nx*ny, vx);
 }
 
 double VectorArray2D::div(int i, int j)

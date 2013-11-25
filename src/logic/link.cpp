@@ -40,7 +40,7 @@ void Link::setTo(const Object* to)
 	this->to.push_back(to);
 }
 
-uint32_t Link::getType() const
+int Link::getType() const
 {
 	return type;
 }
@@ -65,7 +65,7 @@ void Link::toXML(const xmlTextWriterPtr writer) const
 	XMLExport::writeAttribute(writer, "type", typeName);
 	XMLExport::writeAttribute(writer, "probability", probability);
 	XMLExport::writeAttribute(writer, "v", TrackingData::DEFAULT_VALIDITY);
-	for(int i=0; i<to.size(); ++i)
+	for(unsigned int i=0; i<to.size(); ++i)
 	{
 		xmlTextWriterStartElement(writer, BAD_CAST "object"); /* start object */
 		XMLExport::writeAttribute(writer, "objectID", to[i]->getId());
@@ -76,7 +76,7 @@ void Link::toXML(const xmlTextWriterPtr writer) const
 	xmlTextWriterEndElement(writer); /* end link */
 }
 
-void Link::setType(uint32_t type)
+void Link::setType(int type)
 {
 	this->type = type;
 }

@@ -23,18 +23,18 @@ class Frame
 	public:
 		Frame();
 		virtual ~Frame();
-		Object* addObject(uint32_t trackId);
-		const Object* getObject(uint32_t trackId) const;
+		Object* addObject(int trackId);
+		const Object* getObject(int trackId) const;
 		std::vector<Object>::iterator begin();
 		std::vector<Object>::iterator end();
 		void toXML(const xmlTextWriterPtr writer, bool compressed=true) const;
-		uint32_t getNumObjects() const;
+		int getNumObjects() const;
 		const std::vector<Object>& getObjects() const;
 		void setObjects(const std::vector<Object>& objects);
 
 	private:
 		std::vector<Object> objects;
-		std::unordered_map<uint32_t, uint32_t> track2objectId;
+		std::unordered_map<int, int> track2objectId;
 };
 
 } /* namespace elib */

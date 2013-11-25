@@ -11,7 +11,6 @@
 
 #include "componentsMeasurements.hpp"
 #include "connectedComponents.hpp"
-#include "exceptions/IOException.hpp"
 #include "labeling.hpp"
 #include "utils/vectorArray2D.hpp"
 #include "utils/utilities.hpp"
@@ -44,10 +43,10 @@ void FluidTracks::addAppearingObjects(MaskList2D *masks)
 {
 	ComponentsMeasurements cm;
 	ConnectedComponents cc;
-	Image<int32_t> label_image;
+	Image<int> label_image;
 	Mask2D* new_objects;
 	MaskList2D new_object_masks;
-	unordered_map<int32_t, Mask2D*>::iterator it;
+	unordered_map<int, Mask2D*>::iterator it;
 
 	new_objects = masks->getMask(1);
 	if(new_objects != nullptr)
@@ -66,9 +65,9 @@ void FluidTracks::addAppearingObjects(MaskList2D *masks)
 
 void FluidTracks::applySizeConstraints(MaskList2D *masks)
 {
-	unordered_map<int32_t, Mask2D* >::iterator it;
-	vector<int32_t> for_deletion;
-	uint32_t size;
+	unordered_map<int, Mask2D* >::iterator it;
+	vector<int> for_deletion;
+	int size;
 
 	it = masks->begin();
 	while(it != masks->end())
@@ -90,11 +89,11 @@ void FluidTracks::detectDivisions(MaskList2D *masks)
 {
 	ConnectedComponents cc;
 	ComponentsMeasurements cm;
-	Image<int32_t> label_image;
-	int32_t max;
+	Image<int> label_image;
+	int max;
 	MaskList2D objects, tmp_masks;
-	unordered_map<int32_t, Mask2D* >::iterator it, it2;
-	vector<int32_t> for_deletion;
+	unordered_map<int, Mask2D* >::iterator it, it2;
+	vector<int> for_deletion;
 
 	it= masks->begin();
 	while(it!=masks->end())
@@ -130,106 +129,92 @@ void FluidTracks::track()
 {
 	ConnectedComponents cc;
 	ComponentsMeasurements cm;
-	Image<int32_t> image, old_label, *propagated_label;
+	Image<int> *tmp, image, old_label, *propagated_label;
 	Labeling lbg;
 	MaskList2D masks;
 
 	lbg.setVerbosity(verbosity);
 	lbg.setCycles(cycles);
-	try
+
+	cc.setLabelOffset(2);
+	if(initial_mask_image.compare("") == 0)
 	{
-		cc.setLabelOffset(2);
-		if(initial_mask_image.compare("") == 0)
-		{
-			try{
-				initial = Image<int32_t>::openImage((*images)[0]);
-			}
-			catch(IOException &e)
-			{
-				std::cerr << e.what() << std::endl;
-				throw "ERROR: Tracking couldn't be performed!";
-			}
-			Image<int32_t> emptyLabel(initial.getRank(), initial.getDimensions(), 16, initial.getChannels());
-			params->setIntParam(0,2);
-			propagated_label = lbg.labeling(&emptyLabel, &initial, params);
-			initial = *propagated_label;
-			delete propagated_label;
-			initial = cc.getComponents(initial);
-			cm = ComponentsMeasurements(initial);
-			masks = cm.getMasks();
-			applySizeConstraints(&masks);
-			initial = masks.masksToImage(initial.getRank(), initial.getDimensions());
-		}
-		else /* open initial label image */
-		{
-			try{
-				initial = Image<int32_t>::openImage(initial_mask_image);
-				cm = ComponentsMeasurements(initial);
-				masks = cm.getMasks();
-				masks.relabel(1);
-				applySizeConstraints(&masks);
-				initial = masks.masksToImage(initial.getRank(), initial.getDimensions());
-			}
-			catch(IOException &e)
-			{
-				std::cerr << e.what() << std::endl;
-				throw "ERROR: Tracking couldn't be performed!";
-			}
-		}
-		old_label = Image<int32_t>(initial);
-		cm = ComponentsMeasurements(old_label);
+		tmp = Image<int>::openImage((*images)[0]);
+		if(tmp == nullptr)
+			abort();
+		else
+			initial = *tmp;
+		Image<int> emptyLabel(initial.getRank(), initial.getDimensions(), 16, initial.getChannels());
+		params->setIntParam(0,2);
+		propagated_label = lbg.labeling(&emptyLabel, &initial, params);
+		initial = *propagated_label;
+		delete propagated_label;
+		initial = cc.getComponents(initial);
+		cm = ComponentsMeasurements(initial);
 		masks = cm.getMasks();
-		frames->push_back(masks);
-		id_counter = *(--masks.getLabels()->end())+1;
-		VectorArray2D va;
-		if(verbosity)
-			std::cout << "frame: " << 0 << ", #objects: " << masks.getSize() << std::endl;
-		for(int i=1; i<images->size(); ++i)
-		{
-			if(verbosity)
-				std::cout << "frame: " << i << ", #objects: " << masks.getSize() << std::endl;
-;
-			if(flows->size() != 0)
-			{
-				va.load((*flows)[i-1].c_str());
-				old_label.displaceByVectorField(va);
-				cm = ComponentsMeasurements(old_label);
-				masks = cm.getMasks();
-			}
-			try{
-				image = Image<int32_t>::openImage((*images)[i]);
-			}
-			catch(IOException e)
-			{
-				std::cerr << e.what() << std::endl;
-				throw "ERROR: Tracking couldn't be performed!";
-			}
-			params->setIntParam(0, masks.getSize()+2);
-			propagated_label = lbg.labeling(&old_label, &image, params);
-			cm = ComponentsMeasurements(*propagated_label);
-			masks = cm.getMasks();
-			delete propagated_label;
-			if(include_appearing)
-			{
-				addAppearingObjects(&masks);
-			}
-			else
-			{
-				masks.deleteMask(1);
-			}
-			detectDivisions(&masks);
-			frames->push_back(masks);
-			old_label = masks.masksToImage(initial.getRank(), initial.getDimensions());
-		}
+		applySizeConstraints(&masks);
+		initial = masks.masksToImage(initial.getRank(), initial.getDimensions());
+		delete tmp;
 	}
-	catch(class IOException &e)
+	else /* open initial label image */
 	{
-		std::cout << e.what();
-		return;
+		tmp = Image<int>::openImage(initial_mask_image);
+		if(tmp == nullptr)
+			abort();
+		else
+			initial = *tmp;
+		cm = ComponentsMeasurements(initial);
+		masks = cm.getMasks();
+		masks.relabel(1);
+		applySizeConstraints(&masks);
+		initial = masks.masksToImage(initial.getRank(), initial.getDimensions());
+		delete tmp;
+	}
+	old_label = Image<int>(initial);
+	cm = ComponentsMeasurements(old_label);
+	masks = cm.getMasks();
+	frames->push_back(masks);
+	id_counter = *(--masks.getLabels()->end())+1;
+	VectorArray2D va;
+	if(verbosity)
+		std::cout << "frame: " << 0 << ", #objects: " << masks.getSize() << std::endl;
+	for(unsigned int i=1; i<images->size(); ++i)
+	{
+		if(verbosity)
+			std::cout << "frame: " << i << ", #objects: " << masks.getSize() << std::endl;
+		if(flows->size() != 0)
+		{
+			va.load((*flows)[i-1].c_str());
+			old_label.displaceByVectorField(va);
+			cm = ComponentsMeasurements(old_label);
+			masks = cm.getMasks();
+		}
+		tmp = Image<int>::openImage((*images)[i]);
+		if(tmp == nullptr)
+			abort();
+		else
+			image = *tmp;
+		params->setIntParam(0, masks.getSize()+2);
+		propagated_label = lbg.labeling(&old_label, &image, params);
+		delete tmp;
+		cm = ComponentsMeasurements(*propagated_label);
+		masks = cm.getMasks();
+		delete propagated_label;
+		if(include_appearing)
+		{
+			addAppearingObjects(&masks);
+		}
+		else
+		{
+			masks.deleteMask(1);
+		}
+		detectDivisions(&masks);
+		frames->push_back(masks);
+		old_label = masks.masksToImage(initial.getRank(), initial.getDimensions());
 	}
 }
 
-Image<int32_t>* FluidTracks::getInitial()
+Image<int>* FluidTracks::getInitial()
 {
 	return &initial;
 }
@@ -239,12 +224,12 @@ vector<MaskList2D>* FluidTracks::getFrames()
 	return frames;
 }
 
-uint32_t FluidTracks::getMaxObjectSize() const
+int FluidTracks::getMaxObjectSize() const
 {
 	return max_object_size;
 }
 
-void FluidTracks::setMaxObjectSize(uint32_t maxObjectSize)
+void FluidTracks::setMaxObjectSize(int maxObjectSize)
 {
 	max_object_size = maxObjectSize;
 }

@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 2.8.4)
+cmake_minimum_required(VERSION 2.8)
 project(Labeling)
 
 set(SOURCES 
-    src/libraryLink.c
-    src/c_wrapper.cpp
+#    src/libraryLink.c
+#    src/c_wrapper.cpp
     src/alg/labeling.cpp
     src/alg/connectedComponents.cpp
     src/alg/componentsMeasurements.cpp
@@ -29,52 +29,54 @@ add_executable(fluidTracking
     ${SOURCES}
 )
 
-add_library(Labeling SHARED
-    ${SOURCES}
-)
-
 include_directories(
     src/
     lib
     /usr/include/libxml2
 )
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}" ${CMAKE_MODULE_PATH})
-find_package(Mathematica)
-if(${Mathematica_WolframLibrary_FOUND})
-    include_directories(${Mathematica_WolframLibrary_INCLUDE_DIR})
-else(
-	message(ERROR "Mathematica not found")
-)
+set(Boost_USE_STATIC_LIBS OFF) 
+set(Boost_USE_MULTITHREADED ON)  
+set(Boost_USE_STATIC_RUNTIME OFF) 
+find_package(Boost COMPONENTS filesystem system regex program_options) 
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})
+    target_link_libraries(fluidTracking ${Boost_LIBRARIES} X11 xml2 pthread)                                                                                                                                                                                                                     
 endif()
 
-if(WIN32)
-        # Execute Win32 Specific commands - none yet.
-else(WIN32)
-    # Execute commands for other platforms
-    message("Create command")
-    add_custom_command(
-        OUTPUT revision
-        COMMAND ${CMAKE_SOURCE_DIR}/version.sh
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Creates/updates git Revision Header"
-    )
-endif(WIN32)
-message(${CMAKE_SOURCE_DIR}/version.sh)
-add_custom_target(version ALL DEPENDS revision)
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    # require at least gcc 4.8
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
+        message(FATAL_ERROR "GCC version must be at least 4.7!")
+    endif()
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    # require at least clang 3.2
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.2)
+        message(FATAL_ERROR "Clang version must be at least 3.2!")
+    endif()
+else()
+    message(WARNING "You are using an unsupported compiler! Compilation has only been tested with Clang and GCC.")
+endif()
 
-set(CMAKE_CXX_FLAGS
-    "-O4 -pipe -Wall -I/Users/kthierbach/dev/boost-c++11/include -I/opt/local/include -std=c++11 -stdlib=libc++"
-)
-set(CMAKE_C_FLAGS
-    "-O4 -pipe -Wall -I/Users/kthierbach/dev/boost-c++11/include"
-)
+if(UNIX AND NOT APPLE)
+    message("\nEntering configuration for UNIX computers:\n")
+    set(CMAKE_CXX_FLAGS "-O4 -pipe -Wall -std=c++11")
+    set(CMAKE_C_FLAGS "-O4 -pipe -Wall")
+    set_target_properties(fluidTracking
+        PROPERTIES
+        LINK_FLAGS ""
+     )
+endif()
 
 if(APPLE)
     message("\nEntering configuration for APPLE computers:\n")
-    set_target_properties(Labeling fluidTracking
+#    set(CMAKE_CXX_COMPILER g++-mp-4.7)
+#    set(CMAKE_C_COMPILER gcc-mp-4.7)
+    set(CMAKE_CXX_FLAGS "-O4 -pipe -Wall -I/opt/local/include -std=c++11 -stdlib=libc++")
+    set(CMAKE_C_FLAGS "-O4 -pipe -Wall")
+    set_target_properties(fluidTracking
         PROPERTIES
-        LINK_FLAGS "-v -lstdc++ -lpthread  -L/opt/X11/lib -lX11 -lxml2 -L/Users/kthierbach/dev/boost-c++11/lib -lboost_program_options -lboost_regex -lboost_filesystem -lboost_system"
+        LINK_FLAGS "-L/opt/X11/lib"
      )
 endif()
 

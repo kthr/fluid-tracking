@@ -15,7 +15,7 @@ using std::unordered_map;
 
 ComponentsMeasurements::ComponentsMeasurements()
 {
-	labels = new std::set<int32_t>();
+	labels = new std::set<int>();
 	masks = new MaskList2D();
 }
 ComponentsMeasurements::ComponentsMeasurements(const ComponentsMeasurements& other)
@@ -27,10 +27,10 @@ elib::ComponentsMeasurements::ComponentsMeasurements(ComponentsMeasurements&& ot
 {
 	swap(*this,other);
 }
-ComponentsMeasurements::ComponentsMeasurements(Image<int32_t> label_image)
+ComponentsMeasurements::ComponentsMeasurements(Image<int> label_image)
 {
 	this->label_image = label_image;
-	labels = new std::set<int32_t>();
+	labels = new std::set<int>();
 	masks = new MaskList2D();
 	init();
 }
@@ -46,11 +46,11 @@ elib::MaskList2D ComponentsMeasurements::getMasks()
 
 void ComponentsMeasurements::init()
 {
-	Image<int32_t>* tmp_image;
-	int32_t *tmp_data;
-	uint32_t *dimensions, width, height, label;
+	Image<int>* tmp_image;
+	int *tmp_data;
+	int *dimensions, width, height, label;
 
-	tmp_image = new Image<int32_t>(label_image);
+	tmp_image = new Image<int>(label_image);
 	tmp_data = tmp_image->getData();
 
 	if (label_image.getRank() == 2) //2d-image
@@ -61,7 +61,7 @@ void ComponentsMeasurements::init()
 		std::queue<glm::ivec2> indices;
 		std::vector<glm::ivec2> *neighbours;
 		glm::ivec2 index, neighbour;
-		int32_t pixel;
+		int pixel;
 
 		if (connectivity == SMALL_CONNECTIVITY)
 		{
@@ -72,9 +72,9 @@ void ComponentsMeasurements::init()
 			neighbours = &(ConnectedComponents::LARGE_2D);
 		}
 
-		for (int32_t j = 0; j < height; ++j)
+		for (int j = 0; j < height; ++j)
 		{
-			for (int32_t i = 0; i < width; ++i)
+			for (int i = 0; i < width; ++i)
 			{
 				pixel = j * width + i;
 				if (tmp_data[pixel] > 0)

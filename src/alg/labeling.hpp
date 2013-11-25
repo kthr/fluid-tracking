@@ -18,7 +18,7 @@ class Labeling
 	public:
 		Labeling(){}
 		~Labeling(){}
-		Image<int32_t>* labeling(Image<int32_t>* label_image, Image<int32_t>* input_image, Parameters *input_params);
+		Image<int>* labeling(Image<int>* label_image, Image<int>* input_image, Parameters *input_params);
 
 		void setCycles(int cycles = 0)
 		{

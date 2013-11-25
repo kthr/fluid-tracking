@@ -16,7 +16,6 @@
 
 #include "alg/fluidTracks.hpp"
 #include "CImg.h"
-#include "exceptions/IOException.hpp"
 #include "io/xmlExport.hpp"
 #include "logic/trackingData.hpp"
 #include "utils/parameters.hpp"
@@ -32,7 +31,6 @@ int main(int argc, char *argv[])
 
 	using elib::FluidTracks;
 	using elib::Image;
-	using elib::IOException;
 	using elib::Parameters;
 	using elib::TrackingData;
 	using elib::Utilities;
@@ -40,7 +38,7 @@ int main(int argc, char *argv[])
 	namespace fs = boost::filesystem;
 	namespace po = boost::program_options;
 
-	int32_t min = 0, max = INT32_MAX;
+	int min = 0, max = INT32_MAX;
 	double c0 = .1, c1 = .9, mu = 1., lambda = 1.;
 	std::string initial = "", image_folder, vector_field_folder, label_image_folder = "", in;
 	int iao = 1,
@@ -282,7 +280,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	int32_t int_params[1] = { 0 };
+	int int_params[1] = { 0 };
 	double double_params[4] = { c0, c1, lambda, mu };
 	std::vector<std::string> int_names({ "" });
 	std::vector<std::string> double_names({ "C0", "C1", "Lambda", "Mu" });
@@ -295,15 +293,7 @@ int main(int argc, char *argv[])
 	ft.setIncludeAppearing(iao);
 	ft.setVerbosity(verbosity);
 	ft.setCycles(cycles);
-
-	try
-	{
-		ft.track();
-	} catch (const char* e)
-	{
-		std::cerr << e << std::endl;
-		return EXIT_FAILURE;
-	}
+	ft.track();
 
 	TrackingData td(&ft, compressed);
 	td.construct();
@@ -316,18 +306,18 @@ int main(int argc, char *argv[])
 	{
 		std::vector<elib::MaskList2D>::iterator it;
 		std::string file_name;
-		Image<int32_t> image;
+		Image<int> image;
 		int i = 0;
 		for (it = ft.getFrames()->begin(); it != ft.getFrames()->end(); ++it)
 		{
 			file_name = Utilities::createFileName(label_image_folder, std::string("label"), std::string(".png"), i);
 			image = it->masksToImage(ft.getInitial()->getRank(), ft.getInitial()->getDimensions());
-			Image<int32_t>::saveImage(file_name, &image);
+			Image<int>::saveImage(file_name, &image);
 			++i;
 		}
 	}
 
-//	Image<int32_t> image = Image<int32_t>::openImage(images[0]);
+//	Image<int> image = Image<int>::openImage(images[0]);
 //	VectorArray2D va;
 //	for(int i=0; i<vector_fields.size(); ++i)
 //	{
