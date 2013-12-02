@@ -5,7 +5,7 @@
  *      Author: Konstantin Thierbach
  */
 
-#include "VectorArray2D.hpp"
+#include "vectorArray2D.hpp"
 
 #include <fstream>
 

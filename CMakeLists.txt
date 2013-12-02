@@ -1,9 +1,7 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.10)
 project(Labeling)
 
 set(SOURCES 
-#    src/libraryLink.c
-#    src/c_wrapper.cpp
     src/alg/labeling.cpp
     src/alg/connectedComponents.cpp
     src/alg/componentsMeasurements.cpp
@@ -24,10 +22,17 @@ set(SOURCES
     src/utils/vectorArray2D.cpp
 )
 
+add_custom_target(
+    Version
+    COMMAND /bin/bash version.sh
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+
 add_executable(fluidTracking
     src/fluidTracking.cpp
     ${SOURCES}
 )
+add_dependencies(fluidTracking Version)
 
 include_directories(
     src/
@@ -70,8 +75,6 @@ endif()
 
 if(APPLE)
     message("\nEntering configuration for APPLE computers:\n")
-#    set(CMAKE_CXX_COMPILER g++-mp-4.7)
-#    set(CMAKE_C_COMPILER gcc-mp-4.7)
     set(CMAKE_CXX_FLAGS "-O4 -pipe -Wall -I/opt/local/include -std=c++11 -stdlib=libc++")
     set(CMAKE_C_FLAGS "-O4 -pipe -Wall")
     set_target_properties(fluidTracking
