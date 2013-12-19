@@ -11,7 +11,7 @@
 #include <functional>
 #include <iostream>
 #include <set>
-#include <stdint.h>
+#include <limits>
 #include <stdlib.h>
 #include <unordered_map>
 #include <unordered_set>
@@ -160,7 +160,7 @@ class Mask
 		{
 			std::vector<glm::ivec2> box;
 			std::vector<glm::ivec2>::iterator it;
-			int minX = INT32_MAX, minY = INT32_MAX, maxX = 0, maxY = 0;
+			int minX = std::numeric_limits<int>::max(), minY = std::numeric_limits<int>::max(), maxX = 0, maxY = 0;
 			for(it=points->begin(); it!=points->end(); ++it)
 			{
 				minX = std::min(minX, it->x);
