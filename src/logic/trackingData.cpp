@@ -73,9 +73,9 @@ void TrackingData::construct()
 		Link *link;
 		int id = 0, trackId = 0;
 		unsigned int frameId = 0;
-		std::vector<MaskList2D>::iterator it;
+		std::vector<MaskList<int, glm::ivec2>>::iterator it;
 		std::vector<Object>::iterator objectIt;
-		std::unordered_map<int, Mask2D*>::iterator mask;
+		std::unordered_map<int, Mask<glm::ivec2>*>::iterator mask;
 
 		for (it = data->begin(); it != data->end(); ++it)
 		{

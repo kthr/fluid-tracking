@@ -8,11 +8,10 @@
 #ifndef IMAGE_HPP_
 #define IMAGE_HPP_
 
-#include <algorithm>
 #include <stdint.h>
 #include <string>
+#include <utility>
 
-//#include "c_wrapper.h"
 #include "CImg.h"
 #include "utils/vector2D.hpp"
 #include "utils/vectorArray2D.hpp"
@@ -247,14 +246,35 @@ class Image
 		{
 			std::copy(data, data+flattened_length, this->data);
 		}
+		int getWidth()
+		{
+			if(rank>0)
+				return dimensions[0];
+			else
+				return 0;
+		}
+		int getHeight()
+		{
+			if(rank>1)
+				return dimensions[1];
+			else
+				return 0;
+		}
+		int getDepth()
+		{
+			if(rank>2)
+				return dimensions[2];
+			else
+				return 1;
+		}
 
 	private:
-		int 	*dimensions,
-					bit_depth,
-					channels,
-					flattened_length,
-					rank;
-		type 		*data;
+		int 	*dimensions = nullptr,
+				bit_depth = 0,
+				channels = 0,
+				flattened_length = 0,
+				rank = 0;
+		type 	*data = nullptr;
 
 		friend void swap(Image& first,Image& second)
 		{

@@ -7,94 +7,101 @@
 
 #include "parameters.hpp"
 
-#include <algorithm>
+#include <limits>
 #include <sstream>
-#include <iostream>
 
 namespace elib{
 
 Parameters::Parameters()
 {
-	int_params = nullptr;
-	double_params = nullptr;
-	int_names = std::vector<std::string>();
-	double_names = std::vector<std::string>();
-}
-Parameters::Parameters(int int_params_size, int *int_params, std::vector<std::string> int_names, int double_params_size, double *double_params, std::vector<std::string> double_names)
-: int_params_size(int_params_size), double_params_size(double_params_size)
-{
-	this->int_params = new int[int_params_size];
-	this->double_params = new double[double_params_size];
-	this->int_names = std::vector<std::string>(int_params_size,"");
-	this->double_names = std::vector<std::string>(double_params_size,"");
-
-	std::copy(int_params, int_params+int_params_size, this->int_params);
-	std::copy(double_params, double_params+double_params_size, this->double_params);
-	std::copy(int_names.begin(), int_names.end(), this->int_names.begin());
-	std::copy(double_names.begin(), double_names.end(), this->double_names.begin());
 }
 Parameters::~Parameters()
 {
-	delete[] int_params;
-	delete[] double_params;
 }
 
-int Parameters::getIntegerParam(int index) const
+bool Parameters::addParameter(std::string identifier, int value)
 {
-	return int_params[index];
+	integer_params.erase(identifier);
+	auto res = integer_params.insert(std::pair<std::string,int>(identifier,value));
+	return res.second;
 }
-double Parameters::getDoubleParam(int index) const
+
+bool Parameters::addParameter(std::string identifier, double value)
 {
-	return double_params[index];
+	double_params.erase(identifier);
+	auto res = double_params.insert(std::pair<std::string,double>(identifier,value));
+	return res.second;
 }
-bool Parameters::setDoubleParam(int index, double value)
+
+bool Parameters::addParameter(std::string identifier, elib::Tensor<int> &value)
 {
-	if(index >= double_params_size)
-		return false;
+	integer_tensor_params.erase(identifier);
+	auto res = integer_tensor_params.insert(std::pair<std::string, elib::Tensor<int> >(identifier, value));
+	return res.second;
+}
+
+int Parameters::getIntegerParameter(std::string identifier) const
+{
+	auto res = integer_params.find(identifier);
+	if(res == integer_params.end())
+	{
+		return std::numeric_limits<int>::quiet_NaN();
+	}
 	else
 	{
-		double_params[index] = value;
-		return true;
+		return res->second;
 	}
 }
-bool Parameters::setIntParam(int index, int value)
+
+double Parameters::getDoubleParameter(std::string identifier) const
 {
-	if(index >= int_params_size)
-			return false;
+	auto res = double_params.find(identifier);
+	if(res == double_params.end())
+	{
+		return std::numeric_limits<double>::quiet_NaN();
+	}
 	else
 	{
-		int_params[index] = value;
-		return true;
+		return res->second;
 	}
 }
+
+const elib::Tensor<int>* Parameters::getIntegerTensorParameter(std::string identifier) const
+{
+	auto res = integer_tensor_params.find(identifier);
+	if(res == integer_tensor_params.end())
+	{
+		return nullptr;
+	}
+	else
+	{
+		return &(res->second);
+	}
+}
+
 void Parameters::toXML(const xmlTextWriterPtr writer) const
 {
-	int rc;
-
-	rc = xmlTextWriterStartElement(writer, BAD_CAST "parameters"); /* start tracking parameters */
-	writeParameters(writer, int_params_size, int_names, int_params);
-	writeParameters(writer, double_params_size, double_names, double_params);
-	rc = xmlTextWriterEndElement(writer); /* end tracking parameters */
+	xmlTextWriterStartElement(writer, BAD_CAST "parameters"); /* start tracking parameters */
+	writeParameters(writer, &integer_params);
+	writeParameters(writer, &double_params);
+	xmlTextWriterEndElement(writer); /* end tracking parameters */
 }
+
 template <typename type>
-void Parameters::writeParameters(const xmlTextWriterPtr writer, int size, std::vector<std::string> names, type *values) const
+void Parameters::writeParameters(const xmlTextWriterPtr writer, const std::unordered_map<std::string, type> *params) const
 {
-	int rc;
 	std::stringstream tmp;
 
-	for (int i = 0; i < size; ++i)
+	for (auto i = params->begin(); i != params->end(); ++i)
 	{
-		if (names[i].compare("") != 0)
-		{
-			rc = xmlTextWriterStartElement(writer, BAD_CAST "param");
-			rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "name", BAD_CAST names[i].c_str());
-			tmp << values[i];
-			rc = xmlTextWriterWriteAttribute(writer, BAD_CAST "value", BAD_CAST tmp.str().c_str());
-			rc = xmlTextWriterEndElement(writer); /* end param */
-			tmp.str("");
-		}
+		xmlTextWriterStartElement(writer, BAD_CAST "param");
+		xmlTextWriterWriteAttribute(writer, BAD_CAST "name", BAD_CAST i->first.c_str());
+		tmp << i->second;
+		xmlTextWriterWriteAttribute(writer, BAD_CAST "value", BAD_CAST tmp.str().c_str());
+		xmlTextWriterEndElement(writer); /* end param */
+		tmp.str("");
 	}
 }
 
-}
+} /* end namespace elib */
 

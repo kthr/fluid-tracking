@@ -11,6 +11,7 @@
 
 #include "componentsMeasurements.hpp"
 #include "connectedComponents.hpp"
+#include "graphcut.hpp"
 #include "labeling.hpp"
 #include "utils/vectorArray2D.hpp"
 #include "utils/utilities.hpp"
@@ -25,13 +26,13 @@ using std::string;
 FluidTracks::FluidTracks()
 {
 	divisions = new vector<glm::ivec2>;
-	frames = new vector<MaskList2D >();
+	frames = new vector<MaskList<int, glm::ivec2> >();
 }
 FluidTracks::FluidTracks(Parameters *params, vector<string> *images, vector<string> *flows)
 : params(params), images(images), flows(flows)
 {
 	divisions = new vector<glm::ivec2>;
-	frames = new vector<MaskList2D >();
+	frames = new vector<MaskList<int, glm::ivec2> >();
 }
 FluidTracks::~FluidTracks()
 {
@@ -39,14 +40,14 @@ FluidTracks::~FluidTracks()
 	delete frames;
 }
 
-void FluidTracks::addAppearingObjects(MaskList2D *masks)
+void FluidTracks::addAppearingObjects(MaskList<int, glm::ivec2> *masks)
 {
 	ComponentsMeasurements cm;
 	ConnectedComponents cc;
 	Image<int> label_image;
-	Mask2D* new_objects;
-	MaskList2D new_object_masks;
-	unordered_map<int, Mask2D*>::iterator it;
+	Mask<glm::ivec2>* new_objects;
+	MaskList<int, glm::ivec2> new_object_masks(initial.getRank(), initial.getDimensions());
+	unordered_map<int, Mask<glm::ivec2>*>::iterator it;
 
 	new_objects = masks->getMask(1);
 	if(new_objects != nullptr)
@@ -63,9 +64,9 @@ void FluidTracks::addAppearingObjects(MaskList2D *masks)
 	}
 }
 
-void FluidTracks::applySizeConstraints(MaskList2D *masks)
+void FluidTracks::applySizeConstraints(MaskList<int, glm::ivec2> *masks)
 {
-	unordered_map<int, Mask2D* >::iterator it;
+	unordered_map<int, Mask<glm::ivec2>* >::iterator it;
 	vector<int> for_deletion;
 	int size;
 
@@ -85,14 +86,14 @@ void FluidTracks::applySizeConstraints(MaskList2D *masks)
 
 }
 
-void FluidTracks::detectDivisions(MaskList2D *masks)
+void FluidTracks::detectDivisions(MaskList<int, glm::ivec2> *masks)
 {
 	ConnectedComponents cc;
 	ComponentsMeasurements cm;
 	Image<int> label_image;
 	int max;
-	MaskList2D objects, tmp_masks;
-	unordered_map<int, Mask2D* >::iterator it, it2;
+	MaskList<int, glm::ivec2> objects(initial.getRank(),initial.getDimensions()), tmp_masks(initial.getRank(), initial.getDimensions());
+	unordered_map<int, Mask<glm::ivec2>* >::iterator it, it2;
 	vector<int> for_deletion;
 
 	it= masks->begin();
@@ -131,7 +132,7 @@ void FluidTracks::track()
 	ComponentsMeasurements cm;
 	Image<int> *tmp, image, old_label, *propagated_label;
 	Labeling lbg;
-	MaskList2D masks;
+	MaskList<int, glm::ivec2> masks;
 
 	lbg.setVerbosity(verbosity);
 	lbg.setCycles(cycles);
@@ -145,13 +146,13 @@ void FluidTracks::track()
 		else
 			initial = *tmp;
 		Image<int> emptyLabel(initial.getRank(), initial.getDimensions(), 16, initial.getChannels());
-		params->setIntParam(0,2);
-		propagated_label = lbg.labeling(&emptyLabel, &initial, params);
+		propagated_label = graphcut(initial, *params);
 		initial = *propagated_label;
 		delete propagated_label;
 		initial = cc.getComponents(initial);
 		cm = ComponentsMeasurements(initial);
 		masks = cm.getMasks();
+		std::cout << masks.toString() << std::endl;
 		applySizeConstraints(&masks);
 		initial = masks.masksToImage(initial.getRank(), initial.getDimensions());
 		delete tmp;
@@ -180,7 +181,7 @@ void FluidTracks::track()
 		std::cout << "frame: " << 0 << ", #objects: " << masks.getSize() << std::endl;
 	for(unsigned int i=1; i<images->size(); ++i)
 	{
-		if(verbosity)
+		if(verbosity && i%10 == 0)
 			std::cout << "frame: " << i << ", #objects: " << masks.getSize() << std::endl;
 		if(flows->size() != 0)
 		{
@@ -194,7 +195,7 @@ void FluidTracks::track()
 			abort();
 		else
 			image = *tmp;
-		params->setIntParam(0, masks.getSize()+2);
+		params->addParameter("NumberLabels", masks.getSize()+2);
 		propagated_label = lbg.labeling(&old_label, &image, params);
 		delete tmp;
 		cm = ComponentsMeasurements(*propagated_label);
@@ -219,7 +220,7 @@ Image<int>* FluidTracks::getInitial()
 	return &initial;
 }
 
-vector<MaskList2D>* FluidTracks::getFrames()
+vector<MaskList<int, glm::ivec2>>* FluidTracks::getFrames()
 {
 	return frames;
 }

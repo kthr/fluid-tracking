@@ -9,33 +9,35 @@
 #define PARAMETERS_HPP_
 
 #include <libxml/xmlwriter.h>
-#include <stdint.h>
+#include <set>
 #include <string>
-#include <vector>
+#include <unordered_map>
 
-namespace elib{
+#include "templates/tensor.hpp"
+
+namespace elib
+{
 
 class Parameters
 {
 	public:
 		Parameters();
-		Parameters(int int_params_size, int *int_params, std::vector<std::string> int_names, int double_params_size, double *double_params, std::vector<std::string> double_names);
 		virtual ~Parameters();
-		int getIntegerParam(int index) const;
-		double getDoubleParam(int index) const;
-		bool setDoubleParam(int index, double value);
-		bool setIntParam(int index, int value);
+		bool addParameter(std::string identifier, int value);
+		bool addParameter(std::string identifier, double value);
+		bool addParameter(std::string identifier, elib::Tensor<int> &tensor);
+		int getIntegerParameter(std::string identifier) const;
+		double getDoubleParameter(std::string identifier) const;
+		const elib::Tensor<int>* getIntegerTensorParameter(std::string identifier) const;
 		void toXML(const xmlTextWriterPtr writer) const;
 
 	private:
-		int 	int_params_size = 0,
-					double_params_size = 0;
-		double *double_params;
-		int *int_params;
-		std::vector<std::string> int_names, double_names;
+		std::unordered_map<std::string, int> integer_params;
+		std::unordered_map<std::string, double> double_params;
+		std::unordered_map<std::string, elib::Tensor<int> > integer_tensor_params;
 
 		template <typename type>
-		void writeParameters(const xmlTextWriterPtr writer, int size, std::vector<std::string> names, type *values) const;
+		void writeParameters(const xmlTextWriterPtr writer, const std::unordered_map<std::string, type> *params) const;
 
 };
 

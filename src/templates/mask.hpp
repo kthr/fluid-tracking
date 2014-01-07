@@ -8,13 +8,13 @@
 #ifndef MASK_HPP_
 #define MASK_HPP_
 
+#include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <functional>
-#include <iostream>
-#include <set>
 #include <limits>
 #include <stdlib.h>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "circularLinkedList.hpp"
@@ -29,17 +29,20 @@ class Mask
 	public:
 		Mask()
 		{
+		}
+		Mask(int rank, const int *dimensions) : rank(rank)
+		{
 			points = new std::vector<Point>();
+			this->dimensions = new int[rank];
+			std::copy(dimensions, dimensions+rank, this->dimensions);
 		}
 		Mask(const Mask& other)
 		{
-			typename std::vector<Point>::iterator it;
-
-			this->points = new std::vector<Point>();
-			for(it=other.points->begin(); it!=other.points->end(); ++it)
-			{
-				this->points->push_back(*it);
-			}
+			this->rank = other.rank;
+			this->dimensions = new int[this->rank];
+			std::copy(other.dimensions, other.dimensions+other.rank, this->dimensions);
+			this->points = new std::vector<Point>(other.points->size());
+			std::copy(other.points->begin(), other.points->end(), this->points->begin());
 		}
 		Mask(const Mask&& other) : Mask()
 		{
@@ -48,15 +51,40 @@ class Mask
 		virtual ~Mask()
 		{
 			delete points;
+			delete mask;
+			delete[] dimensions;
 		}
 		Mask& operator=(Mask other)
 		{
 			swap(*this,other);
 			return *this;
 		}
+		const Mask operator*(const Mask &other)
+		{
+			namespace ub = boost::numeric::ublas;
+			if(this->mask == nullptr)
+			{
+				this->createSparseRepresentation();
+			}
+			if(other->mask == nullptr)
+			{
+				other.createSparseRepresentation();
+			}
+			Mask mask(this->getRank(), this->getDimensions());
+			boost::numeric::ublas::compressed_matrix<int> result = boost::numeric::ublas::element_prod(this->mask, other.mask);
+			if(mask.getRank()==2)
+			{
+				for(auto i = result.begin2(); i!= result.end2(); ++i)
+				{
+					mask.addPoint(Point(i.index1(), i.index2()));
+				}
+			}
+		}
 		void addPoint(Point p)
 		{
 			points->push_back(p);
+			delete mask;
+			mask = nullptr;
 		}
 		std::vector<Point>* getMask()
 		{
@@ -136,17 +164,37 @@ class Mask
 		{
 			outline(polygon, centroid);
 		}
+		const int* getDimensions() const
+		{
+			return dimensions;
+		}
+		int getRank() const
+		{
+			return rank;
+		}
+
 	private:
+		int rank, *dimensions;
 		const static int bit_depth = 16;
 		std::vector<Point> *points;
+		boost::numeric::ublas::compressed_matrix<int> *mask = nullptr;
 
 		friend void swap(Mask<Point>& first, Mask<Point>& second) // nothrow
 		{
-			// enable ADL (not necessary in our case, but good practice)
 			using std::swap;
-			// by swapping the members of two classes,
-			// the two classes are effectively swapped
 			swap(first.points, second.points);
+			swap(first.mask, second.mask);
+			swap(first.rank, second.rank);
+			swap(first.dimensions, second.dimensions);
+		}
+
+		void createSparseRepresentation()
+		{
+			mask = new boost::numeric::ublas::compressed_matrix<int>(dimensions[0], dimensions[1], points->size());
+			for(auto i=points->begin(); i!=points->end(); ++i)
+			{
+				mask->push_back((*i).x, (*i).y, 1);
+			}
 		}
 		static inline int getPixel(glm::ivec2 p, int *dimensions)
 		{
@@ -176,7 +224,7 @@ class Mask
 		{
 			std::vector<glm::ivec3> box;
 			std::vector<glm::ivec3>::iterator it;
-			int minX = INT32_MAX, minY = INT32_MAX, minZ = INT32_MAX, maxX = 0, maxY = 0, maxZ = 0;
+			int minX = std::numeric_limits<int32_t>::max(), minY = std::numeric_limits<int32_t>::max(), minZ = std::numeric_limits<int32_t>::max(), maxX = 0, maxY = 0, maxZ = 0;
 			for(it=points->begin(); it!=points->end(); ++it)
 			{
 				minX = std::min(minX, it->x);

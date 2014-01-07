@@ -8,12 +8,12 @@
 #ifndef FLUIDTRACKS_HPP_
 #define FLUIDTRACKS_HPP_
 
-#include <stdint.h>
+#include <limits>
 #include <string>
 #include <vector>
 
 #include "templates/image.hpp"
-#include "types.hpp"
+#include "templates/maskList.hpp"
 #include "utils/parameters.hpp"
 
 namespace elib
@@ -25,9 +25,9 @@ class FluidTracks
 		FluidTracks();
 		FluidTracks(Parameters *params, std::vector<std::string> *images, std::vector<std::string> *flows);
 		virtual ~FluidTracks();
-		void addAppearingObjects(MaskList2D *masks);
-		void applySizeConstraints(MaskList2D *masks);
-		void detectDivisions(MaskList2D *masks);
+		void addAppearingObjects(MaskList<int, glm::ivec2> *masks);
+		void applySizeConstraints(MaskList<int, glm::ivec2> *masks);
+		void detectDivisions(MaskList<int, glm::ivec2> *masks);
 		void track();
 		bool isIncludeAppearing() const
 		{
@@ -54,9 +54,9 @@ class FluidTracks
 			initial_mask_image = initialMaskImage;
 		}
 		Image<int>* getInitial();
-		std::vector<MaskList2D >* getFrames();
+		std::vector<MaskList<int, glm::ivec2> >* getFrames();
 		int getMaxObjectSize() const;
-		void setMaxObjectSize(int maxObjectSize = UINT32_MAX);
+		void setMaxObjectSize(int maxObjectSize = std::numeric_limits<int32_t>::max());
 		std::string getImage(unsigned int i)
 		{
 			if(images->size() > i)
@@ -94,10 +94,10 @@ class FluidTracks
 		std::string initial_mask_image = "";
 		int id_counter = 0;
 		int min_object_size=0,
-			max_object_size=INT32_MAX;
+			max_object_size=std::numeric_limits<int32_t>::max();
 		std::vector<std::string> 	*images=nullptr,
 						*flows=nullptr;
-		std::vector<MaskList2D> *frames;
+		std::vector<MaskList<int, glm::ivec2>> *frames;
 		int verbosity = 0,
 			cycles = -1;
 };

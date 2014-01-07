@@ -6,6 +6,7 @@ set(SOURCES
     src/alg/connectedComponents.cpp
     src/alg/componentsMeasurements.cpp
     src/alg/fluidTracks.cpp
+    src/alg/graphcut.cpp
     src/io/xmlExport.cpp
     src/logic/annotation.cpp
     src/logic/frame.cpp
@@ -16,6 +17,8 @@ set(SOURCES
     lib/gco/maxflow.cpp
     lib/gco/GCoptimization.cpp
     lib/gco/LinkedBlockList.cpp
+    lib/maxflow/graph.cpp
+    lib/maxflow/maxflow.cpp
     src/utils/parameters.cpp
     src/utils/rle.cpp
     src/utils/utilities.cpp
@@ -66,7 +69,6 @@ endif()
 if(UNIX AND NOT APPLE)
     message("\nEntering configuration for UNIX computers:\n")
     set(CMAKE_CXX_FLAGS "-O4 -pipe -Wall -std=c++11")
-    set(CMAKE_C_FLAGS "-O4 -pipe -Wall")
     set_target_properties(fluidTracking
         PROPERTIES
         LINK_FLAGS ""
@@ -74,12 +76,12 @@ if(UNIX AND NOT APPLE)
 endif()
 
 if(APPLE)
+#    set(CMAKE_CXX_COMPILER /opt/local/bin/g++-mp-4.8)
     message("\nEntering configuration for APPLE computers:\n")
-    set(CMAKE_CXX_FLAGS "-O4 -pipe -Wall -I/opt/local/include -std=c++11 -stdlib=libc++")
-    set(CMAKE_C_FLAGS "-O4 -pipe -Wall")
+    set(CMAKE_CXX_FLAGS "-g -pipe -Wall -I/opt/local/include -std=c++11")
     set_target_properties(fluidTracking
         PROPERTIES
-        LINK_FLAGS "-L/opt/X11/lib"
+        LINK_FLAGS "-v -L/opt/X11/lib"
      )
 endif()
 

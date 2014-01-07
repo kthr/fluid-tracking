@@ -8,6 +8,8 @@
 #include "componentsMeasurements.hpp"
 
 #include "connectedComponents.hpp"
+#include "glm/glm.hpp"
+#include "templates/mask.hpp"
 
 using elib::ComponentsMeasurements;
 using elib::Image;
@@ -15,8 +17,8 @@ using std::unordered_map;
 
 ComponentsMeasurements::ComponentsMeasurements()
 {
-	labels = new std::set<int>();
-	masks = new MaskList2D();
+	labels = nullptr;
+	masks = nullptr;
 }
 ComponentsMeasurements::ComponentsMeasurements(const ComponentsMeasurements& other)
 {
@@ -27,11 +29,11 @@ elib::ComponentsMeasurements::ComponentsMeasurements(ComponentsMeasurements&& ot
 {
 	swap(*this,other);
 }
-ComponentsMeasurements::ComponentsMeasurements(Image<int> label_image)
+ComponentsMeasurements::ComponentsMeasurements(Image<int> &label_image)
 {
 	this->label_image = label_image;
 	labels = new std::set<int>();
-	masks = new MaskList2D();
+	masks = new MaskList<int, glm::ivec2>(label_image.getRank(), label_image.getDimensions());
 	init();
 }
 ComponentsMeasurements::~ComponentsMeasurements()
@@ -39,8 +41,9 @@ ComponentsMeasurements::~ComponentsMeasurements()
 	delete labels;
 	delete masks;
 }
-elib::MaskList2D ComponentsMeasurements::getMasks()
+elib::MaskList<int, glm::ivec2> ComponentsMeasurements::getMasks()
 {
+	std::cout << masks->toString() << std::endl;
 	return *masks;
 }
 
@@ -79,7 +82,7 @@ void ComponentsMeasurements::init()
 				pixel = j * width + i;
 				if (tmp_data[pixel] > 0)
 				{
-					Mask2D* mask_ptr;
+					Mask<glm::ivec2>* mask_ptr;
 					label = tmp_data[pixel];
 					tmp_data[pixel] = 0;
 					mask_ptr = masks->addMask(label);

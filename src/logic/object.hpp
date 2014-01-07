@@ -12,7 +12,7 @@
 
 #include "annotation.hpp"
 #include "link.hpp"
-#include "types.hpp"
+#include "templates/mask.hpp"
 
 namespace elib
 {
@@ -33,14 +33,14 @@ class Object
 		void setFrameId(int frameId);
 		int getId() const;
 		void setId(int id);
-		const Mask2D* getMask() const;
-		void setMask(const Mask2D* mask);
+		const Mask<glm::ivec2>* getMask() const;
+		void setMask(const Mask<glm::ivec2>* mask);
 		int getTrackId() const;
 		void setTrackId(int trackId);
 
 	private:
 		int id, frameId, trackId;
-		const Mask2D *mask;
+		const Mask<glm::ivec2> *mask;
 		std::vector<Link> links;
 		std::vector<Annotation> annotations;
 

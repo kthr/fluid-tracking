@@ -15,6 +15,7 @@
 
 #include "gco/GCoptimization.h"
 #include "glm/glm.hpp"
+#include "utils/math_functions.hpp"
 
 
 #define GC_INFINITY 300000.
@@ -24,7 +25,7 @@ using elib::Image;
 
 Image<int>* Labeling::labeling(Image<int>* label_image, Image<int>* input_image, Parameters *input_params)
 {
-	int *dimensions, width, height, bit_depth, num_labels;
+	int width, height, bit_depth, num_labels;
 	double c0, c1, lambda, mu, c;
 	std::set<int> labels;
 	std::set<int>::iterator it;
@@ -32,15 +33,21 @@ Image<int>* Labeling::labeling(Image<int>* label_image, Image<int>* input_image,
 	int *label_array, label, num_pixels, *label_data, *image_data;
 	Image<int> *new_label_image = new Image<int>(*label_image);
 
-	dimensions = label_image->getDimensions();
-	width = dimensions[0];
-	height = dimensions[1];
+
+
+	if(
+		isnan(num_labels = input_params->getIntegerParameter("NumberLabels")) ||
+		isnan(c0 = input_params->getDoubleParameter("C0")) ||
+		isnan(c1 = input_params->getDoubleParameter("C1")) ||
+		isnan(lambda = input_params->getDoubleParameter("Lambda")) ||
+		isnan(mu = input_params->getDoubleParameter("Mu"))
+	)
+	{
+		return nullptr;
+	}
+	width = input_image->getWidth();
+	height = input_image->getHeight();
 	bit_depth = input_image->getBitDepth();
-	num_labels = input_params->getIntegerParam(0);
-	c0 = input_params->getDoubleParam(0);
-	c1 = input_params->getDoubleParam(1);
-	lambda = input_params->getDoubleParam(2);
-	mu = input_params->getDoubleParam(3);
 	label_data = label_image->getData();
 	image_data = input_image->getData();
 

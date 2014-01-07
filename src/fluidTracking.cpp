@@ -12,16 +12,16 @@
 #include <boost/regex.hpp>
 #include <getopt.h>
 #include <iostream>
+#include <limits>
 #include <string>
 
 #include "alg/fluidTracks.hpp"
 #include "CImg.h"
 #include "io/xmlExport.hpp"
 #include "logic/trackingData.hpp"
+#include "templates/image.hpp"
 #include "utils/parameters.hpp"
 #include "utils/utilities.hpp"
-#include "templates/image.hpp"
-#include "types.hpp"
 
 #include "utils/rle.hpp"
 
@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 	namespace fs = boost::filesystem;
 	namespace po = boost::program_options;
 
-	int min = 0, max = INT32_MAX;
+	int min = 0, max = std::numeric_limits<int32_t>::max();
 	double c0 = .1, c1 = .9, mu = 1., lambda = 1.;
 	std::string initial = "", image_folder, vector_field_folder, label_image_folder = "", in;
 	int iao = 1,
@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
 				std::cout << "\t --c0 NUM" << std::endl << "\t\t mean background intensity (default=.1)" << std::endl;
 				std::cout << "\t --c1 NUM" << std::endl << "\t\t mean foreground intensity (default=.9)" << std::endl;
 				std::cout << "\t --cycles NUM" << std::endl << "\t\t number of iteration cycles of expansion algorithm  (default=-1)" << std::endl;
-				std::cout << "\t --max NUM" << std::endl << "\t\t maximal object size in pixels  (default=" << INT32_MAX << ")" << std::endl;
+				std::cout << "\t --max NUM" << std::endl << "\t\t maximal object size in pixels  (default=" << std::numeric_limits<int32_t>::max() << ")" << std::endl;
 				std::cout << "\t --min NUM" << std::endl << "\t\t minimal object size in pixels (default=0)" << std::endl;
 				std::cout << "\t --verbosity NUM" << std::endl << "\t\t verbosity level 0,1 or 2 (default=0)" << std::endl;
 				std::cout << "\t -c" << std::endl << "\t\t turn on compression" << std::endl;
@@ -280,11 +280,11 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	int int_params[1] = { 0 };
-	double double_params[4] = { c0, c1, lambda, mu };
-	std::vector<std::string> int_names({ "" });
-	std::vector<std::string> double_names({ "C0", "C1", "Lambda", "Mu" });
-	Parameters params(1, int_params, int_names, 4, double_params, double_names);
+	Parameters params;
+	params.addParameter("C0", c0);
+	params.addParameter("C1", c1);
+	params.addParameter("Lambda", lambda);
+	params.addParameter("Mu", mu);
 
 	FluidTracks ft(&params, &images, &vector_fields);
 	ft.setMinObjectSize(min);
@@ -304,7 +304,7 @@ int main(int argc, char *argv[])
 
 	if (label_image_folder.compare("") != 0)
 	{
-		std::vector<elib::MaskList2D>::iterator it;
+		std::vector<elib::MaskList<int, glm::ivec2>>::iterator it;
 		std::string file_name;
 		Image<int> image;
 		int i = 0;

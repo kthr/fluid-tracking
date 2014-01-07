@@ -11,12 +11,12 @@
 #include <libxml/xmlwriter.h>
 #include <set>
 #include <stdint.h>
-#include <types.hpp>
 #include <unordered_map>
 #include <vector>
 
 #include "alg/fluidTracks.hpp"
 #include "frame.hpp"
+#include "templates/maskList.hpp"
 
 namespace elib
 {
@@ -64,7 +64,7 @@ class TrackingData
 
 	private:
 		elib::FluidTracks *ft;
-		std::vector<MaskList2D> *data;
+		std::vector<MaskList<int, glm::ivec2>> *data;
 		std::vector<Frame> frames;
 		std::set<int> tracks;
 		std::unordered_map<int, std::set<int> > divisions;

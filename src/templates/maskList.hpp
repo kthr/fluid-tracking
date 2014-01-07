@@ -8,8 +8,10 @@
 #ifndef MASKLIST_HPP_
 #define MASKLIST_HPP_
 
+#include <set>
 #include <sstream>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "mask.hpp"
@@ -22,27 +24,25 @@ class MaskList
 	public:
 		MaskList()
 		{
+		}
+		MaskList(int rank, const int *dimensions) : rank(rank)
+		{
 			labels = new std::set<Label>();
 			masks = new std::unordered_map<Label, Mask<Point>*>();
+			this->dimensions = new int[rank];
+			std::copy(dimensions, dimensions+rank, this->dimensions);
 		}
 		MaskList(const MaskList& other)
 		{
-			typename std::set<Label>::iterator sit;
-			typename std::unordered_map<Label, Mask<Point>*>::iterator it;
-
+			this->rank = other.rank;
+			this->dimensions = new int[this->rank];
+			std::copy(other.dimensions, other.dimensions+other.rank, this->dimensions);
 			this->labels = new std::set<Label>();
-			for(sit=other.labels->begin(); sit!=other.labels->end(); ++sit)
-			{
-				this->labels->insert(*sit);
-			}
-			this->masks = new std::unordered_map<Label, Mask<Point>*>(other.masks->size());
-			for(it=other.masks->begin(); it!=other.masks->end(); ++it)
-			{
-				this->masks->insert(std::pair<Label, Mask<Point>* >(it->first, new Mask<Point>(*(it->second))));
-			}
+			labels->insert(other.labels->begin(), other.labels->end());
+			this->masks = new std::unordered_map<Label, Mask<Point>*>();
+			this->masks = other.masks;
 		}
 		MaskList(MaskList&& other)
-		: MaskList()
 		{
 			swap(*this, other);
 		}
@@ -53,13 +53,17 @@ class MaskList
 		}
 		virtual ~MaskList()
 		{
-			typename std::unordered_map<Label, Mask<Point>*>::iterator it;
-			for(it=masks->begin(); it!=masks->end(); ++it)
+			if(masks!=nullptr)
 			{
-				delete it->second;
+				typename std::unordered_map<Label, Mask<Point>*>::iterator it;
+				for(it=masks->begin(); it!=masks->end(); ++it)
+				{
+					delete it->second;
+				}
 			}
 			delete labels;
 			delete masks;
+			delete[] dimensions;
 		}
 
 		elib::Mask<Point>* addMask(Label id)
@@ -71,7 +75,7 @@ class MaskList
 			if(it == masks->end())
 			{
 				labels->insert(id);
-				mask_ptr = new Mask<Point>();
+				mask_ptr = new Mask<Point>(rank, dimensions);
 				masks->insert(std::pair<Label,Mask<Point>*>(id, mask_ptr));
 			}
 			else
@@ -180,32 +184,49 @@ class MaskList
 		{
 			return masks->size();
 		}
+		int getRank() const
+		{
+			return rank;
+		}
+		const int* getDimensions() const
+		{
+			return dimensions;
+		}
 		std::string toString()
 		{
 			std::stringstream ss;
 			typename std::set<Label>::iterator it;
 
-			ss << "Size of list: " << labels->size() << "\n";
+			ss << "Size of list: " << labels->size() << std::endl;
+			ss << "Rank: " << rank << std::endl;
+			ss << "Dimensions: ";
+			for(int i=0; i<rank; ++i)
+			{
+				ss << dimensions[i] << " ";
+			}
+			ss << std::endl;
 			for(it=labels->begin(); it!=labels->end(); ++it)
 			{
-				ss << "\t label: " << *it << " size: " << masks->find(*it)->second->getSize() << "\n";
+				ss << "\t label: " << *it << " size: " << masks->find(*it)->second->getSize() << std::endl;
 			}
 			return ss.str();
 		}
+
 private:
-		std::set<Label> *labels;
-		std::unordered_map<Label, Mask<Point>*> *masks;
+		int rank = 0,
+			*dimensions = nullptr;
 		const static int bit_depth = 16;
+		std::set<Label> *labels = nullptr;
+		std::unordered_map<Label, Mask<Point>*> *masks = nullptr;
 
 		friend void swap(MaskList& first, MaskList& second) // nothrow
 		{
-			// enable ADL (not necessary in our case, but good practice)
 			using std::swap;
 
-			// by swapping the members of two classes,
-			// the two classes are effectively swapped
 			swap(first.labels, second.labels);
 			swap(first.masks, second.masks);
+			first.rank = second.rank;
+			swap(first.dimensions, second.dimensions);
 		}
 };
 

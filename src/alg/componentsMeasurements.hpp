@@ -11,7 +11,9 @@
 #include <set>
 #include <stdint.h>
 
-#include "types.hpp"
+#include "glm/glm.hpp"
+#include "templates/image.hpp"
+#include "templates/maskList.hpp"
 
 namespace elib {
 
@@ -24,9 +26,9 @@ class ComponentsMeasurements
 		ComponentsMeasurements();
 		ComponentsMeasurements(const ComponentsMeasurements& other);
 		ComponentsMeasurements(ComponentsMeasurements&& other);
-		ComponentsMeasurements(Image<int> label_image);
+		ComponentsMeasurements(Image<int> &label_image);
 		virtual ~ComponentsMeasurements();
-		elib::MaskList2D getMasks();
+		elib::MaskList<int, glm::ivec2> getMasks();
 		ComponentsMeasurements& operator=(ComponentsMeasurements other)
 		{
 			swap(*this, other);
@@ -37,8 +39,8 @@ class ComponentsMeasurements
 		Image<int> label_image;
 		int num_labels = 0;
 		short connectivity = LARGE_CONNECTIVITY;
-		std::set<int> *labels;
-		MaskList2D *masks;
+		std::set<int> *labels = nullptr;
+		MaskList<int, glm::ivec2> *masks = nullptr;
 
 		void init();
 		friend void swap(ComponentsMeasurements& first, ComponentsMeasurements& second)

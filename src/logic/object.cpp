@@ -45,12 +45,12 @@ void Object::setId(int id)
 	this->id = id;
 }
 
-const Mask2D* Object::getMask() const
+const Mask<glm::ivec2>* Object::getMask() const
 {
 	return mask;
 }
 
-void Object::setMask(const Mask2D* mask)
+void Object::setMask(const Mask<glm::ivec2>* mask)
 {
 	this->mask = mask;
 }
@@ -68,7 +68,7 @@ void Object::toXML(const xmlTextWriterPtr writer, bool compressed) const
 {
 	std::vector<glm::ivec2> outline;
 	glm::ivec2 centroid(0,0);
-	const_cast<Mask2D*>(mask)->getOutline(outline, centroid);
+	const_cast<Mask<glm::ivec2>*>(mask)->getOutline(outline, centroid);
 
 	xmlTextWriterStartElement(writer, BAD_CAST "centroid"); /* start centroid */
 	writePoint(writer, centroid);
@@ -77,13 +77,13 @@ void Object::toXML(const xmlTextWriterPtr writer, bool compressed) const
 	{
 		xmlTextWriterStartElement(writer, BAD_CAST "mask"); /* start mask */
 		xmlTextWriterStartElement(writer, BAD_CAST "bbox"); /* start bbox */
-		std::vector<glm::ivec2> bbox = const_cast<Mask2D*>(mask)->getBoundingBox();
+		std::vector<glm::ivec2> bbox = const_cast<Mask<glm::ivec2>*>(mask)->getBoundingBox();
 		for(unsigned int i=0; i<bbox.size(); ++i)
 		{
 			writePoint(writer, bbox[i]);
 		}
 		xmlTextWriterEndElement(writer); /* end mask */
-		xmlTextWriterWriteElement(writer, BAD_CAST "d", BAD_CAST RLE::binary_encode(const_cast<Mask2D*>(mask)->getBoxMask()).c_str()); /* start centroid */
+		xmlTextWriterWriteElement(writer, BAD_CAST "d", BAD_CAST RLE::binary_encode(const_cast<Mask<glm::ivec2>*>(mask)->getBoxMask()).c_str()); /* start centroid */
 		xmlTextWriterEndElement(writer); /* end mask */
 	}
 	else
