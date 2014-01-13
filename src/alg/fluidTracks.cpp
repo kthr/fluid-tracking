@@ -148,11 +148,15 @@ void FluidTracks::track()
 		propagated_label = graphcut(initial, *params);
 		initial = *propagated_label;
 		delete propagated_label;
+		initial.saveImage("/home/kthierbach/Desktop/host/test.png");
 		initial = cc.getComponents(initial);
 		cm = ComponentsMeasurements(initial);
+		std::cout << "initial:" << std::endl << masks.toString() << std::endl;
 		masks = cm.getMasks();
 		std::cout << "initial:" << std::endl << masks.toString() << std::endl;
 		applySizeConstraints(&masks);
+		masks.relabel(1);
+		std::cout << "initial:" << std::endl << masks.toString() << std::endl;
 		initial = masks.masksToImage();
 		delete tmp;
 	}
@@ -165,8 +169,12 @@ void FluidTracks::track()
 			initial = *tmp;
 		cm = ComponentsMeasurements(initial);
 		masks = cm.getMasks();
-		masks.relabel(1);
+		std::cout << "initial:" << std::endl << masks.toString() << std::endl;
 		applySizeConstraints(&masks);
+		std::cout << "initial:" << std::endl << masks.toString() << std::endl;
+		masks.relabel(1);
+		std::cout << "initial:" << std::endl << masks.toString() << std::endl;
+		masks.masksToImage().saveImage("/home/kthierbach/test.png");
 		initial = masks.masksToImage();
 		delete tmp;
 	}
@@ -174,6 +182,7 @@ void FluidTracks::track()
 	cm = ComponentsMeasurements(old_label);
 	masks = cm.getMasks();
 	std::cout << "new initial:" << std::endl << masks.toString() << std::endl;
+	masks.masksToImage().saveImage("/home/kthierbach/test.png");
 	frames->push_back(masks);
 	id_counter = *(--masks.getLabels()->end())+1;
 	VectorArray2D va;
@@ -201,6 +210,7 @@ void FluidTracks::track()
 		cm = ComponentsMeasurements(*propagated_label);
 		masks = cm.getMasks();
 		std::cout << i << std::endl << masks.toString() << std::endl;
+		masks.masksToImage().saveImage("/home/kthierbach/Desktop/host/test.png");
 		delete propagated_label;
 		if(include_appearing)
 		{

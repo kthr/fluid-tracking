@@ -26,7 +26,11 @@ using elib::Image;
 Image<int>* Labeling::labeling(Image<int> &label_image, Image<int> &input_image, Parameters &input_params)
 {
 	int width, height, bit_depth, num_labels;
-	double c0, c1, lambda, mu, c;
+	double 	c0 = .1,
+			c1 = .9,
+			lambda = 1.,
+			mu = 1.,
+			c;
 	std::set<int> labels;
 	std::set<int>::iterator it;
 	std::unordered_map<int,int> label_map;

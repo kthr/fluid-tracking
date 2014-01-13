@@ -185,6 +185,10 @@ class Image
 				return nullptr;
 			}
 		}
+		void saveImage(std::string file_name)
+		{
+			Image<type>::saveImage(file_name, this);
+		}
 		static void saveImage(std::string file_name, Image<type> *image)
 		{
 			try

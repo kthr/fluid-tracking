@@ -226,7 +226,6 @@ class Mask
 			std::vector<char> tmp;
 			std::vector<char>::iterator cit;
 			std::vector<glm::ivec2>::iterator it;
-			int dimensions[2];
 			int pixel;
 			std::string mask = "";
 

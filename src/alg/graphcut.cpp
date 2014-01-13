@@ -40,7 +40,10 @@ Image<int>* graphcut(Image<int> &input_image, Parameters &parameters)
 		depth = input_image.getDepth(),
 		bit_depth = input_image.getBitDepth();
 
-	double c0, c1, lambda1, lambda2;
+	double 	c0 = 0.,
+			c1 = 1.,
+			lambda1 = 0.,
+			lambda2 = 1.;
 
 	if(
 		isnan(c0 = parameters.getDoubleParameter("C0")) ||

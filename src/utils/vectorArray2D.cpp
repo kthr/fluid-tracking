@@ -151,13 +151,13 @@ double VectorArray2D::div(int i, int j)
 
 double VectorArray2D::dVxdx(int i, int j)
 {
-	int ip1, im1, jp1, jm1;
+	int ip1, im1, jm1;
 
 	ip1 = (i + 1) % nx;
 	im1 = (i - 1) % nx;
 	if (im1 < 0)
 		im1 = nx - 1;
-	jp1 = (j + 1) % ny;
+//	jp1 = (j + 1) % ny;
 	jm1 = (j - 1) % ny;
 	if (jm1 < 0)
 		jm1 = ny - 1;
@@ -167,13 +167,13 @@ double VectorArray2D::dVxdx(int i, int j)
 
 double VectorArray2D::dVydx(int i, int j)
 {
-	int ip1, im1, jp1, jm1;
+	int ip1, im1, jm1;
 
 	ip1 = (i + 1) % nx;
 	im1 = (i - 1) % nx;
 	if (im1 < 0)
 		im1 = nx - 1;
-	jp1 = (j + 1) % ny;
+//	jp1 = (j + 1) % ny;
 	jm1 = (j - 1) % ny;
 	if (jm1 < 0)
 		jm1 = ny - 1;
@@ -183,9 +183,9 @@ double VectorArray2D::dVydx(int i, int j)
 
 double VectorArray2D::dVxdy(int i, int j) const
 {
-	int ip1, im1, jp1, jm1;
+	int im1, jp1, jm1;
 
-	ip1 = (i + 1) % nx;
+//	ip1 = (i + 1) % nx;
 	im1 = (i - 1) % nx;
 	if (im1 < 0)
 		im1 = nx - 1;
@@ -199,9 +199,9 @@ double VectorArray2D::dVxdy(int i, int j) const
 
 double VectorArray2D::dVydy(int i, int j) const
 {
-	int ip1, im1, jp1, jm1;
+	int im1, jp1, jm1;
 
-	ip1 = (i + 1) % nx;
+//	ip1 = (i + 1) % nx;
 	im1 = (i - 1) % nx;
 	if (im1 < 0)
 		im1 = nx - 1;
@@ -1275,7 +1275,7 @@ bool VectorArray2D::load(const char*fname)
 				ifs.read( reinterpret_cast<char*>(&param.actual_error), sizeof(param.actual_error));
 				ifs.read( reinterpret_cast<char*>(&param.actual_time), sizeof(param.actual_time));
 			}
-			for(int i=0; i<2*size; ++i)
+			for(size_t i=0; i<2*size; ++i)
 			{
 				ifs.read(reinterpret_cast<char*>(&(vx[i])), sizeof(double));
 			}
