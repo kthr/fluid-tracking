@@ -40,7 +40,7 @@ FluidTracks::~FluidTracks()
 	delete frames;
 }
 
-void FluidTracks::addAppearingObjects(MaskList<int, glm::ivec2> *masks)
+void FluidTracks::addAppearingObjects(MaskList<int, glm::ivec2> &masks)
 {
 	ComponentsMeasurements cm;
 	ConnectedComponents cc;
@@ -48,28 +48,28 @@ void FluidTracks::addAppearingObjects(MaskList<int, glm::ivec2> *masks)
 	std::shared_ptr<Mask<glm::ivec2>> new_objects;
 	MaskList<int, glm::ivec2> new_object_masks(initial.getRank(), *(initial.getDimensions()));
 
-	new_objects = masks->getMask(1);
+	new_objects = masks.getMask(1);
 	if(new_objects != nullptr)
 	{
 		label_image = cc.getComponents(new_objects->toImage());
 		cm = ComponentsMeasurements(label_image);
 		new_object_masks = cm.getMasks();
-		applySizeConstraints(&new_object_masks);
+		applySizeConstraints(new_object_masks);
 		for(auto it=new_object_masks.begin(); it!=new_object_masks.end(); ++it)
 		{
-			masks->addMask(id_counter++, *(it->second));
+			masks.addMask(id_counter++, *(it->second));
 		}
-		masks->deleteMask(1);
+		masks.deleteMask(1);
 	}
 }
 
-void FluidTracks::applySizeConstraints(MaskList<int, glm::ivec2> *masks)
+void FluidTracks::applySizeConstraints(MaskList<int, glm::ivec2> &masks)
 {
 	vector<int> for_deletion;
 	int size;
 
-	auto it = masks->begin();
-	while(it != masks->end())
+	auto it = masks.begin();
+	while(it != masks.end())
 	{
 		size = it->second->getSize();
 		if(size < min_object_size || size > max_object_size)
@@ -80,11 +80,11 @@ void FluidTracks::applySizeConstraints(MaskList<int, glm::ivec2> *masks)
 		else
 			++it;
 	}
-	masks->deleteMasks(for_deletion);
+	masks.deleteMasks(for_deletion);
 
 }
 
-void FluidTracks::detectDivisions(MaskList<int, glm::ivec2> *masks)
+void FluidTracks::detectDivisions(MaskList<int, glm::ivec2> &masks)
 {
 	ConnectedComponents cc;
 	ComponentsMeasurements cm;
@@ -95,8 +95,8 @@ void FluidTracks::detectDivisions(MaskList<int, glm::ivec2> *masks)
 	int max;
 
 
-	auto it= masks->begin();
-	while(it!=masks->end())
+	auto it= masks.begin();
+	while(it!=masks.end())
 	{
 		label_image = cc.getComponents(it->second->toImage());
 		max = label_image.max();
@@ -105,7 +105,7 @@ void FluidTracks::detectDivisions(MaskList<int, glm::ivec2> *masks)
 			for_deletion.push_back(it->first);
 			cm = ComponentsMeasurements(label_image);
 			objects = cm.getMasks();
-			applySizeConstraints(&objects);
+			applySizeConstraints(objects);
 			if(objects.getSize() == 1)//no real division
 			{
 				tmp_masks.addMask(it->first, *(objects.begin()->second));
@@ -121,8 +121,8 @@ void FluidTracks::detectDivisions(MaskList<int, glm::ivec2> *masks)
 		}
 		++it;
 	}
-	masks->deleteMasks(for_deletion);
-	masks->addMasks(tmp_masks);
+	masks.deleteMasks(for_deletion);
+	masks.addMasks(tmp_masks);
 }
 
 void FluidTracks::track()
@@ -148,15 +148,11 @@ void FluidTracks::track()
 		propagated_label = graphcut(initial, *params);
 		initial = *propagated_label;
 		delete propagated_label;
-		initial.saveImage("/home/kthierbach/Desktop/host/test.png");
 		initial = cc.getComponents(initial);
 		cm = ComponentsMeasurements(initial);
-		std::cout << "initial:" << std::endl << masks.toString() << std::endl;
 		masks = cm.getMasks();
-		std::cout << "initial:" << std::endl << masks.toString() << std::endl;
-		applySizeConstraints(&masks);
+		applySizeConstraints(masks);
 		masks.relabel(1);
-		std::cout << "initial:" << std::endl << masks.toString() << std::endl;
 		initial = masks.masksToImage();
 		delete tmp;
 	}
@@ -169,29 +165,27 @@ void FluidTracks::track()
 			initial = *tmp;
 		cm = ComponentsMeasurements(initial);
 		masks = cm.getMasks();
-		std::cout << "initial:" << std::endl << masks.toString() << std::endl;
-		applySizeConstraints(&masks);
-		std::cout << "initial:" << std::endl << masks.toString() << std::endl;
+		applySizeConstraints(masks);
 		masks.relabel(1);
-		std::cout << "initial:" << std::endl << masks.toString() << std::endl;
-		masks.masksToImage().saveImage("/home/kthierbach/test.png");
 		initial = masks.masksToImage();
 		delete tmp;
 	}
 	old_label = Image<int>(initial);
 	cm = ComponentsMeasurements(old_label);
 	masks = cm.getMasks();
-	std::cout << "new initial:" << std::endl << masks.toString() << std::endl;
-	masks.masksToImage().saveImage("/home/kthierbach/test.png");
 	frames->push_back(masks);
 	id_counter = *(--masks.getLabels()->end())+1;
 	VectorArray2D va;
 	if(verbosity)
+	{
 		std::cout << "frame: " << 0 << ", #objects: " << masks.getSize() << std::endl;
+	}
 	for(unsigned int i=1; i<images->size(); ++i)
 	{
 		if(verbosity && i%10 == 0)
+		{
 			std::cout << "frame: " << i << ", #objects: " << masks.getSize() << std::endl;
+		}
 		if(flows->size() != 0)
 		{
 			va.load((*flows)[i-1].c_str());
@@ -209,20 +203,17 @@ void FluidTracks::track()
 		delete tmp;
 		cm = ComponentsMeasurements(*propagated_label);
 		masks = cm.getMasks();
-		std::cout << i << std::endl << masks.toString() << std::endl;
-		masks.masksToImage().saveImage("/home/kthierbach/Desktop/host/test.png");
 		delete propagated_label;
 		if(include_appearing)
 		{
-			addAppearingObjects(&masks);
+			addAppearingObjects(masks);
 		}
 		else
 		{
 			masks.deleteMask(1);
 		}
-		detectDivisions(&masks);
+		detectDivisions(masks);
 		frames->push_back(masks);
-		std::cout << i << std::endl << masks.toString() << std::endl;
 		old_label = masks.masksToImage();
 	}
 }

@@ -25,9 +25,9 @@ class FluidTracks
 		FluidTracks();
 		FluidTracks(Parameters *params, std::vector<std::string> *images, std::vector<std::string> *flows);
 		virtual ~FluidTracks();
-		void addAppearingObjects(MaskList<int, glm::ivec2> *masks);
-		void applySizeConstraints(MaskList<int, glm::ivec2> *masks);
-		void detectDivisions(MaskList<int, glm::ivec2> *masks);
+		void addAppearingObjects(MaskList<int, glm::ivec2> &masks);
+		void applySizeConstraints(MaskList<int, glm::ivec2> &masks);
+		void detectDivisions(MaskList<int, glm::ivec2> &masks);
 		void track();
 		bool isIncludeAppearing() const
 		{
@@ -95,8 +95,8 @@ class FluidTracks
 		int id_counter = 0;
 		int min_object_size=0,
 			max_object_size=std::numeric_limits<int32_t>::max();
-		std::vector<std::string> 	*images=nullptr,
-						*flows=nullptr;
+		std::vector<std::string> *images=nullptr,
+								 *flows=nullptr;
 		std::vector<MaskList<int, glm::ivec2>> *frames;
 		int verbosity = 0,
 			cycles = -1;

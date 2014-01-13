@@ -313,10 +313,10 @@ int main(int argc, char *argv[])
 			file_name = Utilities::createFileName(label_image_folder, std::string("label"), std::string(".png"), i);
 			image = it->masksToImage();
 			Image<int>::saveImage(file_name, &image);
+			std::cout << it->toString() << std::endl;
 			++i;
 		}
 	}
-
 //	Image<int> image = Image<int>::openImage(images[0]);
 //	VectorArray2D va;
 //	for(int i=0; i<vector_fields.size(); ++i)
