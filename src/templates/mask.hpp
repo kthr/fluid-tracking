@@ -11,6 +11,7 @@
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <functional>
 #include <limits>
+#include <memory>
 #include <stdlib.h>
 #include <unordered_map>
 #include <unordered_set>
@@ -27,34 +28,34 @@ template <class Point>
 class Mask
 {
 	public:
-		Mask()
+		Mask() noexcept
 		{
 		}
-		Mask(int rank, const int *dimensions) : rank(rank)
+		Mask(int rank, const std::vector<int> &dimensions) : rank(rank)
 		{
-			points = new std::vector<Point>();
-			this->dimensions = new int[rank];
-			std::copy(dimensions, dimensions+rank, this->dimensions);
+			this->dimensions = std::vector<int>(dimensions.begin(), dimensions.end());
 		}
-		Mask(const Mask& other)
+		Mask(const Mask &other)
 		{
 			this->rank = other.rank;
-			this->dimensions = new int[this->rank];
-			std::copy(other.dimensions, other.dimensions+other.rank, this->dimensions);
-			this->points = new std::vector<Point>(other.points->size());
-			std::copy(other.points->begin(), other.points->end(), this->points->begin());
+			this->dimensions = std::vector<int>(other.dimensions.begin(), other.dimensions.end());
+			this->points = std::vector<Point>(other.points.begin(), other.points.end());
 		}
-		Mask(const Mask&& other) : Mask()
+		Mask(Mask&& other) noexcept
+			: rank(other.rank), dimensions(std::move(other.dimensions)),
+			  points(std::move(other.points)), mask(std::move(other.mask))
 		{
-			swap(*this,other);
 		}
 		virtual ~Mask()
 		{
-			delete points;
 			delete mask;
-			delete[] dimensions;
 		}
-		Mask& operator=(Mask other)
+		Mask& operator=(Mask &other)
+		{
+			swap(*this,other);
+			return *this;
+		}
+		Mask& operator=(Mask &&other)
 		{
 			swap(*this,other);
 			return *this;
@@ -79,18 +80,19 @@ class Mask
 					mask.addPoint(Point(i.index1(), i.index2()));
 				}
 			}
+			return this;
 		}
 		void addPoint(Point p)
 		{
-			points->push_back(p);
+			points.push_back(p);
 			delete mask;
 			mask = nullptr;
 		}
-		std::vector<Point>* getMask()
+		const std::vector<Point>* getMask() const
 		{
-			return points;
+			return &points;
 		}
-		Image<int> toImage(int rank, int *dimensions)
+		Image<int> toImage()
 		{
 			Image<int> image;
 			int *image_data;
@@ -99,7 +101,7 @@ class Mask
 
 			image = Image<int>(rank, dimensions, bit_depth, 1);
 			image_data = image.getData();
-			for(it=points->begin(); it!=points->end(); ++it)
+			for(it=points.begin(); it!=points.end(); ++it)
 			{
 				for(int i=0; i<rank; ++i)
 				{
@@ -109,64 +111,41 @@ class Mask
 						return Image<int>();
 					}
 				}
-				pixel = Mask::getPixel(*it, dimensions);
+				pixel = Mask::getPixel(*it);
 				image_data[pixel] = 1;
 			}
 			return image;
 		}
-		static Image<int> masksToImage(int rank, int *dimensions, std::unordered_map<int, Mask<Point>* > *masks)
+		void getBoundingBox(std::unique_ptr<std::vector<Point> > &box) const
 		{
-			Image<int> image;
-			int *image_data, label, pixel;
-			typename std::unordered_map<int, Mask<Point>* >::iterator it;
-			typename std::vector<Point> *points;
-			typename std::vector<Point>::iterator pt_it;
-
-			image = Image<int>(rank, dimensions, bit_depth, 1);
-			image_data = image.getData();
-			for(it = masks->begin(); it!=masks->end(); ++it)
-			{
-				label = it->first;
-				points = it->second->getPoints();
-				for(pt_it=points->begin(); pt_it!=points->end(); ++pt_it)
-				{
-					for(int i=0; i<rank; ++i)
-					{
-						if((*pt_it)[i] < 0 || (*pt_it)[i]>dimensions[i])
-						{
-							//throw GenericException("Mask doesn't fit into the image");
-							return Image<int>();
-						}
-					}
-					pixel = Mask::getPixel(*pt_it, dimensions);
-					image_data[pixel] = label;
-				}
-			}
-			return image;
-		}
-		std::vector<Point> getBoundingBox()
-		{
-			return getBox(points);
+			box = std::unique_ptr<std::vector<Point>>(new std::vector<Point>());
+			getBox(box);
 		}
 		std::string getBoxMask()
 		{
-			return boxMask(getBoundingBox(), points);
+			std::unique_ptr<std::vector<Point> > box;
+			getBoundingBox(box);
+			return boxMask(box);
 		}
-		std::vector<Point>* getPoints()
+		const std::vector<Point>* getPoints() const
 		{
-			return points;
+			return &points;
 		}
-		int getSize()
+		int getSize() const
 		{
-			return (int)points->size();
+			return int(points.size());
 		}
-		void getOutline(std::vector<Point> &polygon, Point &centroid)
+		void getOutline(std::vector<Point> &polygon, Point &centroid) const
 		{
 			outline(polygon, centroid);
 		}
-		const int* getDimensions() const
+		const std::vector<int>* getDimensions() const
 		{
-			return dimensions;
+			return &dimensions;
+		}
+		int getPixel(Point p)
+		{
+			return pixel(p);
 		}
 		int getRank() const
 		{
@@ -174,58 +153,62 @@ class Mask
 		}
 
 	private:
-		int rank, *dimensions;
+		int rank = 0;
 		const static int bit_depth = 16;
-		std::vector<Point> *points;
+		std::vector<int> dimensions;
+		std::vector<Point> points;
 		boost::numeric::ublas::compressed_matrix<int> *mask = nullptr;
 
 		friend void swap(Mask<Point>& first, Mask<Point>& second) // nothrow
 		{
 			using std::swap;
-			swap(first.points, second.points);
-			swap(first.mask, second.mask);
 			swap(first.rank, second.rank);
 			swap(first.dimensions, second.dimensions);
+			swap(first.points, second.points);
+			swap(first.mask, second.mask);
 		}
 
 		void createSparseRepresentation()
 		{
-			mask = new boost::numeric::ublas::compressed_matrix<int>(dimensions[0], dimensions[1], points->size());
-			for(auto i=points->begin(); i!=points->end(); ++i)
+			mask = new boost::numeric::ublas::compressed_matrix<int>(dimensions[0], dimensions[1], points.size());
+			for(auto i=points.begin(); i!=points.end(); ++i)
 			{
 				mask->push_back((*i).x, (*i).y, 1);
 			}
 		}
-		static inline int getPixel(glm::ivec2 p, int *dimensions)
+		inline int pixel(glm::ivec2 p)
 		{
 			return p[1]*dimensions[0]+p[0];
 		}
-		static inline int getPixel(glm::ivec3 p, int *dimensions)
+		inline int pixel(glm::ivec3 p)
 		{
 			return p[2]*dimensions[0]*dimensions[1] + p[1]*dimensions[0] + p[0];
 		}
-		std::vector<glm::ivec2> getBox(std::vector<glm::ivec2> *points)
+		void getBox(std::unique_ptr<std::vector<glm::ivec2> > &box) const
 		{
-			std::vector<glm::ivec2> box;
-			std::vector<glm::ivec2>::iterator it;
-			int minX = std::numeric_limits<int>::max(), minY = std::numeric_limits<int>::max(), maxX = 0, maxY = 0;
-			for(it=points->begin(); it!=points->end(); ++it)
+			int minX = std::numeric_limits<int>::max(),
+				minY = std::numeric_limits<int>::max(),
+				maxX = 0,
+				maxY = 0;
+			for(auto it=points.begin(); it!=points.end(); ++it)
 			{
 				minX = std::min(minX, it->x);
 				minY = std::min(minY, it->y);
 				maxX = std::max(maxX, it->x);
 				maxY = std::max(maxY, it->y);
 			}
-			box.push_back(glm::ivec2(minX, minY));
-			box.push_back(glm::ivec2(maxX+1, maxY+1));
-			return box;
+			box->push_back(glm::ivec2(minX, minY));
+			box->push_back(glm::ivec2(maxX+1, maxY+1));
 		}
-		std::vector<glm::ivec3> getBox(std::vector<glm::ivec3> *points)
+		void getBox(std::unique_ptr<std::vector<glm::ivec3> > &box) const
 		{
-			std::vector<glm::ivec3> box;
-			std::vector<glm::ivec3>::iterator it;
-			int minX = std::numeric_limits<int32_t>::max(), minY = std::numeric_limits<int32_t>::max(), minZ = std::numeric_limits<int32_t>::max(), maxX = 0, maxY = 0, maxZ = 0;
-			for(it=points->begin(); it!=points->end(); ++it)
+			int minX = std::numeric_limits<int32_t>::max(),
+				minY = std::numeric_limits<int32_t>::max(),
+				minZ = std::numeric_limits<int32_t>::max(),
+				maxX = 0,
+				maxY = 0,
+				maxZ = 0;
+			for(auto it=points.begin(); it!=points.end(); ++it)
 			{
 				minX = std::min(minX, it->x);
 				minY = std::min(minY, it->y);
@@ -234,11 +217,10 @@ class Mask
 				maxY = std::max(maxY, it->y);
 				maxZ = std::max(maxZ, it->z);
 			}
-			box.push_back(glm::ivec3(minX, minY, minZ));
-			box.push_back(glm::ivec3(maxX+1, maxY+1, maxZ+1));
-			return box;
+			box->push_back(glm::ivec3(minX, minY, minZ));
+			box->push_back(glm::ivec3(maxX+1, maxY+1, maxZ+1));
 		}
-		std::string boxMask(std::vector<glm::ivec2> boundingBox, std::vector<glm::ivec2> *points)
+		std::string boxMask(std::unique_ptr<std::vector<glm::ivec2> > &boundingBox)
 		{
 			glm::ivec2 p, p2;
 			std::vector<char> tmp;
@@ -248,13 +230,13 @@ class Mask
 			int pixel;
 			std::string mask = "";
 
-			p = boundingBox[1] - boundingBox[0];
+			p = (*boundingBox)[1] - (*boundingBox)[0];
 			dimensions[0] = p[0];
 			dimensions[1] = p[1];
 			tmp = std::vector<char>(p[0]*p[1], '0');
-			for(it=points->begin(); it!=points->end(); ++it)
+			for(it=points.begin(); it!=points.end(); ++it)
 			{
-				pixel = getPixel((*it)-boundingBox[0], dimensions);
+				pixel = getPixel((*it)-(*boundingBox)[0]);
 				tmp[pixel] = '1';
 			}
 			for(cit=tmp.begin(); cit!=tmp.end(); ++cit)
@@ -263,23 +245,23 @@ class Mask
 			}
 			return mask;
 		}
-		void outline(std::vector<glm::ivec2> &outline, glm::ivec2 &centroid)
+		void outline(std::vector<glm::ivec2> &outline, glm::ivec2 &centroid) const
 		{
-//			std::sort(points->begin(), points->end(), VectorSortComparator);
-			if (!points->empty())
+//			std::sort(points.begin(), points.end(), VectorSortComparator);
+			if (!points.empty())
 			{
-				if(points->size() == 1)
+				if(points.size() == 1)
 				{
 					//prevents function from infinite loop when the mask only contains one pixel
-					centroid += points->front();
-					outline.push_back(points->front());
+					centroid += points.front();
+					outline.push_back(points.front());
 					return;
 				}
 				std::unordered_set<glm::ivec2, VectorHashFunctor, VectorEqualFunctor> set;
 				CircularLinkedList<glm::ivec2> neighbours;
 				glm::ivec2 b, c, b0, b1, tmp, c1, *previous, *current;
 
-				set.insert(points->begin(), points->end());
+				set.insert(points.begin(), points.end());
 
 				neighbours.addLast(glm::ivec2(-1, 0));
 				neighbours.addLast(glm::ivec2(-1, -1));
@@ -291,7 +273,7 @@ class Mask
 				neighbours.addLast(glm::ivec2(-1, 1));
 				neighbours.setActualElement(glm::ivec2(-1, 0));
 
-				b0 = (*points)[0];
+				b0 = points[0];
 				for (int i = 1; i < neighbours.size(); i++)
 				{
 					previous = neighbours.getActualElementData();

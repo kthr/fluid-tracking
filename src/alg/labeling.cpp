@@ -23,7 +23,7 @@
 using elib::Labeling;
 using elib::Image;
 
-Image<int>* Labeling::labeling(Image<int>* label_image, Image<int>* input_image, Parameters *input_params)
+Image<int>* Labeling::labeling(Image<int> &label_image, Image<int> &input_image, Parameters &input_params)
 {
 	int width, height, bit_depth, num_labels;
 	double c0, c1, lambda, mu, c;
@@ -31,27 +31,27 @@ Image<int>* Labeling::labeling(Image<int>* label_image, Image<int>* input_image,
 	std::set<int>::iterator it;
 	std::unordered_map<int,int> label_map;
 	int *label_array, label, num_pixels, *label_data, *image_data;
-	Image<int> *new_label_image = new Image<int>(*label_image);
+	Image<int> *new_label_image = new Image<int>(label_image);
 
 
 
 	if(
-		isnan(num_labels = input_params->getIntegerParameter("NumberLabels")) ||
-		isnan(c0 = input_params->getDoubleParameter("C0")) ||
-		isnan(c1 = input_params->getDoubleParameter("C1")) ||
-		isnan(lambda = input_params->getDoubleParameter("Lambda")) ||
-		isnan(mu = input_params->getDoubleParameter("Mu"))
+		isnan(num_labels = input_params.getIntegerParameter("NumberLabels")) ||
+		isnan(c0 = input_params.getDoubleParameter("C0")) ||
+		isnan(c1 = input_params.getDoubleParameter("C1")) ||
+		isnan(lambda = input_params.getDoubleParameter("Lambda")) ||
+		isnan(mu = input_params.getDoubleParameter("Mu"))
 	)
 	{
 		return nullptr;
 	}
-	width = input_image->getWidth();
-	height = input_image->getHeight();
-	bit_depth = input_image->getBitDepth();
-	label_data = label_image->getData();
-	image_data = input_image->getData();
+	width = input_image.getWidth();
+	height = input_image.getHeight();
+	bit_depth = input_image.getBitDepth();
+	label_data = label_image.getData();
+	image_data = input_image.getData();
 
-	labels.insert(label_image->getData(), label_image->getData()+label_image->getFlattenedLength());
+	labels.insert(label_image.getData(), label_image.getData()+label_image.getFlattenedLength());
 	labels.insert(1); //inserts label 1
 	label_array = new int[labels.size()];
 	std::copy(labels.begin(), labels.end(), label_array);
@@ -96,7 +96,7 @@ Image<int>* Labeling::labeling(Image<int>* label_image, Image<int>* input_image,
 //						gc->setSmoothCost(l1,l2,l1==l2 ? 0 : lambda);
 //					}
 		ForSmoothFn data;
-		data.image = input_image->getData();
+		data.image = input_image.getData();
 		data.lambda = lambda;
 		gc->setSmoothCost(&smoothFn, &data);
 		gc->setVerbosity(verbosity);

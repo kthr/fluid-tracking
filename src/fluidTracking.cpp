@@ -311,7 +311,7 @@ int main(int argc, char *argv[])
 		for (it = ft.getFrames()->begin(); it != ft.getFrames()->end(); ++it)
 		{
 			file_name = Utilities::createFileName(label_image_folder, std::string("label"), std::string(".png"), i);
-			image = it->masksToImage(ft.getInitial()->getRank(), ft.getInitial()->getDimensions());
+			image = it->masksToImage();
 			Image<int>::saveImage(file_name, &image);
 			++i;
 		}

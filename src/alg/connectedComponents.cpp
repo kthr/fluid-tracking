@@ -28,16 +28,17 @@ Image<int> ConnectedComponents::getComponents(Image<int> image)
 {
 	Image<int> label_image, tmp_image;
 	int *tmp_data, *label_data;
-	int width, height, *dimensions;
+	int width, height;
+	std::vector<int> dimensions;
 
 	tmp_image = Image<int>(image);
 	tmp_data = tmp_image.getData();
-	label_image = Image<int>(image.getRank(), image.getDimensions(), 16, 1);
+	label_image = Image<int>(image.getRank(), *(image.getDimensions()), 16, 1);
 	label_data = label_image.getData();
 
 	if(image.getRank() == 2) //2d-image
 	{
-		dimensions=image.getDimensions();
+		dimensions=*(image.getDimensions());
 		width = dimensions[0];
 		height = dimensions[1];
 		std::queue<glm::ivec2 > indices;
@@ -64,7 +65,7 @@ Image<int> ConnectedComponents::getComponents(Image<int> image)
 					tmp_data[pixel] = 0;
 					label_data[pixel] = label;
 					index = glm::ivec2(i,j);
-					addNeigbours(&indices, neighbours, index, image.getRank(), image.getDimensions());
+					addNeigbours(&indices, neighbours, index, image.getRank(), dimensions);
 					while(!indices.empty())
 					{
 						index = indices.front();
@@ -74,7 +75,7 @@ Image<int> ConnectedComponents::getComponents(Image<int> image)
 						{
 							tmp_data[pixel] = 0;
 							label_data[pixel] = label;
-							addNeigbours(&indices, neighbours, index,  image.getRank(), image.getDimensions());
+							addNeigbours(&indices, neighbours, index,  image.getRank(), dimensions);
 						}
 					}
 					label++;

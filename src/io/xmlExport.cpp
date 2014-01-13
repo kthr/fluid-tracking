@@ -59,8 +59,8 @@ void XMLExport::write(const char *uri)
 	if(data->getFluidTracks()->getInitial()->getRank() == 2)
 	{
 		xmlTextWriterStartElement(writer, BAD_CAST "image-dimensions"); /* start image-dimensions */
-		writeAttribute(writer, "width", data->getFluidTracks()->getInitial()->getDimensions()[0]);
-		writeAttribute(writer, "height", data->getFluidTracks()->getInitial()->getDimensions()[1]);
+		writeAttribute(writer, "width", (*data->getFluidTracks()->getInitial()->getDimensions())[0]);
+		writeAttribute(writer, "height", (*data->getFluidTracks()->getInitial()->getDimensions())[1]);
 		xmlTextWriterEndElement(writer); /* end image-dimensions */
 	}
 	writeElement(writer, "number_of_tracks", data->getNumTracks());

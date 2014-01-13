@@ -11,54 +11,52 @@
 #include "glm/glm.hpp"
 #include "templates/mask.hpp"
 
-using elib::ComponentsMeasurements;
-using elib::Image;
-using std::unordered_map;
+namespace elib{
 
-ComponentsMeasurements::ComponentsMeasurements()
+ComponentsMeasurements::ComponentsMeasurements() noexcept
 {
-	labels = nullptr;
-	masks = nullptr;
 }
 ComponentsMeasurements::ComponentsMeasurements(const ComponentsMeasurements& other)
 {
 	operator=(other);
 }
-elib::ComponentsMeasurements::ComponentsMeasurements(ComponentsMeasurements&& other)
-: ComponentsMeasurements::ComponentsMeasurements()
+ComponentsMeasurements::ComponentsMeasurements(ComponentsMeasurements&& other) noexcept
+: label_image(std::move(other.label_image)), num_labels(other.num_labels),
+  connectivity(other.connectivity), labels(std::move(other.labels)),
+  masks(std::move(other.masks))
 {
-	swap(*this,other);
 }
-ComponentsMeasurements::ComponentsMeasurements(Image<int> &label_image)
+ComponentsMeasurements& ComponentsMeasurements::operator=(ComponentsMeasurements other)
 {
-	this->label_image = label_image;
-	labels = new std::set<int>();
-	masks = new MaskList<int, glm::ivec2>(label_image.getRank(), label_image.getDimensions());
+	swap(*this, other);
+	return *this;
+}
+ComponentsMeasurements::ComponentsMeasurements(Image<int> &image) : label_image(image)
+{
+	masks = MaskList<int, glm::ivec2>(image.getRank(), *(image.getDimensions()));
 	init();
 }
 ComponentsMeasurements::~ComponentsMeasurements()
 {
-	delete labels;
-	delete masks;
 }
-elib::MaskList<int, glm::ivec2> ComponentsMeasurements::getMasks()
+MaskList<int, glm::ivec2> ComponentsMeasurements::getMasks()
 {
-	std::cout << masks->toString() << std::endl;
-	return *masks;
+	return masks;
 }
 
 void ComponentsMeasurements::init()
 {
-	Image<int>* tmp_image;
+	Image<int> tmp_image;
 	int *tmp_data;
-	int *dimensions, width, height, label;
+	int width, height, label;
+	std::vector<int> dimensions;
 
-	tmp_image = new Image<int>(label_image);
-	tmp_data = tmp_image->getData();
+	tmp_image = Image<int>(label_image);
+	tmp_data = tmp_image.getData();
 
 	if (label_image.getRank() == 2) //2d-image
 	{
-		dimensions = label_image.getDimensions();
+		dimensions = *(label_image.getDimensions());
 		width = dimensions[0];
 		height = dimensions[1];
 		std::queue<glm::ivec2> indices;
@@ -82,14 +80,14 @@ void ComponentsMeasurements::init()
 				pixel = j * width + i;
 				if (tmp_data[pixel] > 0)
 				{
-					Mask<glm::ivec2>* mask_ptr;
+					std::shared_ptr<Mask<glm::ivec2>> shared_mask_ptr;
 					label = tmp_data[pixel];
 					tmp_data[pixel] = 0;
-					mask_ptr = masks->addMask(label);
-					mask_ptr->addPoint(glm::ivec2(i, j));
+					masks.addMask(shared_mask_ptr, label);
+					shared_mask_ptr->addPoint(glm::ivec2(i, j));
 
 					index = glm::ivec2(i, j);
-					ConnectedComponents::addNeigbours(&indices, neighbours, index, label_image.getRank(), label_image.getDimensions());
+					ConnectedComponents::addNeigbours(&indices, neighbours, index, label_image.getRank(), dimensions);
 					while (!indices.empty())
 					{
 						index = indices.front();
@@ -98,8 +96,8 @@ void ComponentsMeasurements::init()
 						if (tmp_data[pixel] == label)
 						{
 							tmp_data[pixel] = 0;
-							mask_ptr->addPoint(glm::ivec2(index.x, index.y));
-							ConnectedComponents::addNeigbours(&indices, neighbours, index, label_image.getRank(), label_image.getDimensions());
+							shared_mask_ptr->addPoint(glm::ivec2(index.x, index.y));
+							ConnectedComponents::addNeigbours(&indices, neighbours, index, label_image.getRank(), dimensions);
 						}
 					}
 				}
@@ -111,5 +109,6 @@ void ComponentsMeasurements::init()
 	{
 
 	}
-	delete tmp_image;
 }
+
+} /* end namespace elib */

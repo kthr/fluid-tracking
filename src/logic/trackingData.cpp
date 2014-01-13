@@ -75,13 +75,12 @@ void TrackingData::construct()
 		unsigned int frameId = 0;
 		std::vector<MaskList<int, glm::ivec2>>::iterator it;
 		std::vector<Object>::iterator objectIt;
-		std::unordered_map<int, Mask<glm::ivec2>*>::iterator mask;
 
 		for (it = data->begin(); it != data->end(); ++it)
 		{
 			id=0;
 			Frame *frame = addFrame();
-			for (mask = it->begin(); mask != it->end(); ++mask)
+			for (auto mask = it->begin(); mask != it->end(); ++mask)
 			{
 				tracks.insert(mask->first); // insert track id
 				object = frame->addObject(mask->first);

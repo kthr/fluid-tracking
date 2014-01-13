@@ -8,6 +8,7 @@
 #ifndef OBJECT_HPP_
 #define OBJECT_HPP_
 
+#include <memory>
 #include <libxml/xmlwriter.h>
 
 #include "annotation.hpp"
@@ -33,14 +34,16 @@ class Object
 		void setFrameId(int frameId);
 		int getId() const;
 		void setId(int id);
-		const Mask<glm::ivec2>* getMask() const;
-		void setMask(const Mask<glm::ivec2>* mask);
+		const std::shared_ptr<Mask<glm::ivec2>> getMask() const;
+		void setMask(std::shared_ptr<Mask<glm::ivec2>> &mask);
 		int getTrackId() const;
 		void setTrackId(int trackId);
 
 	private:
-		int id, frameId, trackId;
-		const Mask<glm::ivec2> *mask;
+		int id = -1,
+			frameId = -1,
+			trackId = -1;
+		std::shared_ptr<Mask<glm::ivec2>> mask;
 		std::vector<Link> links;
 		std::vector<Annotation> annotations;
 

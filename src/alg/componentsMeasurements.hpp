@@ -23,40 +23,31 @@ class ComponentsMeasurements
 		const static short SMALL_CONNECTIVITY = 0;
 		const static short LARGE_CONNECTIVITY = 1;
 
-		ComponentsMeasurements();
+		ComponentsMeasurements() noexcept;
 		ComponentsMeasurements(const ComponentsMeasurements& other);
-		ComponentsMeasurements(ComponentsMeasurements&& other);
-		ComponentsMeasurements(Image<int> &label_image);
+		ComponentsMeasurements(ComponentsMeasurements&& other) noexcept;
+		ComponentsMeasurements& operator=(ComponentsMeasurements other);
+		ComponentsMeasurements(Image<int> &image);
 		virtual ~ComponentsMeasurements();
 		elib::MaskList<int, glm::ivec2> getMasks();
-		ComponentsMeasurements& operator=(ComponentsMeasurements other)
-		{
-			swap(*this, other);
-			return *this;
-		}
 	private:
 
 		Image<int> label_image;
 		int num_labels = 0;
 		short connectivity = LARGE_CONNECTIVITY;
-		std::set<int> *labels = nullptr;
-		MaskList<int, glm::ivec2> *masks = nullptr;
+		std::set<int> labels;
+		MaskList<int, glm::ivec2> masks;
 
 		void init();
 		friend void swap(ComponentsMeasurements& first, ComponentsMeasurements& second)
 		{
-			// enable ADL (not necessary in our case, but good practice)
 			using std::swap;
-			// by swapping the members of two classes,
-			// the two classes are effectively swapped
 			swap(first.connectivity, second.connectivity);
 			swap(first.label_image, second.label_image);
 			swap(first.labels, second.labels);
 			swap(first.masks, second.masks);
 			swap(first.num_labels, second.num_labels);
 		}
-
-
 };
 
 } /* namespace elib */

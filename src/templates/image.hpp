@@ -8,9 +8,9 @@
 #ifndef IMAGE_HPP_
 #define IMAGE_HPP_
 
-#include <stdint.h>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "CImg.h"
 #include "utils/vector2D.hpp"
@@ -24,32 +24,28 @@ class Image
 	public:
 		Image()
 		{
-			dimensions = NULL;
-			data = NULL;
 		}
 		Image(const Image &other)
 		: bit_depth(other.bit_depth), channels(other.channels), flattened_length(other.flattened_length), rank(other.rank)
 		{
-			dimensions = new int[rank];
 			data = new type[flattened_length];
-
-			std::copy(other.dimensions, other.dimensions+rank, dimensions);
+			dimensions=std::vector<int>(other.dimensions.begin(), other.dimensions.end());
 			std::copy(other.data, other.data+flattened_length, data);
 		}
-		Image(const Image &&other)
-		: Image()
+		Image(Image &&other)
+		: dimensions(std::move(other.dimensions)), bit_depth(other.bit_depth), channels(other.channels),
+		  flattened_length(other.flattened_length), rank(other.rank), data(other.data)
 		{
-			this->operator=(other);
+			other.data=nullptr;
 		}
-		Image(int rank, int *dimensions, int bit_depth, int channels)
+		Image(int rank, const std::vector<int> &dimensions, int bit_depth, int channels)
 		: bit_depth(bit_depth), channels(channels), rank(rank)
 		{
-			this->dimensions  = new int[rank];
-			std::copy(dimensions, dimensions+rank, this->dimensions);
+			this->dimensions=std::vector<int>(dimensions.begin(), dimensions.end());
 			this->flattened_length = channels;
-			for(int i=0; i<rank; ++i)
+			for(auto i=dimensions.begin(); i!=dimensions.end(); ++i)
 			{
-				this->flattened_length*=dimensions[i];
+				this->flattened_length*=(*i);
 			}
 			this->data = new type[flattened_length];
 			std::fill_n(this->data, flattened_length, 0);
@@ -67,17 +63,19 @@ class Image
 			if(image->depth() == 1)
 			{
 				rank = 2;
-				dimensions = new int[rank];
-				dimensions[0] = image->width();
-				dimensions[1] = image->height();
+				dimensions=std::vector<int>({image->width(), image->height()});
+//				dimensions = new int[rank];
+//				dimensions[0] = image->width();
+//				dimensions[1] = image->height();
 			}
 			else
 			{
 				rank = 3;
-				dimensions = new int[rank];
-				dimensions[0] = image->width();
-				dimensions[1] = image->height();
-				dimensions[2] = image->depth();
+				dimensions=std::vector<int>({image->width(), image->height(), image->depth()});
+//				dimensions = new int[rank];
+//				dimensions[0] = image->width();
+//				dimensions[1] = image->height();
+//				dimensions[2] = image->depth();
 			}
 			channels = 1;
 			if(image->spectrum()>1)
@@ -102,13 +100,23 @@ class Image
 		}
 		virtual ~Image()
 		{
-			delete[] dimensions;
 			delete[] data;
 		}
 
-		Image& operator=(Image other)
+		Image& operator=(Image &other)
 		{
 			swap(*this,other);
+			return *this;
+		}
+		Image& operator=(Image &&other)
+		{
+			dimensions=std::move(other.dimensions);
+			bit_depth=other.bit_depth;
+			channels=other.channels;
+			flattened_length=other.flattened_length;
+			rank=other.rank;
+			data=other.data;
+			other.data=nullptr;
 			return *this;
 		}
 		type min()
@@ -131,7 +139,7 @@ class Image
 		}
 		void displaceByVectorField(VectorArray2D &field)
 		{
-			Image tmp = Image<type>(this->getRank(),this->getDimensions(),this->getBitDepth(),this->getChannels());
+			Image tmp = Image<type>(this->getRank(),*(this->getDimensions()),this->getBitDepth(),this->getChannels());
 			type *data = tmp.getData();
 
 			if(rank==2)
@@ -165,23 +173,6 @@ class Image
 				*this = tmp;
 			}
 		}
-//		cimage* to_cimage()
-//		{
-//			cimage *new_image;
-//
-//			new_image = (cimage*)malloc(sizeof(cimage));
-//			new_image->bit_depth = this->getBitDepth();
-//			new_image->channels = this->getChannels();
-//			new_image->rank = this->getRank();
-//			new_image->dimensions = (mint*)malloc(sizeof(mint)*this->getRank());
-//			std::copy(this->getDimensions(), this->getDimensions()+this->getRank(), new_image->dimensions);
-//			new_image->flattened_length = this->getFlattenedLength();
-//			new_image->data = (mint*)malloc(sizeof(mint)*new_image->flattened_length);
-//			std::copy(this->getData(), this->getData()+new_image->flattened_length, new_image->data);
-//			new_image->shared = 0;
-//
-//			return new_image;
-//		}
 		static Image<type>* openImage(std::string file_name)
 		{
 			try
@@ -202,8 +193,8 @@ class Image
 				{
 					int width, height, spectrum;
 
-					width = image->getDimensions()[0];
-					height = image->getDimensions()[1];
+					width = (*image->getDimensions())[0];
+					height = (*image->getDimensions())[1];
 					spectrum = image->getChannels();
 					cimg_library::CImg<type> img(width, height, 1, spectrum);
 					std::copy(image->getData(), image->getData()+image->getFlattenedLength(), img.data());
@@ -230,9 +221,9 @@ class Image
 		{
 			return data;
 		}
-		int* getDimensions() const
+		const std::vector<int>* getDimensions() const
 		{
-			return dimensions;
+			return &dimensions;
 		}
 		int getFlattenedLength() const
 		{
@@ -269,8 +260,8 @@ class Image
 		}
 
 	private:
-		int 	*dimensions = nullptr,
-				bit_depth = 0,
+		std::vector<int> dimensions;
+		int		bit_depth = 0,
 				channels = 0,
 				flattened_length = 0,
 				rank = 0;
