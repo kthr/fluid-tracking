@@ -25,9 +25,6 @@ class FluidTracks
 		FluidTracks();
 		FluidTracks(Parameters *params, std::vector<std::string> *images, std::vector<std::string> *flows);
 		virtual ~FluidTracks();
-		void addAppearingObjects(MaskList<int, glm::ivec2> &masks);
-		void applySizeConstraints(MaskList<int, glm::ivec2> &masks);
-		void detectDivisions(MaskList<int, glm::ivec2> &masks);
 		void track();
 		bool isIncludeAppearing() const
 		{
@@ -100,6 +97,11 @@ class FluidTracks
 		std::vector<MaskList<int, glm::ivec2>> *frames;
 		int verbosity = 0,
 			cycles = -1;
+
+		void addAppearingObjects(MaskList<int, glm::ivec2> &masks);
+		void applySizeConstraints(MaskList<int, glm::ivec2> &masks);
+		MaskList<int, glm::ivec2> assignLabels(const MaskList<int, glm::ivec2> &old_labels, MaskList<int, glm::ivec2> &segmentation);
+		void detectDivisions(MaskList<int, glm::ivec2> &masks);
 };
 
 } /* namespace elib */

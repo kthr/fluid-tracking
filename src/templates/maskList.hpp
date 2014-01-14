@@ -94,8 +94,9 @@ class MaskList
 				masks.insert(std::pair<Label,std::shared_ptr<Mask<Point>>>(id, shared_mask_ptr));
 			}
 		}
-		void addMasks(MaskList &list)
+		void addMasks(MaskList list)
 		{
+			labels.insert(list.getLabels()->begin(), list.getLabels()->end());
 			masks.insert(list.begin(),list.end());
 		}
 		std::shared_ptr<Mask<Point>> getMask(Label id)

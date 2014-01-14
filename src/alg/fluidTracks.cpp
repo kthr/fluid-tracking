@@ -84,6 +84,36 @@ void FluidTracks::applySizeConstraints(MaskList<int, glm::ivec2> &masks)
 
 }
 
+MaskList<int, glm::ivec2> FluidTracks::assignLabels(const MaskList<int, glm::ivec2> &old_labels, MaskList<int, glm::ivec2> &segmentation)
+{
+	MaskList<int, glm::ivec2> labeled_masks;
+	std::vector<int> labels;
+
+	for(auto i=segmentation.begin(); i!=segmentation.end(); ++i)
+	{
+		for(auto j=old_labels.begin(); j!= old_labels.end(); ++j)
+		{
+			if((i->second*j->second).getSize() > 0)
+			{
+				labels.push_back(j->first);
+			}
+		}
+		if(include_appearing && labels.size()==0)
+		{
+			labeled_masks.addMask(id_counter++,*i->second);
+		}
+		if(labels.size()==1)
+		{
+			labeled_masks.addMask(labels[0],*i->second);
+		}
+		if(labels.size()>1)
+		{
+			//resolveAmbigousLabeling()
+		}
+	}
+	return labeled_masks;
+}
+
 void FluidTracks::detectDivisions(MaskList<int, glm::ivec2> &masks)
 {
 	ConnectedComponents cc;
