@@ -182,7 +182,7 @@ class MaskList
 		{
 			return &labels;
 		}
-		int getSize()
+		int getSize() const
 		{
 			return masks.size();
 		}

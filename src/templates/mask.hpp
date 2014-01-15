@@ -60,19 +60,19 @@ class Mask
 			swap(*this,other);
 			return *this;
 		}
-		const Mask operator*(const Mask &other)
+		Mask multiply(Mask &other)
 		{
 			namespace ub = boost::numeric::ublas;
 			if(this->mask == nullptr)
 			{
 				this->createSparseRepresentation();
 			}
-			if(other->mask == nullptr)
+			if(other.mask == nullptr)
 			{
 				other.createSparseRepresentation();
 			}
-			Mask mask(this->getRank(), this->getDimensions());
-			boost::numeric::ublas::compressed_matrix<int> result = boost::numeric::ublas::element_prod(this->mask, other.mask);
+			Mask mask(this->getRank(), *(this->getDimensions()));
+			boost::numeric::ublas::compressed_matrix<int> result = boost::numeric::ublas::element_prod(*this->mask, *other.mask);
 			if(mask.getRank()==2)
 			{
 				for(auto i = result.begin2(); i!= result.end2(); ++i)
@@ -80,7 +80,7 @@ class Mask
 					mask.addPoint(Point(i.index1(), i.index2()));
 				}
 			}
-			return this;
+			return mask;
 		}
 		void addPoint(Point p)
 		{

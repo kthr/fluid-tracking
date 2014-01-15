@@ -100,7 +100,7 @@ class FluidTracks
 
 		void addAppearingObjects(MaskList<int, glm::ivec2> &masks);
 		void applySizeConstraints(MaskList<int, glm::ivec2> &masks);
-		MaskList<int, glm::ivec2> assignLabels(const MaskList<int, glm::ivec2> &old_labels, MaskList<int, glm::ivec2> &segmentation);
+		MaskList<int, glm::ivec2> assignLabels(MaskList<int, glm::ivec2> &old_labels, MaskList<int, glm::ivec2> &segmentation);
 		void detectDivisions(MaskList<int, glm::ivec2> &masks);
 };
 

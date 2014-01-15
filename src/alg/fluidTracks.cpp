@@ -7,6 +7,7 @@
 
 #include "fluidTracks.hpp"
 
+#include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <iostream>
 
 #include "componentsMeasurements.hpp"
@@ -84,31 +85,22 @@ void FluidTracks::applySizeConstraints(MaskList<int, glm::ivec2> &masks)
 
 }
 
-MaskList<int, glm::ivec2> FluidTracks::assignLabels(const MaskList<int, glm::ivec2> &old_labels, MaskList<int, glm::ivec2> &segmentation)
+MaskList<int, glm::ivec2> FluidTracks::assignLabels(MaskList<int, glm::ivec2> &old_labels, MaskList<int, glm::ivec2> &segmentation)
 {
 	MaskList<int, glm::ivec2> labeled_masks;
 	std::vector<int> labels;
+	boost::numeric::ublas::compressed_matrix<int> adjacency(old_labels.getSize(), segmentation.getSize());
 
-	for(auto i=segmentation.begin(); i!=segmentation.end(); ++i)
+	int segmentation_index = 0,
+		old_labels_index = 0;
+	for(auto i=segmentation.begin(); i!=segmentation.end(); ++i, ++segmentation_index)
 	{
-		for(auto j=old_labels.begin(); j!= old_labels.end(); ++j)
+		for(auto j=old_labels.begin(); j!=old_labels.end(); ++j, ++old_labels_index)
 		{
-			if((i->second*j->second).getSize() > 0)
+			if((*i->second).multiply((*j->second)).getSize() > 0)
 			{
-				labels.push_back(j->first);
+				adjacency.push_back(segmentation_index, old_labels_index,1);
 			}
-		}
-		if(include_appearing && labels.size()==0)
-		{
-			labeled_masks.addMask(id_counter++,*i->second);
-		}
-		if(labels.size()==1)
-		{
-			labeled_masks.addMask(labels[0],*i->second);
-		}
-		if(labels.size()>1)
-		{
-			//resolveAmbigousLabeling()
 		}
 	}
 	return labeled_masks;
