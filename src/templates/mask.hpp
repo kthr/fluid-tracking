@@ -75,9 +75,10 @@ class Mask
 			boost::numeric::ublas::compressed_matrix<int> result = boost::numeric::ublas::element_prod(*this->mask, *other.mask);
 			if(mask.getRank()==2)
 			{
-				for(auto i = result.begin2(); i!= result.end2(); ++i)
+				for(auto i = result.begin1(); i!= result.end1(); ++i)
 				{
-					mask.addPoint(Point(i.index1(), i.index2()));
+					for(auto j= i.begin(); j != i.end(); ++j)
+						mask.addPoint(Point(j.index1(), j.index2()));
 				}
 			}
 			return mask;
@@ -167,15 +168,6 @@ class Mask
 			swap(first.points, second.points);
 			swap(first.mask, second.mask);
 		}
-
-		void createSparseRepresentation()
-		{
-			mask = new boost::numeric::ublas::compressed_matrix<int>(dimensions[0], dimensions[1], points.size());
-			for(auto i=points.begin(); i!=points.end(); ++i)
-			{
-				mask->push_back((*i).x, (*i).y, 1);
-			}
-		}
 		inline int pixel(glm::ivec2 p)
 		{
 			return p[1]*dimensions[0]+p[0];
@@ -183,6 +175,14 @@ class Mask
 		inline int pixel(glm::ivec3 p)
 		{
 			return p[2]*dimensions[0]*dimensions[1] + p[1]*dimensions[0] + p[0];
+		}
+		void createSparseRepresentation()
+		{
+			mask = new boost::numeric::ublas::compressed_matrix<int>(dimensions[0], dimensions[1], points.size());
+			for(auto i=points.begin(); i!=points.end(); ++i)
+			{
+				mask->insert_element((*i).x, (*i).y, 1);
+			}
 		}
 		void getBox(std::unique_ptr<std::vector<glm::ivec2> > &box) const
 		{

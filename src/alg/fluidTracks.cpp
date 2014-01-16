@@ -8,6 +8,7 @@
 #include "fluidTracks.hpp"
 
 #include <boost/numeric/ublas/matrix_sparse.hpp>
+#include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <iostream>
 
 #include "componentsMeasurements.hpp"
@@ -87,22 +88,84 @@ void FluidTracks::applySizeConstraints(MaskList<int, glm::ivec2> &masks)
 
 MaskList<int, glm::ivec2> FluidTracks::assignLabels(MaskList<int, glm::ivec2> &old_labels, MaskList<int, glm::ivec2> &segmentation)
 {
+	using namespace boost::numeric::ublas;
+
 	MaskList<int, glm::ivec2> labeled_masks;
 	std::vector<int> labels;
-	boost::numeric::ublas::compressed_matrix<int> adjacency(old_labels.getSize(), segmentation.getSize());
+	compressed_matrix<int> adjacency(segmentation.getSize(), old_labels.getSize());
 
-	int segmentation_index = 0,
-		old_labels_index = 0;
+	int segmentation_index = 0;
 	for(auto i=segmentation.begin(); i!=segmentation.end(); ++i, ++segmentation_index)
 	{
+		int old_labels_index = 0;
 		for(auto j=old_labels.begin(); j!=old_labels.end(); ++j, ++old_labels_index)
 		{
 			if((*i->second).multiply((*j->second)).getSize() > 0)
 			{
+//				std::cout << "(" << segmentation_index << "," << old_labels_index << ")=" << 1 << std::endl;
 				adjacency.push_back(segmentation_index, old_labels_index,1);
 			}
 		}
 	}
+
+	int index=1;
+	std::cout << "adjacency: #segmentations=" << segmentation.getSize() << " #old_labels=" << old_labels.getSize() << std::endl;
+	std::cout << "\trow-wise:" << std::endl;
+	for (auto it1 = adjacency.begin1(); it1 != adjacency.end1(); it1++)
+	{
+		if(it1.begin() == it1.end())
+		{
+			std::cout << "\t  " << index++ << ".  (" << it1.index1() << ",:) = empty" << std::endl;
+		}
+		for (auto it2 = it1.begin(); it2 != it1.end(); it2++)
+		{
+			std::cout << "\t  " << index++ << ".  (" << it2.index1() << "," << it2.index2() << ") = ";
+			std::cout << *it2 << std::endl;
+		}
+	}
+	std::cout << "\tcolumn-wise:" << std::endl;
+	index = 1;
+	for (auto it1 = adjacency.begin2(); it1 != adjacency.end2(); it1++)
+	{
+		if(it1.begin() == it1.end())
+		{
+			std::cout << "\t  "<< index++ << ".  (:," << it1.index2()  << ") = empty" << std::endl;
+		}
+		for (auto it2 = it1.begin(); it2 != it1.end(); it2++)
+		{
+			std::cout << "\t  " << index++ << ".  (" << it2.index1() << "," << it2.index2() << ") = ";
+			std::cout << *it2 << std::endl;
+		}
+	}
+
+	std::cout << "\tassociations:" << std::endl;
+	index = 1;
+	for (auto it1 = adjacency.begin1(); it1 != adjacency.end1(); ++it1)
+	{
+		if(it1.begin() == it1.end())
+		{
+			std::cout << "\t  " << index++ << ".  is added as new cell" << std::endl;
+		}
+		else
+		{
+			int count = 0;
+			for (auto it2 = it1.begin(); it2 != it1.end(); it2++)
+			{
+				count++;
+				matrix_column<compressed_matrix<int>> column(adjacency, it2.index1());
+				for(auto it3=column.begin(); it3!=column.end(); ++it3)
+				{
+					count++;
+				}
+			}
+			if(count == 2)
+			{
+				std::cout << "\t  " << index++ << ".  is associated with cell " << it1.begin().index2()+1 << "." << std::endl;
+			}
+		}
+
+	}
+
 	return labeled_masks;
 }
 
@@ -235,6 +298,8 @@ void FluidTracks::track()
 			masks.deleteMask(1);
 		}
 		detectDivisions(masks);
+		applySizeConstraints(masks);
+		assignLabels(frames->back(), masks);
 		frames->push_back(masks);
 		old_label = masks.masksToImage();
 	}
