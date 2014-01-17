@@ -9,6 +9,7 @@
 #define FLUIDTRACKS_HPP_
 
 #include <limits>
+#include <list>
 #include <string>
 #include <vector>
 
@@ -101,6 +102,9 @@ class FluidTracks
 		void addAppearingObjects(MaskList<int, glm::ivec2> &masks);
 		void applySizeConstraints(MaskList<int, glm::ivec2> &masks);
 		MaskList<int, glm::ivec2> assignLabels(MaskList<int, glm::ivec2> &old_labels, MaskList<int, glm::ivec2> &segmentation);
+		std::pair<std::list<int>,std::list<int>> getAssociations(boost::numeric::ublas::compressed_matrix<int> &adjacency, int id);
+		std::list<int> getRowAssociations(boost::numeric::ublas::compressed_matrix<int> &adjacency, int id);
+		std::list<int> getColumnAssociations(boost::numeric::ublas::compressed_matrix<int> &adjacency, int id);
 		void detectDivisions(MaskList<int, glm::ivec2> &masks);
 };
 
