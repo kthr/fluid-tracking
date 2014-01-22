@@ -8,11 +8,13 @@
 #ifndef IMAGE_HPP_
 #define IMAGE_HPP_
 
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "CImg.h"
+#include "glm/glm.hpp"
 #include "utils/vector2D.hpp"
 #include "utils/vectorArray2D.hpp"
 
@@ -137,6 +139,13 @@ class Image
 				maximum = std::max(maximum, data[i]);
 			return maximum;
 		}
+		void multiply(double value)
+		{
+			for(int i=0; i< flattened_length; ++i)
+			{
+				data[i] *= value;
+			}
+		}
 		void displaceByVectorField(VectorArray2D &field)
 		{
 			Image tmp = Image<type>(this->getRank(),*(this->getDimensions()),this->getBitDepth(),this->getChannels());
@@ -171,6 +180,31 @@ class Image
 					}
 				}
 				*this = tmp;
+			}
+		}
+		std::shared_ptr<Image<type>> imageTake(glm::ivec2 upperLeft, glm::ivec2 downRight)
+		{
+			if(rank ==  2 && upperLeft.x <= downRight.x && upperLeft.y <= downRight.y && upperLeft.x >= 0 &&
+					downRight.x < dimensions[0] && downRight.y < dimensions[1])
+			{
+				std::vector<int> new_dimensions;
+				int new_width = downRight.x-upperLeft.x;
+				new_dimensions.push_back(new_width);
+				new_dimensions.push_back(downRight.y-upperLeft.y);
+				std::shared_ptr<Image<type>> part = std::shared_ptr<Image<type>>(new Image<type>(this->rank, new_dimensions, this->bit_depth, this->channels));
+
+				int pixel = upperLeft.x + upperLeft.y*this->getWidth();
+				std::copy(this->data + pixel, this->data + pixel + new_width, part->data);
+				for(int i=1; i<new_dimensions[1]; ++i)
+				{
+					pixel += this->getWidth();
+					std::copy(this->data + pixel, this->data + pixel + new_width, part->data + i*new_width);
+				}
+				return part;
+			}
+			else
+			{
+				return nullptr;
 			}
 		}
 		static Image<type>* openImage(std::string file_name)
@@ -237,7 +271,7 @@ class Image
 		{
 			return rank;
 		}
-		void setData(type* data)
+		void setData(const type* data)
 		{
 			std::copy(data, data+flattened_length, this->data);
 		}

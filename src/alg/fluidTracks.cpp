@@ -86,11 +86,11 @@ void FluidTracks::applySizeConstraints(MaskList<int, glm::ivec2> &masks)
 
 }
 
-MaskList<int, glm::ivec2> FluidTracks::assignLabels(MaskList<int, glm::ivec2> &old_labels, MaskList<int, glm::ivec2> &segmentation)
+MaskList<int, glm::ivec2> FluidTracks::assignLabels(Image<int> &image, MaskList<int, glm::ivec2> &old_labels, MaskList<int, glm::ivec2> &segmentation)
 {
 	using namespace boost::numeric::ublas;
 
-	MaskList<int, glm::ivec2> labeled_masks;
+	MaskList<int, glm::ivec2> labeled_masks(old_labels.getRank(), *old_labels.getDimensions());
 	std::vector<int> labels;
 	compressed_matrix<int> adjacency(segmentation.getSize(), old_labels.getSize());
 	std::vector<int> 	segmentation_index_to_id(segmentation.getSize()),
@@ -110,14 +110,10 @@ MaskList<int, glm::ivec2> FluidTracks::assignLabels(MaskList<int, glm::ivec2> &o
 		{
 			if((*i->second).multiply((*j->second)).getSize() > 0)
 			{
-//				std::cout << "(" << segmentation_index << "," << old_labels_index << ")=" << 1 << std::endl;
 				adjacency.push_back(segmentation_index, old_labels_index,1);
 			}
 		}
 	}
-
-	std::cout << "old:" << std::endl << old_labels.toString() << std::endl;
-	std::cout << "seg:" << std::endl << segmentation.toString() << std::endl;
 
 //	int index=1;
 //	std::cout << "adjacency: #segmentations=" << segmentation.getSize() << " #old_labels=" << old_labels.getSize() << std::endl;
@@ -202,7 +198,48 @@ MaskList<int, glm::ivec2> FluidTracks::assignLabels(MaskList<int, glm::ivec2> &o
 		}
 		else
 		{
+			MaskList<int, glm::ivec2> 	masks(old_labels.getRank(), *old_labels.getDimensions()),
+										label_masks,
+										tmp_masks;
+			int index = 1;
+			for(auto i = tmp.first.begin(); i != tmp.first.end(); ++i)
+			{
+				masks.addMask(index++, *segmentation.getMask(segmentation_index_to_id[*i]));
+			}
+			for(auto i = tmp.second.begin(); i != tmp.second.end(); ++i)
+			{
+				masks.addMask(index++, *old_labels.getMask(old_labels_index_to_id[*i]));
+				label_masks.addMask(old_labels_index_to_id[*i], *old_labels.getMask(old_labels_index_to_id[*i]));
+			}
+			Mask<glm::ivec2> fused = masks.fuse();
+			std::vector<glm::ivec2> bounding_box = fused.getBoundingBox();
+			Image<int> label_image = old_labels.masksToImage();
+			std::shared_ptr<Image<int>> image_part = image.imageTake(bounding_box[0], bounding_box[1]),
+										label_tmp_part = label_image.imageTake(bounding_box[0], bounding_box[1]);
+			ComponentsMeasurements cm = ComponentsMeasurements(*label_tmp_part);
+			tmp_masks = cm.getMasks();
+			masks = MaskList<int, glm::ivec2>(tmp_masks.getRank(), *tmp_masks.getDimensions());
+			for(auto i = tmp.second.begin(); i != tmp.second.end(); ++i)
+			{
+				masks.addMask(old_labels_index_to_id[*i], *tmp_masks.getMask(old_labels_index_to_id[*i]));
+			}
+			Image<int> label_image_part = masks.masksToImage();
+			params->addParameter("NumberLabels", int(tmp.second.size()+2));
+			Labeling lbg;
+			Image<int> *new_label_image = lbg.labeling(label_image_part, *image_part, *params);
+			label_image_part.saveImage("/home/kthierbach/Desktop/host/label_part.png");
+			image_part->saveImage("/home/kthierbach/Desktop/host/image_part.png");
+			new_label_image->saveImage("/home/kthierbach/Desktop/host/new_label_part.png");
+			cm = ComponentsMeasurements(*new_label_image);
+			masks = cm.getMasks();
+			masks.deleteMask(1);
+			detectDivisions(masks);
+			masks.setRank(old_labels.getRank());
+			masks.setDimensions(*old_labels.getDimensions());
+			masks.setOrigin(bounding_box[0]);
+			labeled_masks.addMasks(masks);
 
+			delete new_label_image;
 		}
 
 //		std::cout << "\t  " << index++ << " is associated with seg: ";
@@ -402,16 +439,15 @@ void FluidTracks::track()
 		propagated_label = graphcut(image, *params);
 		cc.setLabelOffset();
 		Image<int> components = cc.getComponents(*propagated_label);
-		delete tmp;
-		delete propagated_label;
 		cm = ComponentsMeasurements(components);
-		components.saveImage("/home/kthierbach/Desktop/host/comp.png");
 		masks = cm.getMasks();
 		applySizeConstraints(masks);
-		masks = assignLabels(frames->back(), masks);
-		std::cout << masks.toString() << std::endl;
+		masks = assignLabels(image, frames->back(), masks);
 		frames->push_back(masks);
 		old_label = masks.masksToImage();
+
+		delete tmp;
+		delete propagated_label;
 	}
 }
 

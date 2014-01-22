@@ -67,6 +67,7 @@ else()
 endif()
 
 if(UNIX AND NOT APPLE)
+	set(CMAKE_CXX_COMPILER clang++)
     message("\nEntering configuration for UNIX computers:\n")
     set(CMAKE_CXX_FLAGS "-g -pipe -Wall -std=c++11")
     set_target_properties(fluidTracking

@@ -76,9 +76,8 @@ void Object::toXML(const xmlTextWriterPtr writer, bool compressed) const
 	{
 		xmlTextWriterStartElement(writer, BAD_CAST "mask"); /* start mask */
 		xmlTextWriterStartElement(writer, BAD_CAST "bbox"); /* start bbox */
-		std::unique_ptr<std::vector<glm::ivec2>> bbox;
-		mask->getBoundingBox(bbox);
-		for(auto i=bbox->begin(); i!=bbox->end(); ++i)
+		std::vector<glm::ivec2> bbox = mask->getBoundingBox();
+		for(auto i=bbox.begin(); i!=bbox.end(); ++i)
 		{
 			writePoint(writer, *i);
 		}

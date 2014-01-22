@@ -129,6 +129,21 @@ class MaskList
 				++dit;
 			}
 		}
+		Mask<Point> fuse()
+		{
+			Mask<Point> mask(this->rank, this->dimensions);
+			const std::vector<Point> *points;
+
+			for(auto i = masks.begin(); i!= masks.end(); ++i)
+			{
+				points = i->second->getPoints();
+				for(auto j = points->begin(); j != points->end(); ++j)
+				{
+					mask.addPoint(*j);
+				}
+			}
+			return mask;
+		}
 		typename std::unordered_map<Label, std::shared_ptr<Mask<Point>>>::iterator begin()
 		{
 			return masks.begin();
@@ -190,9 +205,32 @@ class MaskList
 		{
 			return rank;
 		}
-		const int* getDimensions() const
+		const std::vector<int>* getDimensions() const
 		{
-			return dimensions;
+			return &dimensions;
+		}
+		void setDimensions(const std::vector<int> &dimensions)
+		{
+			this->dimensions = std::vector<int>(dimensions.begin(), dimensions.end());
+			for(auto i = masks.begin(); i != masks.end(); ++i)
+			{
+				i->second->setDimensions(dimensions);
+			}
+		}
+		void setRank(int rank)
+		{
+			this->rank = rank;
+			for(auto i = masks.begin(); i != masks.end(); ++i)
+			{
+				i->second->setRank(rank);
+			}
+		}
+		void setOrigin(Point origin)
+		{
+			for(auto i = masks.begin(); i != masks.end(); ++i)
+			{
+				i->second->setOrigin(origin);
+			}
 		}
 		std::string toString()
 		{

@@ -98,34 +98,37 @@ class Mask
 			Image<int> image;
 			int *image_data;
 			int pixel;
-			typename std::vector<Point>::iterator it;
+			bool add_point;
 
 			image = Image<int>(rank, dimensions, bit_depth, 1);
 			image_data = image.getData();
-			for(it=points.begin(); it!=points.end(); ++it)
+			for(auto it=points.begin(); it!=points.end(); ++it)
 			{
+				add_point=true;
 				for(int i=0; i<rank; ++i)
 				{
 					if((*it)[i] < 0 || (*it)[i]>=dimensions[i])
 					{
-						//throw GenericException("Mask doesn't fit into the image");
-						return Image<int>();
+						add_point=false;
 					}
 				}
-				pixel = Mask::getPixel(*it);
-				image_data[pixel] = 1;
+				if(add_point)
+				{
+					pixel = Mask::getPixel(*it);
+					image_data[pixel] = 1;
+				}
 			}
 			return image;
 		}
-		void getBoundingBox(std::unique_ptr<std::vector<Point> > &box) const
+		std::vector<Point> getBoundingBox() const
 		{
-			box = std::unique_ptr<std::vector<Point>>(new std::vector<Point>());
+			std::vector<Point> box;
 			getBox(box);
+			return box;
 		}
 		std::string getBoxMask()
 		{
-			std::unique_ptr<std::vector<Point> > box;
-			getBoundingBox(box);
+			std::vector<Point> box = getBoundingBox();
 			return boxMask(box);
 		}
 		const std::vector<Point>* getPoints() const
@@ -151,6 +154,22 @@ class Mask
 		int getRank() const
 		{
 			return rank;
+		}
+
+		void setDimensions(const std::vector<int> &dimensions)
+		{
+			this->dimensions = std::vector<int>(dimensions.begin(), dimensions.end());
+		}
+		void setRank(int rank)
+		{
+			this->rank = rank;
+		}
+		void setOrigin(Point origin)
+		{
+			for(auto i = points.begin(); i != points.end(); ++i)
+			{
+				*i += origin;
+			}
 		}
 
 	private:
@@ -184,7 +203,7 @@ class Mask
 				mask->insert_element((*i).x, (*i).y, 1);
 			}
 		}
-		void getBox(std::unique_ptr<std::vector<glm::ivec2> > &box) const
+		void getBox(std::vector<glm::ivec2> &box) const
 		{
 			int minX = std::numeric_limits<int>::max(),
 				minY = std::numeric_limits<int>::max(),
@@ -197,10 +216,10 @@ class Mask
 				maxX = std::max(maxX, it->x);
 				maxY = std::max(maxY, it->y);
 			}
-			box->push_back(glm::ivec2(minX, minY));
-			box->push_back(glm::ivec2(maxX+1, maxY+1));
+			box.push_back(glm::ivec2(minX, minY));
+			box.push_back(glm::ivec2(maxX+1, maxY+1));
 		}
-		void getBox(std::unique_ptr<std::vector<glm::ivec3> > &box) const
+		void getBox(std::vector<glm::ivec3> &box) const
 		{
 			int minX = std::numeric_limits<int32_t>::max(),
 				minY = std::numeric_limits<int32_t>::max(),
@@ -217,10 +236,10 @@ class Mask
 				maxY = std::max(maxY, it->y);
 				maxZ = std::max(maxZ, it->z);
 			}
-			box->push_back(glm::ivec3(minX, minY, minZ));
-			box->push_back(glm::ivec3(maxX+1, maxY+1, maxZ+1));
+			box.push_back(glm::ivec3(minX, minY, minZ));
+			box.push_back(glm::ivec3(maxX+1, maxY+1, maxZ+1));
 		}
-		std::string boxMask(std::unique_ptr<std::vector<glm::ivec2> > &boundingBox)
+		std::string boxMask(const std::vector<glm::ivec2> &boundingBox)
 		{
 			glm::ivec2 p, p2;
 			std::vector<char> tmp;
@@ -229,13 +248,13 @@ class Mask
 			int pixel;
 			std::string mask = "";
 
-			p = (*boundingBox)[1] - (*boundingBox)[0];
+			p = boundingBox[1] - boundingBox[0];
 			dimensions[0] = p[0];
 			dimensions[1] = p[1];
 			tmp = std::vector<char>(p[0]*p[1], '0');
 			for(it=points.begin(); it!=points.end(); ++it)
 			{
-				pixel = getPixel((*it)-(*boundingBox)[0]);
+				pixel = getPixel((*it)-boundingBox[0]);
 				tmp[pixel] = '1';
 			}
 			for(cit=tmp.begin(); cit!=tmp.end(); ++cit)
