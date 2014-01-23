@@ -176,40 +176,84 @@ MaskList<int, glm::ivec2> FluidTracks::assignLabels(Image<int> &image, MaskList<
 //		}
 //
 //	}
-
+	std::shared_ptr<Mask<glm::ivec2>> mask;
 	for (auto it1 = adjacency.begin1(); it1 != adjacency.end1(); ++it1)
 	{
 		std::pair<std::list<int>,std::list<int>> tmp = getAssociations(adjacency, it1.index1());
 		if(tmp.second.empty() && include_appearing) // add new object
 		{
-			labeled_masks.addMask(id_counter++, *segmentation.getMask(segmentation_index_to_id[it1.index1()]));
+			mask = segmentation.getMask(segmentation_index_to_id[it1.index1()]);
+			if(mask != nullptr)
+			{
+				labeled_masks.addMask(id_counter++, *mask);
+			}
+			else
+			{
+				std::cerr << "Error in FluidTracks::assignLabels:186" << std::endl;
+				abort();
+			}
 		}
 		else if(tmp.first.empty() && tmp.second.size()==1) // unique association
 		{
-			labeled_masks.addMask(old_labels_index_to_id[tmp.second.front()], *segmentation.getMask(segmentation_index_to_id[it1.index1()]));
+			mask = segmentation.getMask(segmentation_index_to_id[it1.index1()]);
+			if(mask != nullptr)
+			{
+				labeled_masks.addMask(old_labels_index_to_id[tmp.second.front()], *mask);
+			}
+			else
+			{
+				std::cerr << "Error in FluidTracks::assignLabels:199" << std::endl;
+				abort();
+			}
 		}
 		else if(!tmp.first.empty() && tmp.second.size()==1) // division
 		{
 			for(auto i = tmp.first.begin(); i!=tmp.first.end(); ++i)
 			{
 				divisions->push_back(glm::ivec2(old_labels_index_to_id[tmp.second.front()], id_counter));
-				labeled_masks.addMask(id_counter++, *segmentation.getMask(segmentation_index_to_id[*i]));
+				mask = segmentation.getMask(segmentation_index_to_id[*i]);
+				if(mask != nullptr)
+				{
+					labeled_masks.addMask(id_counter++, *mask);
+				}
+				else
+				{
+					std::cerr << "Error in FluidTracks::assignLabels:215" << std::endl;
+					abort();
+				}
 			}
 		}
 		else
 		{
 			MaskList<int, glm::ivec2> 	masks(old_labels.getRank(), *old_labels.getDimensions()),
-										label_masks,
 										tmp_masks;
 			int index = 1;
 			for(auto i = tmp.first.begin(); i != tmp.first.end(); ++i)
 			{
-				masks.addMask(index++, *segmentation.getMask(segmentation_index_to_id[*i]));
+				mask = segmentation.getMask(segmentation_index_to_id[*i]);
+				if(mask != nullptr)
+				{
+					masks.addMask(index++, *mask);
+				}
+				else
+				{
+					std::cerr << "Error in FluidTracks::assignLabels:234" << std::endl;
+					abort();
+				}
+
 			}
 			for(auto i = tmp.second.begin(); i != tmp.second.end(); ++i)
 			{
-				masks.addMask(index++, *old_labels.getMask(old_labels_index_to_id[*i]));
-				label_masks.addMask(old_labels_index_to_id[*i], *old_labels.getMask(old_labels_index_to_id[*i]));
+				mask = old_labels.getMask(old_labels_index_to_id[*i]);
+				if(mask != nullptr)
+				{
+					masks.addMask(index++, *mask);
+				}
+				else
+				{
+					std::cerr << "Error in FluidTracks::assignLabels:248" << std::endl;
+					abort();
+				}
 			}
 			Mask<glm::ivec2> fused = masks.fuse();
 			std::vector<glm::ivec2> bounding_box = fused.getBoundingBox();
@@ -432,6 +476,7 @@ void FluidTracks::track()
 			masks = cm.getMasks();
 		}
 		tmp = Image<int>::openImage((*images)[i]);
+		std::cout << (*images)[i] << std::endl;
 		if(tmp == nullptr)
 			abort();
 		else

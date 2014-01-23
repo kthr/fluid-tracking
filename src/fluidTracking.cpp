@@ -286,6 +286,8 @@ int main(int argc, char *argv[])
 	params.addParameter("Lambda", lambda);
 	params.addParameter("Mu", mu);
 
+	std::sort(images.begin(), images.end());
+	std::sort(vector_fields.begin(), vector_fields.end());
 	FluidTracks ft(&params, &images, &vector_fields);
 	ft.setMinObjectSize(min);
 	ft.setMaxObjectSize(max);

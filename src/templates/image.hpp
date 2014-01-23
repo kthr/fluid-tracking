@@ -185,7 +185,7 @@ class Image
 		std::shared_ptr<Image<type>> imageTake(glm::ivec2 upperLeft, glm::ivec2 downRight)
 		{
 			if(rank ==  2 && upperLeft.x <= downRight.x && upperLeft.y <= downRight.y && upperLeft.x >= 0 &&
-					downRight.x < dimensions[0] && downRight.y < dimensions[1])
+					downRight.x <= dimensions[0] && downRight.y <= dimensions[1])
 			{
 				std::vector<int> new_dimensions;
 				int new_width = downRight.x-upperLeft.x;
