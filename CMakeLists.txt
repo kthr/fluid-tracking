@@ -69,7 +69,8 @@ endif()
 if(UNIX AND NOT APPLE)
 	set(CMAKE_CXX_COMPILER clang++)
     message("\nEntering configuration for UNIX computers:\n")
-    set(CMAKE_CXX_FLAGS "-g -pipe -Wall -std=c++11")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g -pipe -Wall -std=c++11")
+    set(CMAKE_CXX_FLAGS_DEBUG "-O4 -pipe -Wall -std=c++11")
     set_target_properties(fluidTracking
         PROPERTIES
         LINK_FLAGS ""
@@ -77,9 +78,10 @@ if(UNIX AND NOT APPLE)
 endif()
 
 if(APPLE)
-#    set(CMAKE_CXX_COMPILER g++-mp-4.8)
+    #set(CMAKE_CXX_COMPILER g++-mp-4.8)
     message("\nEntering configuration for APPLE computers:\n")
-    set(CMAKE_CXX_FLAGS "-g -pipe -Wall -I/opt/local/include -std=c++11 -stdlib=libc++")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g -pipe -Wall -I/opt/local/include -std=c++11 -stdlib=libc++")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O4 -pipe -I/opt/local/include -std=c++11 -stdlib=libc++")
     set_target_properties(fluidTracking
         PROPERTIES
         LINK_FLAGS "-v -L/opt/X11/lib"

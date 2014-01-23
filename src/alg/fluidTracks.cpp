@@ -189,7 +189,7 @@ MaskList<int, glm::ivec2> FluidTracks::assignLabels(Image<int> &image, MaskList<
 			}
 			else
 			{
-				std::cerr << "Error in FluidTracks::assignLabels:186" << std::endl;
+				std::cerr << "Error in FluidTracks::assignLabels:" << __LINE__ << std::endl;
 				abort();
 			}
 		}
@@ -202,7 +202,7 @@ MaskList<int, glm::ivec2> FluidTracks::assignLabels(Image<int> &image, MaskList<
 			}
 			else
 			{
-				std::cerr << "Error in FluidTracks::assignLabels:199" << std::endl;
+				std::cerr << "Error in FluidTracks::assignLabels:" << __LINE__ << std::endl;
 				abort();
 			}
 		}
@@ -218,7 +218,7 @@ MaskList<int, glm::ivec2> FluidTracks::assignLabels(Image<int> &image, MaskList<
 				}
 				else
 				{
-					std::cerr << "Error in FluidTracks::assignLabels:215" << std::endl;
+					std::cerr << "Error in FluidTracks::assignLabels:" << __LINE__ << std::endl;
 					abort();
 				}
 			}
@@ -237,7 +237,7 @@ MaskList<int, glm::ivec2> FluidTracks::assignLabels(Image<int> &image, MaskList<
 				}
 				else
 				{
-					std::cerr << "Error in FluidTracks::assignLabels:234" << std::endl;
+					std::cerr << "Error in FluidTracks::assignLabels:" << __LINE__ << std::endl;
 					abort();
 				}
 
@@ -251,7 +251,7 @@ MaskList<int, glm::ivec2> FluidTracks::assignLabels(Image<int> &image, MaskList<
 				}
 				else
 				{
-					std::cerr << "Error in FluidTracks::assignLabels:248" << std::endl;
+					std::cerr << "Error in FluidTracks::assignLabels:" << __LINE__ << std::endl;
 					abort();
 				}
 			}
@@ -260,20 +260,34 @@ MaskList<int, glm::ivec2> FluidTracks::assignLabels(Image<int> &image, MaskList<
 			Image<int> label_image = old_labels.masksToImage();
 			std::shared_ptr<Image<int>> image_part = image.imageTake(bounding_box[0], bounding_box[1]),
 										label_tmp_part = label_image.imageTake(bounding_box[0], bounding_box[1]);
+			fused.toImage().saveImage("/Users/kthierbach/test/fused.png");
+			image_part->saveImage("/Users/kthierbach/test/image_part.png");
+			label_tmp_part->saveImage("/Users/kthierbach/test/label_tmp_part.png");
+			for(auto i = tmp.second.begin(); i != tmp.second.end(); ++i)
+			{
+				std::cout << old_labels_index_to_id[*i] << " ";
+			}
+			std::cout << std::endl;
 			ComponentsMeasurements cm = ComponentsMeasurements(*label_tmp_part);
 			tmp_masks = cm.getMasks();
 			masks = MaskList<int, glm::ivec2>(tmp_masks.getRank(), *tmp_masks.getDimensions());
 			for(auto i = tmp.second.begin(); i != tmp.second.end(); ++i)
 			{
-				masks.addMask(old_labels_index_to_id[*i], *tmp_masks.getMask(old_labels_index_to_id[*i]));
+				mask = tmp_masks.getMask(old_labels_index_to_id[*i]);
+				if(mask != nullptr)
+				{
+					masks.addMask(index++, *mask);
+				}
+				else
+				{
+					std::cerr << "Error in FluidTracks::assignLabels:" << __LINE__ << std::endl;
+					abort();
+				}
 			}
 			Image<int> label_image_part = masks.masksToImage();
 			params->addParameter("NumberLabels", int(tmp.second.size()+2));
 			Labeling lbg;
 			Image<int> *new_label_image = lbg.labeling(label_image_part, *image_part, *params);
-			label_image_part.saveImage("/home/kthierbach/Desktop/host/label_part.png");
-			image_part->saveImage("/home/kthierbach/Desktop/host/image_part.png");
-			new_label_image->saveImage("/home/kthierbach/Desktop/host/new_label_part.png");
 			cm = ComponentsMeasurements(*new_label_image);
 			masks = cm.getMasks();
 			masks.deleteMask(1);
