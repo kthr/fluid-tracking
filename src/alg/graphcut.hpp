@@ -9,13 +9,14 @@
 #define GRAPHCUTIMAGE_HPP_
 
 #include <math.h>
+#include <memory>
 
 #include "templates/image.hpp"
 #include "utils/parameters.hpp"
 
 namespace elib{
 
-Image<int>* graphcut(Image<int> &input_image, Parameters &params);
+std::shared_ptr<Image<int>> graphcut(Image<int> &input_image, Parameters &params);
 
 } /* end namespace elib */
 

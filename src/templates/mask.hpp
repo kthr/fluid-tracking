@@ -48,7 +48,6 @@ class Mask
 		}
 		virtual ~Mask()
 		{
-			delete mask;
 		}
 		Mask& operator=(Mask &other)
 		{
@@ -60,7 +59,7 @@ class Mask
 			swap(*this,other);
 			return *this;
 		}
-		Mask multiply(Mask &other)
+		Mask overlap(Mask &other)
 		{
 			namespace ub = boost::numeric::ublas;
 			if(this->mask == nullptr)
@@ -72,7 +71,16 @@ class Mask
 				other.createSparseRepresentation();
 			}
 			Mask mask(this->getRank(), *(this->getDimensions()));
-			boost::numeric::ublas::compressed_matrix<int> result = boost::numeric::ublas::element_prod(*this->mask, *other.mask);
+			boost::numeric::ublas::compressed_matrix<int> result;
+			try
+			{
+				result = boost::numeric::ublas::element_prod(*this->mask, *other.mask);
+			}
+			catch(const std::exception &e)
+			{
+				std::cout << "Can't get element product: " << e.what() << std::endl;
+				abort();
+			}
 			if(mask.getRank()==2)
 			{
 				for(auto i = result.begin1(); i!= result.end1(); ++i)
@@ -86,8 +94,7 @@ class Mask
 		void addPoint(Point p)
 		{
 			points.push_back(p);
-			delete mask;
-			mask = nullptr;
+			mask.reset();
 		}
 		const std::vector<Point>* getMask() const
 		{
@@ -177,7 +184,7 @@ class Mask
 		const static int bit_depth = 16;
 		std::vector<int> dimensions;
 		std::vector<Point> points;
-		boost::numeric::ublas::compressed_matrix<int> *mask = nullptr;
+		std::unique_ptr<boost::numeric::ublas::compressed_matrix<int>> mask = nullptr;
 
 		friend void swap(Mask<Point>& first, Mask<Point>& second) // nothrow
 		{
@@ -197,7 +204,13 @@ class Mask
 		}
 		void createSparseRepresentation()
 		{
-			mask = new boost::numeric::ublas::compressed_matrix<int>(dimensions[0], dimensions[1], points.size());
+			namespace ub = boost::numeric::ublas;
+			mask = std::unique_ptr<ub::compressed_matrix<int>>(new ub::compressed_matrix<int>(dimensions[0], dimensions[1], points.size()));
+			if(!mask)
+			{
+				std::cerr << "Creation of sparse representation failed!";
+				abort();
+			}
 			for(auto i=points.begin(); i!=points.end(); ++i)
 			{
 				mask->insert_element((*i).x, (*i).y, 1);

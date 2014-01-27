@@ -23,7 +23,7 @@
 using elib::Labeling;
 using elib::Image;
 
-Image<int>* Labeling::labeling(Image<int> &label_image, Image<int> &input_image, Parameters &input_params)
+std::shared_ptr<Image<int>> Labeling::labeling(Image<int> &label_image, Image<int> &input_image, Parameters &input_params)
 {
 	int width, height, bit_depth, num_labels;
 	double 	c0 = .1,
@@ -35,7 +35,7 @@ Image<int>* Labeling::labeling(Image<int> &label_image, Image<int> &input_image,
 	std::set<int>::iterator it;
 	std::unordered_map<int,int> label_map;
 	int *label_array, label, num_pixels, *label_data, *image_data;
-	Image<int> *new_label_image = new Image<int>(label_image);
+	std::shared_ptr<Image<int>> new_label_image = std::shared_ptr<Image<int>>(new Image<int>(label_image.getRank(), *label_image.getDimensions(), label_image.getBitDepth(), label_image.getChannels()));
 
 
 
@@ -74,23 +74,23 @@ Image<int>* Labeling::labeling(Image<int> &label_image, Image<int> &input_image,
 		//label for appearing objects == 1
 		for (int i = 0; i < num_pixels; i++ )
 		{
-			label = label_map.find(static_cast<int>(label_data[i]))->second;
-			gc->setDataCost(i,1, static_cast<int>(mu*(label_dist(0-label))+fabs((double)image_data[i]-c)));
+			label = label_map.find(label_data[i])->second;
+			gc->setDataCost(i,1, mu*(label_dist(0-label)+fabs((double)image_data[i]-c)));
 		}
 		for (int l = 2; l < num_labels; l++ )
 		{
 			for (int i = 0; i < num_pixels; i++ )
 			{
-				label = label_map.find(static_cast<int>(label_data[i]))->second;
-				gc->setDataCost(i,l, static_cast<int>(mu*(label_dist(l-label))+fabs((double)image_data[i]-c)));
+				label = label_map.find(label_data[i])->second;
+				gc->setDataCost(i,l, mu*(label_dist(l-label)+fabs((double)image_data[i]-c)));
 			}
 		}
 		//background labeling == 0
 		c = c0*(pow(2,bit_depth)-1);
 		for (int i = 0; i < num_pixels; i++ )
 		{
-			label = label_map.find(static_cast<int>(label_data[i]))->second;
-			gc->setDataCost(i,0, static_cast<int>(mu*(label_dist(0-label)))+fabs((double)image_data[i]-c));
+			label = label_map.find(label_data[i])->second;
+			gc->setDataCost(i,0, mu*(label_dist(0-label))+fabs((double)image_data[i]-c));
 		}
 
 //		 //next set up smoothness costs individually
@@ -131,7 +131,7 @@ int elib::smoothFn(int p1, int p2, int l1, int l2, void *data)
 		}
 		else
 		{
-			return static_cast<float>((label_dist(l1-l2)) + fsf.lambda*exp(-pow(fsf.image[p1]-fsf.image[p2],2)));
+			return float(label_dist(l1-l2) + fsf.lambda*exp(-pow(fsf.image[p1]-fsf.image[p2],2)));
 //			return GC_INFINITY;
 		}
 	}

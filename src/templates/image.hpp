@@ -182,7 +182,7 @@ class Image
 				*this = tmp;
 			}
 		}
-		std::shared_ptr<Image<type>> imageTake(glm::ivec2 upperLeft, glm::ivec2 downRight)
+		std::shared_ptr<Image<type>> imageTake(glm::ivec2 upperLeft, glm::ivec2 downRight) const
 		{
 			if(rank ==  2 && upperLeft.x <= downRight.x && upperLeft.y <= downRight.y && upperLeft.x >= 0 &&
 					downRight.x <= dimensions[0] && downRight.y <= dimensions[1])
@@ -207,23 +207,23 @@ class Image
 				return nullptr;
 			}
 		}
-		static Image<type>* openImage(std::string file_name)
+		static std::shared_ptr<Image<type>> openImage(std::string file_name)
 		{
 			try
 			{
 				cimg_library::CImg<type> img(file_name.c_str());
-				return new Image<type>(&img);
+				return std::shared_ptr<Image<type>>(new Image<type>(&img));
 			}
 			catch(cimg_library::CImgException &e)
 			{
 				return nullptr;
 			}
 		}
-		void saveImage(std::string file_name)
+		void saveImage(std::string file_name) const
 		{
 			Image<type>::saveImage(file_name, this);
 		}
-		static void saveImage(std::string file_name, Image<type> *image)
+		static void saveImage(std::string file_name, const Image<type> *image)
 		{
 			try
 			{
@@ -275,21 +275,21 @@ class Image
 		{
 			std::copy(data, data+flattened_length, this->data);
 		}
-		int getWidth()
+		int getWidth() const
 		{
 			if(rank>0)
 				return dimensions[0];
 			else
 				return 0;
 		}
-		int getHeight()
+		int getHeight() const
 		{
 			if(rank>1)
 				return dimensions[1];
 			else
 				return 0;
 		}
-		int getDepth()
+		int getDepth() const
 		{
 			if(rank>2)
 				return dimensions[2];

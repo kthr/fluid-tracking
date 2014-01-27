@@ -15,9 +15,9 @@ namespace elib{
 
 #define GC_INFINITY 300000
 
-Image<int>* graphcut(Image<int> &input_image, Parameters &parameters)
+std::shared_ptr<Image<int>> graphcut(Image<int> &input_image, Parameters &parameters)
 {
-	Image<int> *binary_image = new Image<int>(input_image.getRank(), *(input_image.getDimensions()), input_image.getBitDepth(), input_image.getChannels());
+	std::shared_ptr<Image<int>> binary_image = std::shared_ptr<Image<int>>(new Image<int>(input_image.getRank(), *(input_image.getDimensions()), input_image.getBitDepth(), input_image.getChannels()));
 	int nodeCount;
 	int max_intensity, bg, fg, value;
 	int x, y, z;

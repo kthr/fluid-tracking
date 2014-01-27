@@ -8,6 +8,7 @@
 #ifndef MASKLIST_HPP_
 #define MASKLIST_HPP_
 
+#include <iostream>
 #include <memory>
 #include <set>
 #include <sstream>
@@ -152,29 +153,38 @@ class MaskList
 		{
 			return masks.end();
 		}
-		Image<int> masksToImage()
+		Image<int> toImage()
 		{
 			Image<int> image;
+			std::shared_ptr<Mask<Point>> mask_ptr;
 			int *image_data, label, pixel;
 
 			image = Image<int>(rank, dimensions, bit_depth, 1);
 			image_data = image.getData();
-			for(auto it = masks.begin(); it!=masks.end(); ++it)
+			for(auto it = labels.begin(); it!=labels.end(); ++it)
 			{
-				label = it->first;
-				auto points = it->second->getPoints();
-				for(auto pt_it=points->begin(); pt_it!=points->end(); ++pt_it)
+				label = *it;
+				mask_ptr = this->getMask(label);
+				if(mask_ptr!=nullptr)
 				{
-					for(int i=0; i<rank; ++i)
+					auto points = mask_ptr->getPoints();
+					for(auto pt_it=points->begin(); pt_it!=points->end(); ++pt_it)
 					{
-						if((*pt_it)[i] < 0 || (*pt_it)[i]>dimensions[i])
+						for(int i=0; i<rank; ++i)
 						{
-							//throw GenericException("Mask doesn't fit into the image");
-							return Image<int>();
+							if((*pt_it)[i] < 0 || (*pt_it)[i]>dimensions[i])
+							{
+								//throw GenericException("Mask doesn't fit into the image");
+								return Image<int>();
+							}
 						}
+						pixel = mask_ptr->getPixel(*pt_it);
+						image_data[pixel] = label;
 					}
-					pixel = it->second->getPixel(*pt_it);
-					image_data[pixel] = label;
+				}
+				else
+				{
+					std::cerr << "mask with label " << label << " not found!";
 				}
 			}
 			return image;
@@ -193,7 +203,7 @@ class MaskList
 			}
 			masks = tmp;
 		}
-		const std::set<Label>* getLabels()
+		const std::set<Label>* getLabels() const
 		{
 			return &labels;
 		}

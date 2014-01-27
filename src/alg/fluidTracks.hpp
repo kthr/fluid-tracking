@@ -101,7 +101,8 @@ class FluidTracks
 
 		void addAppearingObjects(MaskList<int, glm::ivec2> &masks);
 		void applySizeConstraints(MaskList<int, glm::ivec2> &masks);
-		MaskList<int, glm::ivec2> assignLabels(Image<int> &image, MaskList<int, glm::ivec2> &old_labels, MaskList<int, glm::ivec2> &segmentation);
+		MaskList<int, glm::ivec2> assignLabels(const Image<int> &image, MaskList<int, glm::ivec2> &old_labels, MaskList<int, glm::ivec2> &segmentations);
+		std::shared_ptr<boost::numeric::ublas::compressed_matrix<int>> computeAdjacency(MaskList<int, glm::ivec2> &old_labels, MaskList<int, glm::ivec2> &segmentations);
 		std::pair<std::list<int>,std::list<int>> getAssociations(boost::numeric::ublas::compressed_matrix<int> &adjacency, int id);
 		std::list<int> getRowAssociations(boost::numeric::ublas::compressed_matrix<int> &adjacency, int id);
 		std::list<int> getColumnAssociations(boost::numeric::ublas::compressed_matrix<int> &adjacency, int id);
