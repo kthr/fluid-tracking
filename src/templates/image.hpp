@@ -36,7 +36,7 @@ class Image
 		}
 		Image(Image &&other)
 		: dimensions(std::move(other.dimensions)), bit_depth(other.bit_depth), channels(other.channels),
-		  flattened_length(other.flattened_length), rank(other.rank), data(other.data)
+		  flattened_length(other.flattened_length), rank(other.rank), data(std::move(other.data))
 		{
 			other.data=nullptr;
 		}

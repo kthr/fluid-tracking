@@ -108,9 +108,6 @@ MaskList<int, glm::ivec2> FluidTracks::assignLabels(const Image<int> &image, Mas
 		segmentation_index_to_id[segmentation_index] = *i;
 	}
 
-	std::cout << old_labels.toString() << std::endl;
-	std::cout << segmentations.toString() << std::endl;
-
 	adjacency = computeAdjacency(old_labels, segmentations);
 
 	std::vector<bool> visited(segmentations.getSize(), false);
@@ -329,7 +326,6 @@ std::shared_ptr<boost::numeric::ublas::compressed_matrix<int>> FluidTracks::comp
 		old_labels_index_to_id[old_labels_index] = *i;
 	}
 	int segmentation_index = 0;
-	int test_counter = 0;
 	for(auto i=segmentations.getLabels()->begin(); i!=segmentations.getLabels()->end(); ++i, ++segmentation_index)
 	{
 		segmentation_index_to_id[segmentation_index] = *i;
@@ -340,7 +336,6 @@ std::shared_ptr<boost::numeric::ublas::compressed_matrix<int>> FluidTracks::comp
 			label_mask = old_labels.getMask(*j);
 			if(seg_mask->overlap(*label_mask).getSize() > 0)
 			{
-				std::cout << test_counter++ << std::endl;
 				adjacency->insert_element(segmentation_index, old_labels_index,1);
 			}
 		}
