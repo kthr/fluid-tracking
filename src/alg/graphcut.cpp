@@ -7,6 +7,8 @@
 
 #include "graphcut.hpp"
 
+#include <iostream>
+
 #include "maxflow/energy.h"
 #include "maxflow/graph.h"
 #include "utils/math_functions.hpp"
@@ -63,25 +65,23 @@ std::shared_ptr<Image<int>> graphcut(Image<int> &input_image, Parameters &parame
 	fg = c1*max_intensity;
 
 	/****** Create the Energy *************************/
-	int number_nodes = width*height*depth;
-	gc::Energy energy;
-	gc::Energy::Var varx[number_nodes];
+	gc::Energy *energy = new gc::Energy();
+	gc::Energy::Var *varx = new gc::Energy::Var[width*height*depth];
 
 	/****** Build Unary Term *************************/
-	for(int k=0; k<depth; ++k )
+	for(int k=0; k<depth; ++k)
 	{
-		for (int j=0; j < height; ++j)
+		for (int j=0; j<height; ++j)
 		{
-			for (int i = 0; i < width; ++i)
+			for (int i=0; i<width; ++i)
 			{
 				nodeCount = i + j*width + k*width*height;
-
 				// add node
-				varx[nodeCount] = energy.add_variable();
+				varx[nodeCount] = energy->add_variable();
 
 				// add likelihood
 				value = input_image_data[nodeCount];
-				energy.add_term1(varx[nodeCount], abs(value - bg), abs(value - fg));
+				energy->add_term1(varx[nodeCount], abs(value - bg), abs(value - fg));
 			}
 		}
 	}
@@ -105,7 +105,7 @@ std::shared_ptr<Image<int>> graphcut(Image<int> &input_image, Parameters &parame
 						value = lambda1
 								+ lambda2
 										* exp(pow(input_image_data[nodeCount] - input_image_data[x + y*width + z*width*height], 2));
-						energy.add_term2(varx[nodeCount], varx[x + y*width + z*width*height], 0., value, value, 0.);
+						energy->add_term2(varx[nodeCount], varx[x + y*width + z*width*height], 0., value, value, 0.);
 					}
 				}
 			}
@@ -113,7 +113,7 @@ std::shared_ptr<Image<int>> graphcut(Image<int> &input_image, Parameters &parame
 	}
 
 	/******* Minimize energy ********************/
-	energy.minimize();
+	energy->minimize();
 
 	/******* Show binary image and clean up ********************/
 	for(int k=0; k<depth; ++k)
@@ -122,8 +122,8 @@ std::shared_ptr<Image<int>> graphcut(Image<int> &input_image, Parameters &parame
 		{
 			for (int i = 0; i < width; ++i)
 			{
-				nodeCount = i + j * width + k*width*height;
-				if (energy.get_var(varx[nodeCount]))
+				nodeCount = i + j*width + k*width*height;
+				if (energy->get_var(varx[nodeCount]))
 				{
 					binary_image_data[nodeCount] = 1;
 				}
@@ -135,6 +135,9 @@ std::shared_ptr<Image<int>> graphcut(Image<int> &input_image, Parameters &parame
 
 		}
 	}
+
+	delete energy;
+	delete[] varx;
 
 	return binary_image;
 

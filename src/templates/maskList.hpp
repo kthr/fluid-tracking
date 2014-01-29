@@ -130,6 +130,13 @@ class MaskList
 				++dit;
 			}
 		}
+		void deleteSparseRepresentations()
+		{
+			for(auto i = masks.begin(); i != masks.end(); ++i)
+			{
+				i->second->deleteSparseRepresentation();
+			}
+		}
 		Mask<Point> fuse()
 		{
 			Mask<Point> mask(this->rank, this->dimensions);

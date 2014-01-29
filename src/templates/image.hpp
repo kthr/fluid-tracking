@@ -35,10 +35,8 @@ class Image
 			std::copy(other.data, other.data+flattened_length, data);
 		}
 		Image(Image &&other)
-		: dimensions(std::move(other.dimensions)), bit_depth(other.bit_depth), channels(other.channels),
-		  flattened_length(other.flattened_length), rank(other.rank), data(std::move(other.data))
 		{
-			other.data=nullptr;
+			move(*this,other);
 		}
 		Image(int rank, const std::vector<int> &dimensions, int bit_depth, int channels)
 		: bit_depth(bit_depth), channels(channels), rank(rank)
@@ -66,18 +64,11 @@ class Image
 			{
 				rank = 2;
 				dimensions=std::vector<int>({image->width(), image->height()});
-//				dimensions = new int[rank];
-//				dimensions[0] = image->width();
-//				dimensions[1] = image->height();
 			}
 			else
 			{
 				rank = 3;
 				dimensions=std::vector<int>({image->width(), image->height(), image->depth()});
-//				dimensions = new int[rank];
-//				dimensions[0] = image->width();
-//				dimensions[1] = image->height();
-//				dimensions[2] = image->depth();
 			}
 			channels = 1;
 			if(image->spectrum()>1)
@@ -112,13 +103,7 @@ class Image
 		}
 		Image& operator=(Image &&other)
 		{
-			dimensions=std::move(other.dimensions);
-			bit_depth=other.bit_depth;
-			channels=other.channels;
-			flattened_length=other.flattened_length;
-			rank=other.rank;
-			data=other.data;
-			other.data=nullptr;
+			move(*this, other);
 			return *this;
 		}
 		type min()
@@ -305,7 +290,7 @@ class Image
 				rank = 0;
 		type 	*data = nullptr;
 
-		friend void swap(Image& first,Image& second)
+		friend void swap(Image &first,Image &second)
 		{
 			using std::swap;
 
@@ -315,6 +300,17 @@ class Image
 			swap(first.flattened_length, second.flattened_length);
 			swap(first.rank, second.rank);
 			swap(first.data, second.data);
+		}
+
+		friend void move(Image &first, Image &second)
+		{
+			first.dimensions = std::move(second.dimensions);
+			first.bit_depth = std::move(second.bit_depth);
+			first.channels = std::move(second.channels);
+			first.flattened_length = std::move(second.flattened_length);
+			first.rank = std::move(second.rank);
+			first.data = std::move(second.data);
+			second.data = nullptr;
 		}
 };
 

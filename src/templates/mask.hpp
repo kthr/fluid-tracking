@@ -96,6 +96,10 @@ class Mask
 			points.push_back(p);
 			mask.reset();
 		}
+		void deleteSparseRepresentation()
+		{
+			mask.reset();
+		}
 		const std::vector<Point>* getMask() const
 		{
 			return &points;
