@@ -8,11 +8,13 @@
 #ifndef IMAGE_HPP_
 #define IMAGE_HPP_
 
+#include <math.h>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "boundingBox.hpp"
 #include "CImg.h"
 #include "glm/glm.hpp"
 #include "utils/vector2D.hpp"
@@ -30,13 +32,13 @@ class Image
 		Image(const Image &other)
 		: bit_depth(other.bit_depth), channels(other.channels), flattened_length(other.flattened_length), rank(other.rank)
 		{
-			data = new type[flattened_length];
+			data = std::unique_ptr<type[]>(new type[flattened_length]);
 			dimensions=std::vector<int>(other.dimensions.begin(), other.dimensions.end());
-			std::copy(other.data, other.data+flattened_length, data);
+			std::copy(other.data.get(), other.data.get()+flattened_length, data.get());
 		}
-		Image(Image &&other)
+		Image(Image &&other) : dimensions(std::move(other.dimensions)), bit_depth(other.bit_depth), channels(other.channels),
+				flattened_length(other.flattened_length), rank(other.rank), data(std::move(other.data))
 		{
-			move(*this,other);
 		}
 		Image(int rank, const std::vector<int> &dimensions, int bit_depth, int channels)
 		: bit_depth(bit_depth), channels(channels), rank(rank)
@@ -47,17 +49,9 @@ class Image
 			{
 				this->flattened_length*=(*i);
 			}
-			this->data = new type[flattened_length];
-			std::fill_n(this->data, flattened_length, 0);
+			this->data = std::unique_ptr<type[]>(new type[flattened_length]);
+			std::fill_n(this->data.get(), flattened_length, 0);
 		}
-//		explicit Image(cimage *image)
-//		: bit_depth(image->bit_depth), channels(image->channels), flattened_length(image->flattened_length), rank(image->rank)
-//		{
-//			dimensions = new int[rank];
-//			std::copy(image->dimensions, image->dimensions+rank, dimensions);
-//			data = new type[flattened_length];
-//			std::copy(image->data, image->data+flattened_length, data);
-//		}
 		explicit Image(cimg_library::CImg<type> *image)
 		{
 			if(image->depth() == 1)
@@ -75,14 +69,14 @@ class Image
 			{
 				cimg_library::CImg<type> tmp = image->get_channel(0);
 				flattened_length = tmp.size();
-				data = new type[flattened_length];
-				std::copy(tmp.data(), tmp.data() + tmp.size(), data);
+				data = std::unique_ptr<type[]>(new type[flattened_length]);;
+				std::copy(tmp.data(), tmp.data() + tmp.size(), data.get());
 			}
 			else
 			{
 				flattened_length = image->size();
-				data = new type[flattened_length];
-				std::copy(image->data(), image->data() + image->size(), data);
+				data = std::unique_ptr<type[]>(new type[flattened_length]);;
+				std::copy(image->data(), image->data() + image->size(), data.get());
 			}
 			if(image->max() > pow(2,16)-1)//32bit
 				bit_depth = 32;
@@ -93,17 +87,27 @@ class Image
 		}
 		virtual ~Image()
 		{
-			delete[] data;
 		}
 
-		Image& operator=(Image &other)
+		Image& operator=(const Image &other)
 		{
-			swap(*this,other);
+			dimensions = other.dimensions;
+			bit_depth = other.bit_depth,
+			channels = other.channels,
+			flattened_length = other.flattened_length,
+			rank = other.rank;
+			data = std::unique_ptr<type[]>(new type[flattened_length]);
+			std::copy(other.data.get(), other.data.get()+flattened_length, data.get());
 			return *this;
 		}
 		Image& operator=(Image &&other)
 		{
-			move(*this, other);
+			dimensions = std::move(other.dimensions);
+			bit_depth = other.bit_depth;
+			channels = other.channels;
+			flattened_length = other.flattened_length;
+			rank = other.rank;
+			data = std::move(other.data);
 			return *this;
 		}
 		type min()
@@ -167,23 +171,25 @@ class Image
 				*this = tmp;
 			}
 		}
-		std::shared_ptr<Image<type>> imageTake(glm::ivec2 upperLeft, glm::ivec2 downRight) const
+		std::shared_ptr<Image<type>> imageTake(BoundingBox<glm::ivec2> box) const
 		{
-			if(rank ==  2 && upperLeft.x <= downRight.x && upperLeft.y <= downRight.y && upperLeft.x >= 0 &&
-					downRight.x <= dimensions[0] && downRight.y <= dimensions[1])
+			glm::ivec2 	upperLeft = box.getUpperLeft(),
+						bottomRight = box.getBottomRight();
+			if(rank ==  2 && upperLeft.x <= bottomRight.x && upperLeft.y <= bottomRight.y && upperLeft.x >= 0 &&
+					bottomRight.x <= dimensions[0] && bottomRight.y <= dimensions[1])
 			{
 				std::vector<int> new_dimensions;
-				int new_width = downRight.x-upperLeft.x;
+				int new_width = bottomRight.x-upperLeft.x;
 				new_dimensions.push_back(new_width);
-				new_dimensions.push_back(downRight.y-upperLeft.y);
+				new_dimensions.push_back(bottomRight.y-upperLeft.y);
 				std::shared_ptr<Image<type>> part = std::shared_ptr<Image<type>>(new Image<type>(this->rank, new_dimensions, this->bit_depth, this->channels));
 
 				int pixel = upperLeft.x + upperLeft.y*this->getWidth();
-				std::copy(this->data + pixel, this->data + pixel + new_width, part->data);
+				std::copy(this->data.get() + pixel, this->data.get() + pixel + new_width, part->data.get());
 				for(int i=1; i<new_dimensions[1]; ++i)
 				{
 					pixel += this->getWidth();
-					std::copy(this->data + pixel, this->data + pixel + new_width, part->data + i*new_width);
+					std::copy(this->data.get() + pixel, this->data.get() + pixel + new_width, part->data.get() + i*new_width);
 				}
 				return part;
 			}
@@ -214,14 +220,15 @@ class Image
 			{
 				if(image->getRank() == 2)
 				{
-					int width, height, spectrum;
+					int width, height, depth, spectrum;
 
-					width = (*image->getDimensions())[0];
-					height = (*image->getDimensions())[1];
+					width = image->getWidth();
+					height = image->getHeight();
+					depth = image->getDepth();
 					spectrum = image->getChannels();
-					cimg_library::CImg<type> img(width, height, 1, spectrum);
+					cimg_library::CImg<type> img(width, height, depth, spectrum);
 					std::copy(image->getData(), image->getData()+image->getFlattenedLength(), img.data());
-					img.save(file_name.c_str());
+					img.save_tiff(file_name.c_str(),5);
 				}
 				else
 				{
@@ -242,7 +249,7 @@ class Image
 		}
 		type* getData() const
 		{
-			return data;
+			return data.get();
 		}
 		const std::vector<int>* getDimensions() const
 		{
@@ -288,30 +295,8 @@ class Image
 				channels = 0,
 				flattened_length = 0,
 				rank = 0;
-		type 	*data = nullptr;
+		std::unique_ptr<type[]> data = nullptr;
 
-		friend void swap(Image &first,Image &second)
-		{
-			using std::swap;
-
-			swap(first.dimensions, second.dimensions);
-			swap(first.bit_depth, second.bit_depth);
-			swap(first.channels, second.channels);
-			swap(first.flattened_length, second.flattened_length);
-			swap(first.rank, second.rank);
-			swap(first.data, second.data);
-		}
-
-		friend void move(Image &first, Image &second)
-		{
-			first.dimensions = std::move(second.dimensions);
-			first.bit_depth = std::move(second.bit_depth);
-			first.channels = std::move(second.channels);
-			first.flattened_length = std::move(second.flattened_length);
-			first.rank = std::move(second.rank);
-			first.data = std::move(second.data);
-			second.data = nullptr;
-		}
 };
 
 } /* namespace elib */

@@ -34,10 +34,8 @@ std::shared_ptr<Image<int>> Labeling::labeling(Image<int> &label_image, Image<in
 	std::set<int> labels;
 	std::set<int>::iterator it;
 	std::unordered_map<int,int> label_map;
-	int *label_array, label, num_pixels, *label_data, *image_data;
+	int label, num_pixels, *label_data, *image_data;
 	std::shared_ptr<Image<int>> new_label_image = std::shared_ptr<Image<int>>(new Image<int>(label_image.getRank(), *label_image.getDimensions(), label_image.getBitDepth(), label_image.getChannels()));
-
-
 
 	if(
 		isnan(num_labels = input_params.getIntegerParameter("NumberLabels")) ||
@@ -57,7 +55,7 @@ std::shared_ptr<Image<int>> Labeling::labeling(Image<int> &label_image, Image<in
 
 	labels.insert(label_image.getData(), label_image.getData()+label_image.getFlattenedLength());
 	labels.insert(1); //inserts label 1
-	label_array = new int[labels.size()];
+	int label_array[labels.size()];
 	std::copy(labels.begin(), labels.end(), label_array);
 
 	for(unsigned int i=0; i<labels.size(); ++i)

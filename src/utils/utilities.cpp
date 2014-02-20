@@ -32,7 +32,7 @@ std::string Utilities::createFileName(std::string folder, std::string file_name,
 	std::stringstream name;
 	boost::filesystem::path dir(folder);
 	name << file_name << std::setw(length) << std::setfill('0') << index << extension;
-	dir /= name.str();
+	dir /= boost::filesystem::path(name.str());
 	return dir.string();
 
 }
@@ -74,7 +74,7 @@ std::string Utilities::getTime()
 
 	time(&rawtime);
 	ptm = localtime(&rawtime);
-	tmp << ptm->tm_year + 1900 << "-" << ptm->tm_mon +1 << "-" << ptm->tm_mday << "_"
+	tmp << ptm->tm_year + 1900 << "-" << std::setw(2) << std::setfill('0') <<ptm->tm_mon +1 << "-" << std::setw(2) << std::setfill('0') << ptm->tm_mday << "_"
 		<< std::setw(2) << std::setfill('0') << ptm->tm_hour << ":" << std::setw(2) << std::setfill('0') << ptm->tm_min << ":" << std::setw(2) << std::setfill('0') << ptm->tm_sec;
 
 	return tmp.str();

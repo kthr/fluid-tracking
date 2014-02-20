@@ -35,66 +35,98 @@ class Mask
 		{
 			this->dimensions = std::vector<int>(dimensions.begin(), dimensions.end());
 		}
-		Mask(const Mask &other)
+		Mask(const Mask &other) : rank(other.rank), dimensions(other.dimensions), points(other.points)
 		{
-			this->rank = other.rank;
-			this->dimensions = std::vector<int>(other.dimensions.begin(), other.dimensions.end());
-			this->points = std::vector<Point>(other.points.begin(), other.points.end());
+			if(other.mask != nullptr)
+			{
+				mask = std::unique_ptr<boost::numeric::ublas::compressed_matrix<int>>(new boost::numeric::ublas::compressed_matrix<int>(*other.mask));
+			}
+			if(other.bounding_box != nullptr)
+			{
+				bounding_box = std::unique_ptr<BoundingBox<Point>>(new BoundingBox<Point>(*other.bounding_box));
+			}
 		}
-		Mask(Mask&& other) noexcept
-			: rank(other.rank), dimensions(std::move(other.dimensions)),
-			  points(std::move(other.points)), mask(std::move(other.mask))
+		Mask(Mask&& other) : rank(other.rank), dimensions(std::move(other.dimensions)), points(std::move(other.points)),
+				mask(std::move(other.mask)), bounding_box(std::move(other.bounding_box))
 		{
 		}
 		virtual ~Mask()
 		{
 		}
-		Mask& operator=(Mask &other)
+		Mask& operator=(const Mask &other)
 		{
-			swap(*this,other);
+			rank = other.rank;
+			dimensions = other.dimensions;
+			points = other.points;
+			if(other.mask != nullptr)
+			{
+				mask = std::unique_ptr<boost::numeric::ublas::compressed_matrix<int>>(new boost::numeric::ublas::compressed_matrix<int>(*other.mask));
+			}
+			if(other.bounding_box != nullptr)
+			{
+				bounding_box = std::unique_ptr<BoundingBox<Point>>(new BoundingBox<Point>(*bounding_box));
+			}
 			return *this;
 		}
 		Mask& operator=(Mask &&other)
 		{
-			swap(*this,other);
+			rank = other.rank;
+			dimensions = std::move(other.dimensions);
+			points = std::move(other.points);
+			mask = std::move(other.mask);
+			bounding_box = std::move(other.bounding_box);
 			return *this;
 		}
-		Mask overlap(Mask &other)
+		bool overlap(Mask &other)
 		{
 			namespace ub = boost::numeric::ublas;
-			if(this->mask == nullptr)
+
+			if(this->bounding_box == nullptr)
 			{
-				this->createSparseRepresentation();
+				this->setBox(this->bounding_box);
 			}
-			if(other.mask == nullptr)
+			if(other.bounding_box == nullptr)
 			{
-				other.createSparseRepresentation();
+				other.setBox(other.bounding_box);
 			}
-			Mask mask(this->getRank(), *(this->getDimensions()));
-			boost::numeric::ublas::compressed_matrix<int> result;
-			try
+			if(this->bounding_box->overlap(*other.bounding_box))
 			{
-				result = boost::numeric::ublas::element_prod(*this->mask, *other.mask);
-			}
-			catch(const std::exception &e)
-			{
-				std::cout << "Can't get element product: " << e.what() << std::endl;
-				abort();
-			}
-			if(mask.getRank()==2)
-			{
-				for(auto i = result.begin1(); i!= result.end1(); ++i)
+				if(this->mask == nullptr)
 				{
-					for(auto j= i.begin(); j != i.end(); ++j)
-						mask.addPoint(Point(j.index1(), j.index2()));
+					this->createSparseRepresentation();
 				}
+				if(other.mask == nullptr)
+				{
+					other.createSparseRepresentation();
+				}
+				Mask mask(this->getRank(), *(this->getDimensions()));
+				boost::numeric::ublas::compressed_matrix<int> result;
+				try
+				{
+					result = boost::numeric::ublas::element_prod(*this->mask, *other.mask);
+				}
+				catch(const std::exception &e)
+				{
+					std::cout << "Can't get element product: " << e.what() << std::endl;
+					abort();
+				}
+				if(mask.getRank()==2)
+				{
+					for(auto i = result.begin1(); i!= result.end1(); ++i)
+					{
+						for(auto j= i.begin(); j != i.end(); ++j)
+							mask.addPoint(Point(j.index1(), j.index2()));
+					}
+				}
+				return bool(mask.getSize());
 			}
-			return mask;
+			return false;
 		}
 		void addPoint(Point p)
 		{
 			points.push_back(p);
 			mask.reset();
+			bounding_box.reset();
 		}
 		void deleteSparseRepresentation()
 		{
@@ -131,16 +163,21 @@ class Mask
 			}
 			return image;
 		}
-		std::vector<Point> getBoundingBox() const
+		BoundingBox<Point> getBoundingBox()
 		{
-			std::vector<Point> box;
-			getBox(box);
-			return box;
+			if(bounding_box == nullptr)
+			{
+				setBox(bounding_box);
+			}
+			return *bounding_box;
 		}
 		std::string getBoxMask()
 		{
-			std::vector<Point> box = getBoundingBox();
-			return boxMask(box);
+			if(bounding_box == nullptr)
+			{
+				setBox(bounding_box);
+			}
+			return boxMask(bounding_box);
 		}
 		const std::vector<Point>* getPoints() const
 		{
@@ -189,15 +226,8 @@ class Mask
 		std::vector<int> dimensions;
 		std::vector<Point> points;
 		std::unique_ptr<boost::numeric::ublas::compressed_matrix<int>> mask = nullptr;
+		std::unique_ptr<BoundingBox<Point>> bounding_box = nullptr;
 
-		friend void swap(Mask<Point>& first, Mask<Point>& second) // nothrow
-		{
-			using std::swap;
-			swap(first.rank, second.rank);
-			swap(first.dimensions, second.dimensions);
-			swap(first.points, second.points);
-			swap(first.mask, second.mask);
-		}
 		inline int pixel(glm::ivec2 p)
 		{
 			return p[1]*dimensions[0]+p[0];
@@ -220,7 +250,7 @@ class Mask
 				mask->insert_element((*i).x, (*i).y, 1);
 			}
 		}
-		void getBox(std::vector<glm::ivec2> &box) const
+		void setBox(std::unique_ptr<BoundingBox<glm::ivec2>> &box)
 		{
 			int minX = std::numeric_limits<int>::max(),
 				minY = std::numeric_limits<int>::max(),
@@ -233,10 +263,9 @@ class Mask
 				maxX = std::max(maxX, it->x);
 				maxY = std::max(maxY, it->y);
 			}
-			box.push_back(glm::ivec2(minX, minY));
-			box.push_back(glm::ivec2(maxX+1, maxY+1));
+			box = std::unique_ptr<BoundingBox<glm::ivec2>>(new BoundingBox<glm::ivec2>(glm::ivec2(minX, minY), glm::ivec2(maxX+1, maxY+1)));
 		}
-		void getBox(std::vector<glm::ivec3> &box) const
+		void setBox(std::unique_ptr<BoundingBox<glm::ivec3>> &box)
 		{
 			int minX = std::numeric_limits<int32_t>::max(),
 				minY = std::numeric_limits<int32_t>::max(),
@@ -253,10 +282,9 @@ class Mask
 				maxY = std::max(maxY, it->y);
 				maxZ = std::max(maxZ, it->z);
 			}
-			box.push_back(glm::ivec3(minX, minY, minZ));
-			box.push_back(glm::ivec3(maxX+1, maxY+1, maxZ+1));
+			std::unique_ptr<BoundingBox<glm::ivec3>>(new BoundingBox<glm::ivec3>(glm::ivec3(minX, minY, minZ), glm::ivec3(maxX+1, maxY+1, maxZ+1)));
 		}
-		std::string boxMask(const std::vector<glm::ivec2> &boundingBox)
+		std::string boxMask(const std::unique_ptr<BoundingBox<glm::ivec2>> &boundingBox)
 		{
 			glm::ivec2 p, p2;
 			std::vector<char> tmp;
@@ -265,13 +293,13 @@ class Mask
 			int pixel;
 			std::string mask = "";
 
-			p = boundingBox[1] - boundingBox[0];
+			p = boundingBox->getBottomRight() - boundingBox->getUpperLeft();
 			dimensions[0] = p[0];
 			dimensions[1] = p[1];
 			tmp = std::vector<char>(p[0]*p[1], '0');
 			for(it=points.begin(); it!=points.end(); ++it)
 			{
-				pixel = getPixel((*it)-boundingBox[0]);
+				pixel = getPixel((*it)-boundingBox->getUpperLeft());
 				tmp[pixel] = '1';
 			}
 			for(cit=tmp.begin(); cit!=tmp.end(); ++cit)

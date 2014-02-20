@@ -112,11 +112,13 @@ MaskList<int, glm::ivec2> FluidTracks::assignLabels(const Image<int> &image, Mas
 
 	std::vector<bool> visited(segmentations.getSize(), false);
 	std::shared_ptr<Mask<glm::ivec2>> mask;
+
 	for (auto it1 = adjacency->begin1(); it1 != adjacency->end1(); ++it1)
 	{
 		if(!visited[it1.index1()])
 		{
 			std::pair<std::list<int>,std::list<int>> tmp = getAssociations(*adjacency, it1.index1());
+
 			if(tmp.second.empty()) // add new object or not
 			{
 				if(include_appearing)
@@ -152,6 +154,7 @@ MaskList<int, glm::ivec2> FluidTracks::assignLabels(const Image<int> &image, Mas
 			{
 				for(auto i = tmp.first.begin(); i!=tmp.first.end(); ++i)
 				{
+					visited[*i] = true;
 					divisions->push_back(glm::ivec2(old_labels_index_to_id[tmp.second.front()], id_counter));
 					mask = segmentations.getMask(segmentation_index_to_id[*i]);
 					if(mask != nullptr)
@@ -212,11 +215,10 @@ MaskList<int, glm::ivec2> FluidTracks::assignLabels(const Image<int> &image, Mas
 					}
 				}
 				Mask<glm::ivec2> fused = masks.fuse();
-				std::vector<glm::ivec2> bounding_box = fused.getBoundingBox();
+				BoundingBox<glm::ivec2> bounding_box = fused.getBoundingBox();
 				Image<int> label_image = old_labels.toImage();
-				std::shared_ptr<Image<int>> image_part = image.imageTake(bounding_box[0], bounding_box[1]),
-											label_tmp_part = label_image.imageTake(bounding_box[0], bounding_box[1]);
-
+				std::shared_ptr<Image<int>> image_part = image.imageTake(bounding_box),
+											label_tmp_part = label_image.imageTake(bounding_box);
 
 				ComponentsMeasurements cm = ComponentsMeasurements(*label_tmp_part);
 				tmp_masks = cm.getMasks();
@@ -244,7 +246,7 @@ MaskList<int, glm::ivec2> FluidTracks::assignLabels(const Image<int> &image, Mas
 				detectDivisions(masks);
 				masks.setRank(old_labels.getRank());
 				masks.setDimensions(*old_labels.getDimensions());
-				masks.setOrigin(bounding_box[0]);
+				masks.setOrigin(bounding_box.getUpperLeft());
 				labeled_masks.addMasks(masks);
 			}
 		}
@@ -274,7 +276,7 @@ std::shared_ptr<boost::numeric::ublas::compressed_matrix<int>> FluidTracks::comp
 		{
 			seg_mask = segmentations.getMask(*i);
 			label_mask = old_labels.getMask(*j);
-			if(seg_mask->overlap(*label_mask).getSize() > 0)
+			if(seg_mask->overlap(*label_mask))
 			{
 				adjacency->insert_element(segmentation_index, old_labels_index,1);
 			}
@@ -289,6 +291,7 @@ std::pair<std::list<int>,std::list<int>> FluidTracks::getAssociations(boost::num
 	std::pair<std::list<int>,std::list<int>> labels;
 	std::list<int> row_labels, column_labels, tmp;
 	int current_row, current_column;
+	std::vector<bool> visited_rows(adjacency.size1()), visited_columns(adjacency.size2());
 
 	current_row = id;
 	row_labels=getRowAssociations(adjacency, id);
@@ -296,25 +299,43 @@ std::pair<std::list<int>,std::list<int>> FluidTracks::getAssociations(boost::num
 	while(!row_labels.empty())
 	{
 		current_column =  row_labels.front();
-		row_labels.pop_front();
-		tmp = getColumnAssociations(adjacency, current_column);
-		tmp.remove(current_row);
-		labels.first.insert(labels.first.end(), tmp.begin(), tmp.end());
-		column_labels.insert(column_labels.end(), tmp.begin(), tmp.end());
+		if(!visited_columns[current_column])
+		{
+			visited_columns[current_column] = true;
+			row_labels.pop_front();
+			tmp = getColumnAssociations(adjacency, current_column);
+			tmp.remove(current_row);
+			labels.first.insert(labels.first.end(), tmp.begin(), tmp.end());
+			column_labels.insert(column_labels.end(), tmp.begin(), tmp.end());
+		}
+		else
+		{
+			row_labels.pop_front();
+		}
+
 		while(!column_labels.empty())
 		{
 			current_row = column_labels.front();
-			tmp = getRowAssociations(adjacency, current_row);
-			tmp.remove(current_column);
-			column_labels.pop_front();
-			labels.second.insert(labels.second.end(), tmp.begin(), tmp.end());
-			row_labels.insert(row_labels.end(), tmp.begin(), tmp.end());
+			if(!visited_rows[current_row])
+			{
+				visited_rows[current_row] = true;
+				column_labels.pop_front();
+				tmp = getRowAssociations(adjacency, current_row);
+				tmp.remove(current_column);
+				labels.second.insert(labels.second.end(), tmp.begin(), tmp.end());
+				row_labels.insert(row_labels.end(), tmp.begin(), tmp.end());
+			}
+			else
+			{
+				column_labels.pop_front();
+			}
 		}
 	}
 	labels.first.sort();
 	labels.first.unique();
 	labels.second.sort();
 	labels.second.unique();
+
 	return labels;
 }
 
@@ -404,9 +425,14 @@ void FluidTracks::track()
 	{
 		tmp = Image<int>::openImage((*images)[0]);
 		if(tmp == nullptr)
+		{
+			std::cerr << "Image " << (*images)[0] << " not found!" << std::endl;
 			abort();
+		}
 		else
+		{
 			initial = *tmp;
+		}
 		Image<int> emptyLabel(initial.getRank(), *(initial.getDimensions()), 16, initial.getChannels());
 		propagated_label = graphcut(initial, *params);
 		initial = *propagated_label;
@@ -421,9 +447,14 @@ void FluidTracks::track()
 	{
 		tmp = Image<int>::openImage(initial_mask_image);
 		if(tmp == nullptr)
+		{
+			std::cerr << "Initial image " << initial_mask_image << " not found!" << std::endl;
 			abort();
+		}
 		else
+		{
 			initial = *tmp;
+		}
 		cm = ComponentsMeasurements(initial);
 		masks = cm.getMasks();
 		applySizeConstraints(masks);
@@ -436,16 +467,10 @@ void FluidTracks::track()
 	frames->push_back(masks);
 	id_counter = *(--masks.getLabels()->end())+1;
 	VectorArray2D va;
-	if(verbosity)
-	{
-		std::cout << "frame: " << 0 << ", #objects: " << masks.getSize() << std::endl;
-	}
+	std::cout << "\r" << "frame: " << 0 << ", #objects: " << masks.getSize() << std::flush;
 	for(unsigned int i=1; i<images->size(); ++i)
 	{
-		if(verbosity && i%10 == 0)
-		{
-			std::cout << "frame: " << i << ", #objects: " << masks.getSize() << std::endl;
-		}
+		std::cout << "\r" << "frame: " << i << ", #objects: " << masks.getSize() << std::flush;
 		if(flows->size() != 0)
 		{
 			va.load((*flows)[i-1].c_str());
@@ -456,6 +481,7 @@ void FluidTracks::track()
 		image = Image<int>::openImage((*images)[i]);
 		if(image == nullptr)
 		{
+			std::cerr << "Image " << (*images)[i] << " not found!" << std::endl;
 			abort();
 		}
 		propagated_label = graphcut(*image, *params);
@@ -465,11 +491,13 @@ void FluidTracks::track()
 		masks = cm.getMasks();
 		applySizeConstraints(masks);
 		masks = assignLabels(*image, frames->back(), masks);
+		applySizeConstraints(masks);
 		masks.deleteSparseRepresentations();
 		frames->push_back(masks);
 		old_label = masks.toImage();
 
 	}
+	std::cout << "\r" << "finished successfully" << std::string(50,' ') << std::endl;
 }
 
 Image<int>* FluidTracks::getInitial()

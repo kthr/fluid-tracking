@@ -25,29 +25,21 @@ class ComponentsMeasurements
 
 		ComponentsMeasurements() noexcept;
 		ComponentsMeasurements(const ComponentsMeasurements& other);
-		ComponentsMeasurements(ComponentsMeasurements&& other) noexcept;
-		ComponentsMeasurements& operator=(ComponentsMeasurements other);
+		ComponentsMeasurements(ComponentsMeasurements&& other);
+		ComponentsMeasurements& operator=(const ComponentsMeasurements &other);
+		ComponentsMeasurements& operator=(ComponentsMeasurements &&other);
 		ComponentsMeasurements(Image<int> &image);
 		virtual ~ComponentsMeasurements();
 		elib::MaskList<int, glm::ivec2> getMasks();
 	private:
 
-		Image<int> label_image;
-		int num_labels = 0;
 		short connectivity = LARGE_CONNECTIVITY;
+		Image<int> label_image;
 		std::set<int> labels;
 		MaskList<int, glm::ivec2> masks;
+		int num_labels = 0;
 
 		void init();
-		friend void swap(ComponentsMeasurements& first, ComponentsMeasurements& second)
-		{
-			using std::swap;
-			swap(first.connectivity, second.connectivity);
-			swap(first.label_image, second.label_image);
-			swap(first.labels, second.labels);
-			swap(first.masks, second.masks);
-			swap(first.num_labels, second.num_labels);
-		}
 };
 
 } /* namespace elib */

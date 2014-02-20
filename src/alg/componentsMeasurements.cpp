@@ -16,19 +16,33 @@ namespace elib{
 ComponentsMeasurements::ComponentsMeasurements() noexcept
 {
 }
-ComponentsMeasurements::ComponentsMeasurements(const ComponentsMeasurements& other)
-{
-	operator=(other);
-}
-ComponentsMeasurements::ComponentsMeasurements(ComponentsMeasurements&& other) noexcept
-: label_image(std::move(other.label_image)), num_labels(other.num_labels),
-  connectivity(other.connectivity), labels(std::move(other.labels)),
-  masks(std::move(other.masks))
+ComponentsMeasurements::ComponentsMeasurements(const ComponentsMeasurements& other) : connectivity(other.connectivity), label_image(other.label_image),
+		  labels(other.labels), masks(other.masks), num_labels(other.num_labels)
 {
 }
-ComponentsMeasurements& ComponentsMeasurements::operator=(ComponentsMeasurements other)
+ComponentsMeasurements::ComponentsMeasurements(ComponentsMeasurements&& other)
+: connectivity(other.connectivity), label_image(std::move(other.label_image)),
+  labels(std::move(other.labels)), masks(std::move(other.masks)), num_labels(other.num_labels)
 {
-	swap(*this, other);
+}
+ComponentsMeasurements& ComponentsMeasurements::operator=(const ComponentsMeasurements &other)
+{
+	connectivity = other.connectivity;
+	label_image = other.label_image;
+	labels = other.labels;
+	masks = other.masks;
+	num_labels = other.num_labels;
+	return *this;
+}
+ComponentsMeasurements& ComponentsMeasurements::operator=(ComponentsMeasurements &&other)
+{
+	using namespace std;
+
+	connectivity = other.connectivity;
+	label_image = move(other.label_image);
+	labels = move(other.labels);
+	masks = move(other.masks);
+	num_labels = other.num_labels;
 	return *this;
 }
 ComponentsMeasurements::ComponentsMeasurements(Image<int> &image) : label_image(image)

@@ -312,7 +312,7 @@ int main(int argc, char *argv[])
 		int i = 0;
 		for (it = ft.getFrames()->begin(); it != ft.getFrames()->end(); ++it)
 		{
-			file_name = Utilities::createFileName(label_image_folder, std::string("label"), std::string(".png"), i);
+			file_name = Utilities::createFileName(label_image_folder, "label", ".tif", i);
 			it->toImage().saveImage(file_name);
 			++i;
 		}

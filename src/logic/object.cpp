@@ -10,6 +10,7 @@
 #include <sstream>
 
 #include "io/xmlExport.hpp"
+#include "templates/boundingBox.hpp"
 #include "trackingData.hpp"
 #include "utils/rle.hpp"
 
@@ -76,11 +77,9 @@ void Object::toXML(const xmlTextWriterPtr writer, bool compressed) const
 	{
 		xmlTextWriterStartElement(writer, BAD_CAST "mask"); /* start mask */
 		xmlTextWriterStartElement(writer, BAD_CAST "bbox"); /* start bbox */
-		std::vector<glm::ivec2> bbox = mask->getBoundingBox();
-		for(auto i=bbox.begin(); i!=bbox.end(); ++i)
-		{
-			writePoint(writer, *i);
-		}
+		BoundingBox<glm::ivec2> bbox = mask->getBoundingBox();
+		writePoint(writer, bbox.getUpperLeft());
+		writePoint(writer, bbox.getBottomRight());
 		xmlTextWriterEndElement(writer); /* end mask */
 		xmlTextWriterWriteElement(writer, BAD_CAST "d", BAD_CAST RLE::binary_encode(mask->getBoxMask()).c_str()); /* start centroid */
 		xmlTextWriterEndElement(writer); /* end mask */

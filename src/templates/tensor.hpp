@@ -8,7 +8,9 @@
 #ifndef TENSOR_HPP_
 #define TENSOR_HPP_
 
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace elib{
 
@@ -21,18 +23,13 @@ class Tensor
 
 		}
 		Tensor(const Tensor &other)
-		: flattened_length(other.flattened_length), rank(other.rank)
+		: dimensions(other.dimensions), flattened_length(other.flattened_length), rank(other.rank)
 		{
-			dimensions = new int[rank];
-			data = new T[flattened_length];
-
-			std::copy(other.dimensions, other.dimensions+rank, dimensions);
-			std::copy(other.data, other.data+flattened_length, data);
+			data = std::unique_ptr<T[]>(new T[flattened_length]);
+			std::copy(other.data.get(), other.data.get()+flattened_length, data.get());
 		}
-		Tensor(const Tensor &&other)
-		: Tensor()
+		Tensor(Tensor &&other) : data(std::move(other.data)), dimensions(std::move(other.dimensions)), flattened_length(other.flattened_length), rank(other.rank)
 		{
-			this->operator=(other);
 		}
 		Tensor(int rank, int *dimensions) : rank(rank)
 		{
@@ -43,29 +40,35 @@ class Tensor
 				{
 					flattened_length *= dimensions[i];
 				}
-				this->data = new T[flattened_length];
-				this->dimensions = new int[rank];
+				this->data = std::unique_ptr<T[]>(new T[flattened_length]);
+				this->dimensions =std::vector<int>(rank);
 				std::copy(dimensions, dimensions + rank, this->dimensions);
-				std::fill_n(this->data, flattened_length, 0);
+				std::fill_n(this->data.get(), flattened_length, 0);
 			}
 		}
 		Tensor(int rank, int *dimensions, T *data) : Tensor(rank, dimensions)
 		{
-			std::copy(data, data + this->flattened_length, this->data);
+			std::copy(data.get(), data.get() + this->flattened_length, this->data.get());
 		}
 		virtual ~Tensor()
 		{
-			delete[] data;
-			delete[] dimensions;
 		}
 
-		Tensor& operator=(Tensor other)
+		Tensor& operator=(const Tensor &other)
 		{
 			swap(*this,other);
 			return *this;
 		}
+		Tensor& operator=(Tensor &&other)
+		{
+			data = std::move(other.data);
+			dimensions = std::move(other.dimensions);
+			flattened_length = other.flattened_length;
+			rank = other.rank;
+			return *this;
+		}
 
-		int* getDimensions() const
+		const std::vector<int> getDimensions() const
 		{
 			return dimensions;
 		}
@@ -79,24 +82,14 @@ class Tensor
 		}
 		T* getData()
 		{
-			return data;
+			return data.get();
 		}
 
 	private:
-		T *data = nullptr;
-		int *dimensions = nullptr,
-			flattened_length = 0,
+		std::unique_ptr<T[]> data = nullptr;
+		std::vector<int> dimensions;
+		int flattened_length = 0,
 			rank = 0;
-
-		friend void swap(Tensor& first,Tensor& second)
-		{
-			using std::swap;
-
-			swap(first.dimensions, second.dimensions);
-			swap(first.flattened_length, second.flattened_length);
-			swap(first.rank, second.rank);
-			swap(first.data, second.data);
-		}
 };
 
 } /* end namespace elib */
