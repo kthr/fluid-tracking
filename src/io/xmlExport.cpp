@@ -47,7 +47,7 @@ void XMLExport::write(const char *uri)
 	/*************************************
 	 * start data-frame
 	 *************************************/
-	xmlTextWriterStartElement(writer, BAD_CAST "data-frame");
+	xmlTextWriterStartElement(writer, BAD_CAST "celltrackingResults");
 	writeAttribute(writer, "version", "1.0");
 	writeAttribute(writer, "compressed", data->isCompressed());
 
@@ -58,17 +58,17 @@ void XMLExport::write(const char *uri)
 	writeElement(writer, "date", Utilities::getTime());
 	if(data->getFluidTracks()->getInitial()->getRank() == 2)
 	{
-		xmlTextWriterStartElement(writer, BAD_CAST "image-dimensions"); /* start image-dimensions */
-		writeAttribute(writer, "width", (*data->getFluidTracks()->getInitial()->getDimensions())[0]);
-		writeAttribute(writer, "height", (*data->getFluidTracks()->getInitial()->getDimensions())[1]);
+		xmlTextWriterStartElement(writer, BAD_CAST "imageDimensions"); /* start image-dimensions */
+		writeElement(writer, "width", data->getFluidTracks()->getInitial()->getWidth());
+		writeElement(writer, "height", data->getFluidTracks()->getInitial()->getHeight());
 		xmlTextWriterEndElement(writer); /* end image-dimensions */
 	}
-	writeElement(writer, "number_of_tracks", data->getNumTracks());
-	writeElement(writer, "total_number_of_objects", data->getNumberObjects());
-	xmlTextWriterStartElement(writer, BAD_CAST "tracking_info"); /* start tracking info */
+	writeElement(writer, "numberOfTracks", data->getNumTracks());
+	writeElement(writer, "numberOfObjects", data->getNumberObjects());
+	xmlTextWriterStartElement(writer, BAD_CAST "trackingInfo"); /* start tracking info */
 	writeElement(writer, "revision", REVISION);
-	writeElement(writer, "image-path", data->getImagePath());
-	writeElement(writer, "flow-path", data->getFlowPath());
+	writeElement(writer, "imagePath", data->getImagePath());
+	writeElement(writer, "flowPath", data->getFlowPath());
 	params->toXML(writer); /* tracking parameters */
 	xmlTextWriterEndElement(writer); /* end tracking info */
 	xmlTextWriterWriteElement(writer, BAD_CAST "details ", BAD_CAST ""); /* details */

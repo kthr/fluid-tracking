@@ -74,16 +74,6 @@ class FluidTracks
 			return divisions;
 		}
 
-		void setCycles(int cycles = -1)
-		{
-			this->cycles = cycles;
-		}
-
-		void setVerbosity(int verbosity = 0)
-		{
-			this->verbosity = verbosity;
-		}
-
 	private:
 		bool include_appearing = true;
 		Image<int> initial;
@@ -96,8 +86,6 @@ class FluidTracks
 		std::vector<std::string> *images=nullptr,
 								 *flows=nullptr;
 		std::vector<MaskList<int, glm::ivec2>> *frames;
-		int verbosity = 0,
-			cycles = -1;
 
 		void addAppearingObjects(MaskList<int, glm::ivec2> &masks);
 		void applySizeConstraints(MaskList<int, glm::ivec2> &masks);

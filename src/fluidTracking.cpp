@@ -41,10 +41,8 @@ int main(int argc, char *argv[])
 	int min = 0, max = std::numeric_limits<int32_t>::max();
 	double c0 = .1, c1 = .9, mu = 1., lambda = 1.;
 	std::string initial = "", image_folder, vector_field_folder, label_image_folder = "", in;
-	int iao = 1,
-		verbosity = 0,
-		cycles = -1;
-	bool compressed = false;
+	int iao = 1;
+	bool compressed = true;
 	int option, option_index;
 	std::vector<std::string> images, vector_fields;
 	bool without_flows = false;
@@ -91,8 +89,6 @@ int main(int argc, char *argv[])
 		{ "c1", required_argument, NULL, '4' },
 		{ "write-label-images", required_argument, NULL, '5' },
 		{ "include-appearing-objects", no_argument, &iao, 1 },
-		{ "verbosity", required_argument, NULL, '6'},
-		{ "cycles", required_argument, NULL, '7'},
 		{ 0, 0, 0, 0 }
 	};
 	while (1)
@@ -147,22 +143,6 @@ int main(int argc, char *argv[])
 				}
 				label_image_folder = std::string(optarg);
 				break;
-			case '6': // label_image_directory
-				if (optarg == NULL)
-				{
-					fprintf(stderr, "Missing argument for option -%c.\n", option);
-					return EXIT_FAILURE;
-				}
-				verbosity = atoi(optarg);
-				break;
-			case '7': // label_image_directory
-				if (optarg == NULL)
-				{
-					fprintf(stderr, "Missing argument for option -%c.\n", option);
-					return EXIT_FAILURE;
-				}
-				cycles = atoi(optarg);
-				break;
 			case 'm': // mu
 				if (optarg == NULL)
 				{
@@ -198,9 +178,6 @@ int main(int argc, char *argv[])
 				}
 				label_image_folder = std::string(optarg);
 				break;
-			case 'c': // initial
-				compressed = true;
-				break;
 			case 'h':
 #ifdef REVISION
 				std::cout << "Revision: " << REVISION << std::endl;
@@ -209,11 +186,8 @@ int main(int argc, char *argv[])
 #endif
 				std::cout << "\t --c0 NUM" << std::endl << "\t\t mean background intensity (default=.1)" << std::endl;
 				std::cout << "\t --c1 NUM" << std::endl << "\t\t mean foreground intensity (default=.9)" << std::endl;
-				std::cout << "\t --cycles NUM" << std::endl << "\t\t number of iteration cycles of expansion algorithm  (default=-1)" << std::endl;
 				std::cout << "\t --max NUM" << std::endl << "\t\t maximal object size in pixels  (default=" << std::numeric_limits<int32_t>::max() << ")" << std::endl;
 				std::cout << "\t --min NUM" << std::endl << "\t\t minimal object size in pixels (default=0)" << std::endl;
-				std::cout << "\t --verbosity NUM" << std::endl << "\t\t verbosity level 0,1 or 2 (default=0)" << std::endl;
-				std::cout << "\t -c" << std::endl << "\t\t turn on compression" << std::endl;
 				std::cout << "\t -i IMAGE" << std::endl << "\t\t initial label image" << std::endl;
 				std::cout << "\t -l NUM" << std::endl << "\t\t parameter lambda (default=1.)" << std::endl;
 				std::cout << "\t -m NUM" << std::endl << "\t\t parameter mu (default=1.)" << std::endl;
@@ -293,8 +267,6 @@ int main(int argc, char *argv[])
 	ft.setMaxObjectSize(max);
 	ft.setInitialMaskImage(initial);
 	ft.setIncludeAppearing(iao);
-	ft.setVerbosity(verbosity);
-	ft.setCycles(cycles);
 	ft.track();
 
 	TrackingData td(&ft, compressed);
@@ -306,14 +278,13 @@ int main(int argc, char *argv[])
 
 	if (label_image_folder.compare("") != 0)
 	{
-		std::vector<elib::MaskList<int, glm::ivec2>>::iterator it;
 		std::string file_name;
 		Image<int> image;
 		int i = 0;
-		for (it = ft.getFrames()->begin(); it != ft.getFrames()->end(); ++it)
+		for (auto& it : *ft.getFrames())
 		{
 			file_name = Utilities::createFileName(label_image_folder, "label", ".tif", i);
-			it->toImage().saveImage(file_name);
+			it.toImage().saveImage(file_name);
 			++i;
 		}
 	}

@@ -101,7 +101,6 @@ std::shared_ptr<Image<int>> Labeling::labeling(Image<int> &label_image, Image<in
 		data.image = input_image.getData();
 		data.lambda = lambda;
 		gc->setSmoothCost(&smoothFn, &data);
-		gc->setVerbosity(verbosity);
 		gc->swap(cycles);
 		for (int i = 0; i < num_pixels; i++)
 		{

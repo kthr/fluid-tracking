@@ -20,15 +20,6 @@ class Labeling
 		~Labeling(){}
 		std::shared_ptr<Image<int>> labeling(Image<int> &label_image, Image<int> &input_image, Parameters &input_params);
 
-		void setCycles(int cycles = 0)
-		{
-			this->cycles = cycles;
-		}
-		void setVerbosity(int verbosity = 0)
-		{
-			this->verbosity = verbosity;
-		}
-
 		private:
 		int verbosity = 0,
 			cycles = -1;

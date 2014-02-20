@@ -417,9 +417,6 @@ void FluidTracks::track()
 	Labeling lbg;
 	MaskList<int, glm::ivec2> masks;
 
-	lbg.setVerbosity(verbosity);
-	lbg.setCycles(cycles);
-
 	cc.setLabelOffset(2);
 	if(initial_mask_image.compare("") == 0)
 	{
