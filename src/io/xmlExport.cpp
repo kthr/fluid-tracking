@@ -49,7 +49,6 @@ void XMLExport::write(const char *uri)
 	 *************************************/
 	xmlTextWriterStartElement(writer, BAD_CAST "celltrackingResults");
 	writeAttribute(writer, "version", "1.0");
-	writeAttribute(writer, "compressed", data->isCompressed());
 
 	/*************************************
 	 * start description
@@ -66,9 +65,18 @@ void XMLExport::write(const char *uri)
 	writeElement(writer, "numberOfTracks", data->getNumTracks());
 	writeElement(writer, "numberOfObjects", data->getNumberObjects());
 	xmlTextWriterStartElement(writer, BAD_CAST "trackingInfo"); /* start tracking info */
-	writeElement(writer, "revision", REVISION);
-	writeElement(writer, "imagePath", data->getImagePath());
-	writeElement(writer, "flowPath", data->getFlowPath());
+	xmlTextWriterStartElement(writer, BAD_CAST "info");
+	writeAttribute(writer, "name", "revision");
+	writeAttribute(writer, "value", REVISION);
+	xmlTextWriterEndElement(writer);
+	xmlTextWriterStartElement(writer, BAD_CAST "info");
+		writeAttribute(writer, "name", "imagePath");
+		writeAttribute(writer, "value", data->getImagePath());
+	xmlTextWriterEndElement(writer);
+	xmlTextWriterStartElement(writer, BAD_CAST "info");
+		writeAttribute(writer, "name", "flowPath");
+		writeAttribute(writer, "value", data->getFlowPath());
+	xmlTextWriterEndElement(writer);
 	params->toXML(writer); /* tracking parameters */
 	xmlTextWriterEndElement(writer); /* end tracking info */
 	xmlTextWriterWriteElement(writer, BAD_CAST "details ", BAD_CAST ""); /* details */

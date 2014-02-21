@@ -47,7 +47,7 @@ void Frame::toXML(const xmlTextWriterPtr writer, bool compressed) const
 	{
 		xmlTextWriterStartElement(writer, BAD_CAST "object"); /* start object */
 		XMLExport::writeAttribute(writer, "id", i);
-		XMLExport::writeAttribute(writer, "v", TrackingData::DEFAULT_VALIDITY);
+		XMLExport::writeAttribute(writer, "valid", TrackingData::DEFAULT_VALIDITY);
 		objects[i].toXML(writer, compressed);
 		xmlTextWriterEndElement(writer); /* end object */
 	}

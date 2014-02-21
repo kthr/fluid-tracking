@@ -212,6 +212,27 @@ class Mask
 		{
 			this->rank = rank;
 		}
+		int getWidth() const
+		{
+			if(rank>0)
+				return dimensions[0];
+			else
+				return 0;
+		}
+		int getHeight() const
+		{
+			if(rank>1)
+				return dimensions[1];
+			else
+				return 0;
+		}
+		int getDepth() const
+		{
+			if(rank>2)
+				return dimensions[2];
+			else
+				return 1;
+		}
 		void setOrigin(Point origin)
 		{
 			for(auto i = points.begin(); i != points.end(); ++i)

@@ -248,7 +248,7 @@ class MaskList
 				i->second->setOrigin(origin);
 			}
 		}
-		std::string toString()
+		std::string toString() const
 		{
 			std::stringstream ss;
 			typename std::set<Label>::iterator it;
@@ -261,9 +261,11 @@ class MaskList
 				ss << dimensions[i] << " ";
 			}
 			ss << std::endl;
-			for(it=labels.begin(); it!=labels.end(); ++it)
+			std::shared_ptr<Mask<Point>> mask;
+			for(auto it: labels)
 			{
-				ss << "\t label: " << *it << " size: " << masks.find(*it)->second->getSize() << std::endl;
+				mask = masks.find(it)->second;
+				ss << "\t label: " << it << " size: " << mask->getSize() << " rank: " << mask->getRank() << " width: " << mask->getWidth() << " height: " << mask->getHeight() << " depth: " << mask->getDepth() << std::endl;
 			}
 			return ss.str();
 		}

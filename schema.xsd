@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified">
+
+  <!-- Major element tree -->
+  <xs:element name="celltrackingResults">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="description" minOccurs="1"/>
+        <xs:element ref="frameList" minOccurs="1"/>
+      </xs:sequence>
+      <xs:attribute name="version" use="required" type="xs:decimal"/>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- definition of simple elements -->
+  <xs:element name="date" type="xs:string"/>
+  <xs:element name="details" type="xs:string"/>
+  <xs:element name="numberOfTracks" type="xs:integer"/>
+  <xs:element name="numberOfObjects" type="xs:integer"/>
+  <xs:element name="rleString" type="xs:string"/>
+  <xs:element name="mitotic" type="xs:boolean"/>
+  <xs:element name="height" type="xs:integer"/>
+  <xs:element name="width" type="xs:integer"/>
+  <xs:element name="depth" type="xs:integer" default="1"/>
+  <xs:element name="x" type="xs:integer"/>
+  <xs:element name="y" type="xs:integer"/>
+  <xs:element name="z" type="xs:integer" default="0"/>
+  <xs:element name="id" type="xs:integer"/>
+  <xs:element name="numberOfFrames" type="xs:integer"/>
+  <xs:element name="compressed" type="xs:boolean" fixed="1"/>
+  <xs:element name="version" type="xs:decimal"/>
+
+  <!-- definition of types -->
+  <xs:simpleType name="probabilityType">
+    <xs:restriction base="xs:decimal">
+      <xs:minInclusive value="0"/>
+      <xs:maxInclusive value="1"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- definition of complex elements -->
+
+  <xs:element name="description">
+    <xs:complexType>
+      <xs:all>
+        <xs:element ref="date" minOccurs="0"/>
+        <xs:element ref="imageDimensions" minOccurs="1"/>
+        <xs:element ref="numberOfTracks" minOccurs="1"/>
+        <xs:element ref="numberOfObjects" minOccurs="0"/>
+        <xs:element ref="trackingInfo" minOccurs="0"/>
+        <xs:element ref="details" minOccurs="0"/>
+      </xs:all>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="imageDimensions">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="width" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="height" minOccurs="1" maxOccurs="1"/>
+        <xs:element ref="depth" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="trackingInfo">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="info" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element ref="parameters" minOccurs="0" maxOccurs="1"/>
+     </xs:sequence>
+   </xs:complexType>
+ </xs:element>
+
+<xs:element name="info">
+  <xs:complexType>
+    <xs:all/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="value" type="xs:string" use="required"/> 
+  </xs:complexType> 
+</xs:element>
+
+<xs:element name="parameters">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="param" minOccurs="0" maxOccurs="unbounded">
+      </xs:element>
+   </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="param">
+  <xs:complexType>
+    <xs:all/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="value" type="xs:string" use="required"/> 
+  </xs:complexType> 
+</xs:element>
+
+<xs:element name="frameList">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="frame" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="numberOfFrames" use="required" type="xs:integer"/>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="frame">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="object" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="id" use="required" type="xs:integer"/>
+    <xs:attribute name="numberOfObjects" use="required" type="xs:integer"/>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="object">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="centroid" minOccurs="1"/>
+      <xs:element ref="mask" minOccurs="1"/>
+      <xs:element ref="links" minOccurs="1"/>
+      <xs:element ref="mitotic" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="id" use="required" type="xs:integer"/>
+    <xs:attribute name="valid" use="required" type="xs:boolean"/>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="centroid">
+  <xs:complexType>
+    <xs:all>
+      <xs:element ref="point" minOccurs="1"/>
+    </xs:all>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="point">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="x" minOccurs="1"/>
+      <xs:element ref="y" minOccurs="1"/>
+      <xs:element ref="z" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="mask">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="bbox" minOccurs="1"/>
+      <xs:element ref="rleString" minOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="bbox">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="point" minOccurs="2" maxOccurs="2"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="links">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="link" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="link">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element ref="objectLink" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="type" use="required" type="xs:string"/>
+    <xs:attribute name="probability" use="required" type="probabilityType"/>
+    <xs:attribute name="valid" use="required" type="xs:boolean"/>
+  </xs:complexType>
+</xs:element>
+
+<xs:element name="objectLink">
+  <xs:complexType>
+    <xs:all/>
+    <xs:attribute name="objectID" use="required" type="xs:integer"/>
+    <xs:attribute name="frameID" use="required" type="xs:integer"/>
+    <xs:attribute name="valid" use="required" type="xs:boolean"/>
+  </xs:complexType>
+</xs:element>
+
+</xs:schema>

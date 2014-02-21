@@ -48,7 +48,7 @@ class Tensor
 		}
 		Tensor(int rank, int *dimensions, T *data) : Tensor(rank, dimensions)
 		{
-			std::copy(data.get(), data.get() + this->flattened_length, this->data.get());
+			std::copy(data, data + this->flattened_length, this->data.get());
 		}
 		virtual ~Tensor()
 		{

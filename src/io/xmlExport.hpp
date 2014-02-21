@@ -23,7 +23,7 @@ struct writeElementImpl
 	{
 		std::stringstream tmp;
 		tmp << value;
-		return xmlTextWriterWriteAttribute(writer, BAD_CAST name.c_str(), BAD_CAST tmp.str().c_str());
+		return xmlTextWriterWriteElement(writer, BAD_CAST name.c_str(), BAD_CAST tmp.str().c_str());
 	}
 };
 template<>
@@ -33,7 +33,7 @@ struct writeElementImpl<std::string>
 	{
 		std::stringstream tmp;
 		tmp << value;
-		return xmlTextWriterWriteAttribute(writer, BAD_CAST name.c_str(), BAD_CAST tmp.str().c_str());
+		return xmlTextWriterWriteElement(writer, BAD_CAST name.c_str(), BAD_CAST tmp.str().c_str());
 	}
 };
 template<>
@@ -43,7 +43,7 @@ struct writeElementImpl<const char *>
 	{
 		std::stringstream tmp;
 		tmp << std::string(value);
-		return xmlTextWriterWriteAttribute(writer, BAD_CAST name.c_str(), BAD_CAST tmp.str().c_str());
+		return xmlTextWriterWriteElement(writer, BAD_CAST name.c_str(), BAD_CAST tmp.str().c_str());
 	}
 };
 

@@ -64,13 +64,13 @@ void Link::toXML(const xmlTextWriterPtr writer) const
 	}
 	XMLExport::writeAttribute(writer, "type", typeName);
 	XMLExport::writeAttribute(writer, "probability", probability);
-	XMLExport::writeAttribute(writer, "v", TrackingData::DEFAULT_VALIDITY);
+	XMLExport::writeAttribute(writer, "valid", TrackingData::DEFAULT_VALIDITY);
 	for(unsigned int i=0; i<to.size(); ++i)
 	{
-		xmlTextWriterStartElement(writer, BAD_CAST "object"); /* start object */
+		xmlTextWriterStartElement(writer, BAD_CAST "objectLink"); /* start object */
 		XMLExport::writeAttribute(writer, "objectID", to[i]->getId());
 		XMLExport::writeAttribute(writer, "frameID", to[i]->getFrameId());
-		XMLExport::writeAttribute(writer, "v", TrackingData::DEFAULT_VALIDITY);
+		XMLExport::writeAttribute(writer, "valid", TrackingData::DEFAULT_VALIDITY);
 		xmlTextWriterEndElement(writer); /* end object */
 	}
 	xmlTextWriterEndElement(writer); /* end link */

@@ -145,14 +145,13 @@ void TrackingData::constructDivisions()
 }
 void TrackingData::toXML(const xmlTextWriterPtr writer) const
 {
-	xmlTextWriterStartElement(writer, BAD_CAST "frames"); /* start frames */
-	XMLExport::writeAttribute(writer, "number_of_frames", getNumFrames());
+	xmlTextWriterStartElement(writer, BAD_CAST "frameList"); /* start frames */
+	XMLExport::writeAttribute(writer, "numberOfFrames", getNumFrames());
 	for (unsigned int i = 0; i < frames.size(); ++i)
 	{
 		xmlTextWriterStartElement(writer, BAD_CAST "frame"); /* start frame */
 		XMLExport::writeAttribute(writer, "id", i);
-		XMLExport::writeAttribute(writer, "number_of_objects", frames[i].getNumObjects());
-		XMLExport::writeAttribute(writer, "v", DEFAULT_VALIDITY);
+		XMLExport::writeAttribute(writer, "numberOfObjects", frames[i].getNumObjects());
 		frames[i].toXML(writer, compressed);
 		xmlTextWriterEndElement(writer); /* end frame */
 	}

@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 	std::vector<std::string> images, vector_fields;
 	bool without_flows = false;
 
-//	po::options_description desc("Allowed options");
+//	po::options_description desc("Available options");
 //	desc.add_options()
 //		("c0", po::value<double>(&c0)->default_value(0.1), "mean background intensity (between 0. and 1.)")
 //		("c1", po::value<double>(&c1)->default_value(0.9), "mean foreground intensity (between 0. and 1.)")
@@ -269,17 +269,9 @@ int main(int argc, char *argv[])
 	ft.setIncludeAppearing(iao);
 	ft.track();
 
-	TrackingData td(&ft, compressed);
-	td.construct();
-
-	XMLExport xe(&params, &td);
-	std::string output_file = std::string("./") + Utilities::getTime() + std::string("-data-frame.xml");
-	xe.write(output_file.c_str());
-
 	if (label_image_folder.compare("") != 0)
 	{
 		std::string file_name;
-		Image<int> image;
 		int i = 0;
 		for (auto& it : *ft.getFrames())
 		{
@@ -288,13 +280,13 @@ int main(int argc, char *argv[])
 			++i;
 		}
 	}
-//	Image<int> image = Image<int>::openImage(images[0]);
-//	VectorArray2D va;
-//	for(int i=0; i<vector_fields.size(); ++i)
-//	{
-//		va.load(vector_fields[i].c_str());
-//		image.displaceByVectorField(va);
-//		image.saveImage(Utilities::createFileName("/Users/kthierbach/Documents/current/emb/refdata_smaller/displaced","image",".png",i,4),&image);
-//	}
+
+	TrackingData td(&ft, compressed);
+	td.construct();
+
+	XMLExport xe(&params, &td);
+	std::string output_file = std::string("./") + Utilities::getTime() + std::string("-data-frame.xml");
+	xe.write(output_file.c_str());
+
 	return EXIT_SUCCESS;
 }

@@ -81,7 +81,7 @@ void Object::toXML(const xmlTextWriterPtr writer, bool compressed) const
 		writePoint(writer, bbox.getUpperLeft());
 		writePoint(writer, bbox.getBottomRight());
 		xmlTextWriterEndElement(writer); /* end mask */
-		xmlTextWriterWriteElement(writer, BAD_CAST "d", BAD_CAST RLE::binary_encode(mask->getBoxMask()).c_str()); /* start centroid */
+		xmlTextWriterWriteElement(writer, BAD_CAST "rleString", BAD_CAST RLE::binary_encode(mask->getBoxMask()).c_str()); /* start centroid */
 		xmlTextWriterEndElement(writer); /* end mask */
 	}
 	else
@@ -118,12 +118,12 @@ void Object::writePoint(const xmlTextWriterPtr writer, const glm::ivec2 &point) 
 {
 	std::stringstream tmp;
 
-	xmlTextWriterStartElement(writer, BAD_CAST "p"); /* start point */
+	xmlTextWriterStartElement(writer, BAD_CAST "point"); /* start point */
 	tmp << point.x;
-	xmlTextWriterWriteAttribute(writer, BAD_CAST "x", BAD_CAST tmp.str().c_str()); /*  x */
+	XMLExport::writeElement(writer, "x", tmp.str()); /*  x */
 	tmp.str("");
 	tmp << point.y;
-	xmlTextWriterWriteAttribute(writer, BAD_CAST "y", BAD_CAST tmp.str().c_str()); /*  y */
+	XMLExport::writeElement(writer, "y", tmp.str()); /*  y */
 	xmlTextWriterEndElement(writer); /* end point */
 }
 } /* namespace elib */

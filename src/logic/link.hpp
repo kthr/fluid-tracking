@@ -39,7 +39,7 @@ class Link
 		int type;
 		const Object *from;
 		std::vector<const Object*> to;
-		double probability = 1.;
+		double probability = 1.0;
 };
 
 } /* namespace elib */
