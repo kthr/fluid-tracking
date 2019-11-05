@@ -16,7 +16,7 @@ Relevant publications:
 Dependencies
 ---------------
 First install the following dependencies:
-  boost
+  [boost](https://github.com/boostorg/boost)
 
 
 Installation
