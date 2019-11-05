@@ -18,6 +18,7 @@ Installation
 First clone the repository with
 ```bash
 git clone https://gitlab.com/kth/fluid-tracking.git 
+```
 
 Then create a directory "build" inside the cloned repository
 ```bash
