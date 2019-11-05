@@ -17,6 +17,11 @@ Dependencies
 ---------------
 First install the following dependencies:
   [boost](https://github.com/boostorg/boost)
+  
+#### On Mac (via macports) install
+```bash
+sudo port install boost
+```
 
 
 Installation
