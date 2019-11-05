@@ -13,6 +13,12 @@ Relevant publications:
 [http://www.cs.ucl.ac.uk/staff/V.Kolmogorov/papers/KZ-PAMI-graph_cuts.pdf](http://www.cs.ucl.ac.uk/staff/V.Kolmogorov/papers/KZ-PAMI-graph_cuts.pdf)
 [http://www.csd.uwo.ca/~yuri/Papers/ijcv10_labelcost.pdf](http://www.csd.uwo.ca/~yuri/Papers/ijcv10_labelcost.pdf)
 
+Dependencies
+---------------
+First install the following dependencies:
+  boost
+
+
 Installation
 --------------
 First clone the repository with
